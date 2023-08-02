@@ -1,0 +1,6 @@
+Build/
+Docs/DoxyDocs/
+#Lib/*
+!/Lib/.placeholder
+.vs/
+out/

@@ -1,0 +1,24 @@
+[submodule "Source/Lib/SDL"]
+	path = Source/Lib/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "Source/Lib/tinyxml2"]
+	path = Source/Lib/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "Source/Lib/imgui"]
+	path = Source/Lib/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "Source/Lib/implot"]
+	path = Source/Lib/implot
+	url = https://github.com/epezent/implot.git
+[submodule "Source/Lib/bgfx"]
+	path = Source/Lib/bgfx
+	url = https://github.com/bkaradzic/bgfx.git
+[submodule "Source/Lib/openal-soft"]
+	path = Source/Lib/openal-soft
+	url = https://github.com/kcat/openal-soft.git
+[submodule "Source/Lib/glm"]
+	path = Source/Lib/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "Source/Lib/sol2"]
+	path = Source/Lib/sol2
+	url = https://github.com/ThePhD/sol2.git

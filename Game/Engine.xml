@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Engine>
+    <Option name="iconFilename" value=""/>
+    <Option name="glVersion" major="4" minor="5"/>
+	<Option name="glDebugEnabled" value="true"/>
+	<Option name="defWindowTitle" value="BGE2"/>
+	<Option name="defWindowWidth" value="1280"/>
+	<Option name="defWindowHeight" value="720"/>
+	<Option name="windowResizable" value="false"/>
+	<Option name="fullscreenEnabled" value="false"/>
+	<Option name="verticalSyncEnabled" value="true"/>
+	<!-- Multisampling (0=OFF) -->
+	<Option name="MSAA" value="4"/>
+	<Option name="imGuiEnabled" value="true"/>
+	<Option name="toLimitFrames" value="true"/>
+	<Option name="minFrames" value="6"/>
+</Engine>

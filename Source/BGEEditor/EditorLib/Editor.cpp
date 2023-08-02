@@ -1,0 +1,1 @@
+int Foo(void) { return 0; }
