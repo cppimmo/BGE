@@ -35,7 +35,7 @@
 #include <SDL.h>
 #include <imgui.h>
 #include <implot.h>
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <tinyxml2.h>
 // Common standard headers:
 #include <cstddef>

@@ -148,7 +148,7 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		return false;
 	}
 	// Set the function loader for OpenGL
-	if (!gladLoadGLLoader(SDL_GL_GetProcAddress))
+	if (!gladLoadGL(SDL_GL_GetProcAddress))
 	{
 		BGE_ERROR("BGUTInit Failure: glad OpenGL loader can't be set (%s).", SDL_GetError());
 		return false;
@@ -253,6 +253,7 @@ void BGE::BGUTShutdown(void)
 		BGUTShutdownImGui();
 
 	SDL_GL_DeleteContext(s_BGUT.pContext);
+	gladLoaderUnloadGL(); // Unload glad
 	SDL_DestroyWindow(s_BGUT.pWindow);
 	SDL_Quit();
 }

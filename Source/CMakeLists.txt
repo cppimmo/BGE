@@ -66,8 +66,8 @@ endif()
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-# ImGUi library:
-set(IMGUI_DIR "Lib/imgui-1.89.3")
+# ImGui library:
+set(IMGUI_DIR "Lib/imgui")
 add_library(ImGui STATIC
 	"${IMGUI_DIR}/imgui.cpp"
 	"${IMGUI_DIR}/imgui_demo.cpp"
@@ -80,7 +80,7 @@ add_library(ImGui STATIC
 target_include_directories(ImGui PUBLIC ${SDL2_INCLUDE_DIRS} ${IMGUI_DIR} "${IMGUI_DIR}/backends")
 
 # ImPlot library:
-set(IMPLOT_DIR "Lib/implot-0.14")
+set(IMPLOT_DIR "Lib/implot")
 add_library(ImPlot STATIC
 	"${IMPLOT_DIR}/implot.cpp"
 	"${IMPLOT_DIR}/implot_demo.cpp"
@@ -100,11 +100,11 @@ include_directories(${OPENAL_INCLUDE_DIRS})
 
 # glad library:
 set(GLAD_DIR "Lib/glad")
-add_library(glad STATIC "${GLAD_DIR}/src/glad.c")
+add_library(glad STATIC "${GLAD_DIR}/src/gl.c")
 target_include_directories(glad PUBLIC "${GLAD_DIR}/include")
 
 # tinyxml2 library:
-set(TINYXML_DIR "Lib/tinyxml2-9.0.0")
+set(TINYXML_DIR "Lib/tinyxml2")
 add_library(TinyXml2 STATIC "${TINYXML_DIR}/tinyxml2.cpp")
 target_include_directories(TinyXml2 PUBLIC ${TINYXML_DIR})
 
@@ -165,7 +165,7 @@ target_sources(TankBattlesEditorApp PRIVATE ${EDITOR_SRC_DIR})
 target_link_libraries(TankBattlesEditorApp Engine EditorLib)
 
 # Game Projects:
-set(GAME_SRC_DIR "TankBattles")
+set(GAME_SRC_DIR "TestGame")
 
 add_executable(Game)
 

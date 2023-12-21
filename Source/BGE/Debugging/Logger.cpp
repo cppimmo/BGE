@@ -205,9 +205,9 @@ LogManager::LogManager(void)
 {
 	using namespace Logger;
 	// Set default flags for log tags
-	SetDisplayFlags(LevelToString(Level::Error), Utils::ToUnderlying(DisplayFlag::Console | DisplayFlag::File));
-	SetDisplayFlags(LevelToString(Level::Warning), Utils::ToUnderlying(DisplayFlag::Console | DisplayFlag::File));
-	SetDisplayFlags(LevelToString(Level::Info), Utils::ToUnderlying(DisplayFlag::Console | DisplayFlag::File));
+	SetDisplayFlags(LevelToString(Level::Error), kDISPLAY_FLAG_CONSOLE | kDISPLAY_FLAG_FILE);
+	SetDisplayFlags(LevelToString(Level::Warning), kDISPLAY_FLAG_CONSOLE | kDISPLAY_FLAG_FILE);
+	SetDisplayFlags(LevelToString(Level::Info), kDISPLAY_FLAG_CONSOLE | kDISPLAY_FLAG_FILE);
 }
 
 LogManager::~LogManager(void)
@@ -347,3 +347,4 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		break;
 	}
 }
+

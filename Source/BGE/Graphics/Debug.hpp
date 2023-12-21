@@ -32,23 +32,28 @@
 
 namespace BGE::GL
 {
-/**
- * Reset the OpenGL internal error state variable.
- */
-void ClearErrors(void);
-/**
- * Use glDebugMessageCallback(DEBUGPROC callback, void *pUserParam)
- * Use glEnable/glDisable(GL_DEBUG_OUTPUT)
- * Use glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) to enable output in realtime and disable caching.
- */
-void APIENTRY DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-								   const GLchar *pMessage, const void *pUserParam);
-/**
- * This function doesn't really do the heavy lifting that's needed.  The context first needs to be set
- * by the windowing system (SDL abstracts it in this case), otherwise the functionality could be limited.
- */
-void DebugContextSetup(void);
-
+	/**
+	 * Reset the OpenGL internal error state variable.
+	 */
+	void ClearErrors(void);
+	/**
+	 * Use glDebugMessageCallback(DEBUGPROC callback, void *pUserParam)
+	 * Use glEnable/glDisable(GL_DEBUG_OUTPUT)
+	 * Use glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) to enable output in realtime and disable caching.
+	 */
+#if BGE_PLATFORM_WIN
+	void APIENTRY DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+									   const GLchar *pMessage, const void *pUserParam);
+#else
+	void DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+							  const GLchar *pMessage, const void *pUserParam);
+#endif
+	/**
+	 * This function doesn't really do the heavy lifting that's needed.  The context first needs to be set
+	 * by the windowing system (SDL abstracts it in this case), otherwise the functionality could be limited.
+	 */
+	void DebugContextSetup(void);
+	
 } // End namespace (BGE::GL)
 
 #endif /* !_BGE_GRAPHICS_DEBUG_HPP_ */

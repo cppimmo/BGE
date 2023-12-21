@@ -1,6 +1,8 @@
 #ifndef _BGE_ACTOR_HPP_
 #define _BGE_ACTOR_HPP_
 
+#include "Actors/ActorComponent.hpp"
+
 namespace BGE
 {
 	/**

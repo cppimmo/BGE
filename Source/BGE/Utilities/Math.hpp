@@ -193,7 +193,7 @@ namespace BGE::Math
 			return copyOfThis;
 		}
 		// "Pseudo-cross product" or "cross product magnitude" magnitude of the cross product between the vectors
-		Type PsuedoCross(const Vec2<Type> &vec) const { return std::abs<Type>((x * vec.y) - (y * vec.x)); }
+		Type PsuedoCross(const Vec2<Type> &vec) const { return std::abs((x * vec.y) - (y * vec.x)); }
 		void Normalize(void) // Normalize vector by magnitude
 		{
 			const Type kMagnitude = Magnitude();
@@ -209,7 +209,7 @@ namespace BGE::Math
 			copyOfThis.Normalize();
 			return copyOfThis;
 		}
-		Type Magnitude(void) const { return std::abs<Type>(std::sqrt<Type>((x * x) + (y * y))); } // Vector magnitude/length
+		Type Magnitude(void) const { return std::abs(std::sqrt((x * x) + (y * y))); } // Vector magnitude/length
 		void Inverse(void) { -(*this); } // Negate this
 		void Translate(const Vec2<Type> &vec) { (*this) = (*this) + vec; } // Add vec to this
 		void Scale(const Vec2<Type> &vec) { (*this) = (*this) * vec; } // Multiply this by vec
@@ -221,7 +221,7 @@ namespace BGE::Math
 			return Vec2<Type>(kDX, kDY);
 		}
 		// Modify all elements in the vector to be absolute values
-		void AbsoluteValue(void) { x = std::abs<Type>(x); y = std::abs<Type>(y); }
+		void AbsoluteValue(void) { x = std::abs(x); y = std::abs(y); }
 		// Get the sum of all elements in the vector
 		Type Summation(Type startValue = 0) const { return (startValue + (x + y)); }
 		// Get the product of all elements in the vector
@@ -370,13 +370,13 @@ namespace BGE::Math
 			const Type kDX = x - vec.x;
 			const Type kDY = y - vec.y;
 			const Type kDZ = z - vec.z;
-			return std::sqrt<Type>((kDX * kDX) + (kDY * kDY) + (kDZ * kDZ));
+			return std::sqrt((kDX * kDX) + (kDY * kDY) + (kDZ * kDZ));
 		}
 		void AbsoluteValue(void) // Modify all elements in the vector to be absolute values
 		{
-			x = std::abs<Type>(x);
-			y = std::abs<Type>(y);
-			z = std::abs<Type>(z);
+			x = std::abs(x);
+			y = std::abs(y);
+			z = std::abs(z);
 		}
 		Type Summation(Type startValue = 0) const // Get the sum of all elements in the vector
 		{
