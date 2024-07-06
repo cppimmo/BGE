@@ -347,4 +347,3 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		break;
 	}
 }
-

@@ -1,23 +1,29 @@
 /*=============================================================================*
- * EngineMain.cpp : Defines the engine entry point
+ * EngineMain.cpp - Defines the engine entry point.
  *
- * Part of the BGEngine Project
+ * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
- * (c) Copyright 2022 Brian Hoffpauir
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser GPL v3
- * as published by the Free Software Foundation.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See 
- * http://www.gnu.org/licenses/lgpl-3.0.txt for more details.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
- * You should have received a copy of the GNU Lesser GPL v3
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
 #include "Engine/EngineStd.hpp"
 #include "Graphics/Screenshot.hpp"
@@ -70,9 +76,9 @@ void main(void)
 }
 )fs";
 
-int BGE::EngineMain(int numArgs, char *pArgv[])
+int BGE::EngineMain(int numArgs, char *pArgs[])
 {
-	const auto kArgsSpan = GetArguments(numArgs, pArgv);
+	const auto kArgsSpan = GetArguments(numArgs, pArgs);
 #if BGE_PLATFORM_WINDBG
 	int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Retrieve the current flags
 	// Don't actually free the blocks
@@ -89,7 +95,6 @@ int BGE::EngineMain(int numArgs, char *pArgv[])
 		BGE_ERROR("Engine preparation failure.");
 		return 1;
 	}
-
 	// Initialize logging system
 	Logger::Init("Logging.xml");
 	// Try to initialize the utility toolkit
@@ -164,8 +169,8 @@ bool Prepare(void)
 		BGE_INFO("Adequate memory is available.");
 	}
 	
-	const auto kSaveGameDir = GetSaveGameDirectory("cppimmo", "Tank Battles");
-	// check for null optional
+	const auto kSaveGameDir = GetSaveGameDirectory("cppimmo", "TestGame");
+	// Check for null optional
 	if (!kSaveGameDir)
 	{
 		BGE_ERROR("Could not fetch save game directory!");

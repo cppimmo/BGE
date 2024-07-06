@@ -1,10 +1,10 @@
-#ifndef _TB_TANKBATTLES_HPP_
-#define _TB_TANKBATTLES_HPP_
+#ifndef _TG_TESTGAME_HPP_
+#define _TG_TESTGAME_HPP_
 
 #include <Engine/Engine.hpp>
 #include <Engine/BaseGameLogic.hpp>
 
-class TankBattlesApp final : public BGE::EngineApp
+class TestGameApp final : public BGE::EngineApp
 {
 public:
 	virtual BGE::BaseGameLogic *VCreateGameAndView(void) override;
@@ -18,4 +18,4 @@ protected:
 	virtual void VDestroyNetworkEventForwarder(void) override;
 };
 
-#endif /* !_TB_TANKBATTLES_HPP_ */
+#endif /* !_TG_TESTGAME_HPP_ */

@@ -54,11 +54,11 @@ namespace BGE
 	class EngineApp : public INonCopyable, public INonMoveable
 	{
 	protected:
-		bool m_isRunning; // True if game is in the main loop
-		bool m_quitRequested; // True if the exit sequence is nigh
-		bool m_quitting; // True if the exit sequence is being ran
-		bool m_hasQuit; // true if the exit sequence has been run
-		bool m_isEditorRunning; // True if the game editor is running
+		bool m_bRunning; // True if game is in the main loop
+		bool m_bQuitRequested; // True if the exit sequence is nigh
+		bool m_bQuitting; // True if the exit sequence is being ran
+		bool m_bHasQuit; // true if the exit sequence has been run
+		bool m_bEditorRunning; // True if the game editor is running
 		TextStringMap m_textStrings; // Localized string container
 		UniqueBaseGameLogicPtr m_pGame;
 	public:

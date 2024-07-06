@@ -1,24 +1,25 @@
 #include <Engine/EngineStd.hpp>
-#include "TankBattles.hpp"
+#include "TestGame.hpp"
 
 using namespace BGE;
 
-int main(int argc, char *argv[])
+int main(int numArgs, char *pArgs[])
 {
 	// Create the application layer:
-	if (!CreateEngineApp<TankBattlesApp>())
+	if (!CreateEngineApp<TestGameApp>())
 		return BGE_EXIT_FAILURE;
-	return EngineMain(argc, argv);
+
+	return EngineMain(numArgs, pArgs);
 }
 // Tank Battles application layer implementation:
-std::string TankBattlesApp::VGetGameTitle(void)
+std::string TestGameApp::VGetGameTitle(void)
 {
 	return "Tank Battles";
 }
 
-std::string TankBattlesApp::VGetGameAppDirectory(void)
+std::string TestGameApp::VGetGameAppDirectory(void)
 {
-	auto saveGameDir = GetSaveGameDirectory("cppimmo", "Tank Battles");
+	auto saveGameDir = GetSaveGameDirectory("cppimmo", SnakeCaseString(VGetGameTitle()));
 	if (!saveGameDir)
 	{
 		auto currDirectory = GetCurrentDirectory();
@@ -28,29 +29,29 @@ std::string TankBattlesApp::VGetGameAppDirectory(void)
 	return *saveGameDir;
 }
 
-std::string TankBattlesApp::VGetIcon(void)
+std::string TestGameApp::VGetIcon(void)
 {
 	return "TankBattles.ico";
 }
 
-void TankBattlesApp::VRegisterGameEvents(void)
+void TestGameApp::VRegisterGameEvents(void)
 {
 }
 
-void TankBattlesApp::VCreateNetworkEventForwarder(void)
+void TestGameApp::VCreateNetworkEventForwarder(void)
 {
 }
 
-void TankBattlesApp::VDestroyNetworkEventForwarder(void)
+void TestGameApp::VDestroyNetworkEventForwarder(void)
 {
 }
 
-BaseGameLogic *TankBattlesApp::VCreateGameAndView(void)
+BaseGameLogic *TestGameApp::VCreateGameAndView(void)
 {
 	return nullptr;
 }
 
-int TankBattlesApp::VGetRendererImpl(void)
+int TestGameApp::VGetRendererImpl(void)
 {
 	return 0;
 }

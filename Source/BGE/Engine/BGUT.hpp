@@ -45,7 +45,7 @@ namespace BGE
 	void BGUTMainLoop(void);
 	void BGUTSendExitCode(int exitCode); // Signal termination
 	void BGUTShutdown(void);
-	void BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool useFullscreen);
+	void BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen);
 	void BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height);
 	// TODO: This responsibility should be handled by the renderer and the app layer.
 	void BGUTSetViewport(int x, int y, int width, int height);

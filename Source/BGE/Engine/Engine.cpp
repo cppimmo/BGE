@@ -36,7 +36,7 @@
 #include "imgui_impl_opengl3.h"
 
 // Initialize global application instance pointer
-extern BGE::UniqueEngineAppPtr BGE::g_pApp = nullptr;
+BGE::UniqueEngineAppPtr BGE::g_pApp = nullptr;
 
 BGE::UniqueEngineAppPtr &BGE::GetEngineAppPtr(void)
 {
@@ -44,18 +44,18 @@ BGE::UniqueEngineAppPtr &BGE::GetEngineAppPtr(void)
 }
 
 BGE::EngineApp::EngineApp(void)
-	: m_isRunning(false),
-	  m_quitRequested(false),
-	  m_quitting(false),
-	  m_hasQuit(false),
-	  m_isEditorRunning(false)
+	: m_bRunning(false),
+	  m_bQuitRequested(false),
+	  m_bQuitting(false),
+	  m_bHasQuit(false),
+	  m_bEditorRunning(false)
 {
 }
 
 BGE::EngineApp::~EngineApp(void)
 {
 	// Call the OnClose routine if the game wasn't exited properly.
-	if (!m_hasQuit)
+	if (!m_bHasQuit)
 		OnClose();
 }
 
@@ -63,7 +63,7 @@ bool BGE::EngineApp::LoadStrings(std::string_view language)
 {
 	using namespace tinyxml2;
 
-	std::string languageFilePath = "Strings/";
+	std::string languageFilePath = "Assets/Strings/";
 	languageFilePath += language; // Specify language
 	languageFilePath += ".xml";
 

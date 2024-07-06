@@ -35,7 +35,7 @@
 #include <SDL.h>
 #include <imgui.h>
 #include <implot.h>
-#include <glad/gl.h>
+#include <glad/glad.h>
 #include <tinyxml2.h>
 // Common standard headers:
 #include <cstddef>
@@ -65,6 +65,8 @@
 #include <ratio>
 #include <exception>
 #include <source_location>
+#include <iostream>
+#include <system_error>
 // Common project headers:
 #include "Utilities/Types.hpp"
 #include "Utilities/Templates.hpp"
@@ -143,7 +145,7 @@ namespace BGE
 namespace BGE
 {
 	// Engine entry point:
-	extern int EngineMain(int numArgs, char *pArgv[]);
+	extern int EngineMain(int numArgs, char *pArgs[]);
 } // End namespace (BGE)
 
 #endif /* !_BGE_ENGINESTD_HPP_ */

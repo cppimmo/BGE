@@ -1,9 +1,9 @@
-#include <BGEngine/BGEngineStd.hpp>
+#include <Engine/EngineStd.hpp>
 #include "Editor.hpp"
 
 using namespace BGE;
 
-int main(int argc, char *argv[])
+int main(int numArgs, char *pArgs[])
 {
 	return 0;
 }

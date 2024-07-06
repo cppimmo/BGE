@@ -28,6 +28,8 @@
 #include "Engine/EngineStd.hpp"
 #include "Screenshot.hpp"
 
+#include <filesystem>
+
 static std::string GetScreenshotFilename(std::string_view saveGameDir);
 
 void BGE::TakeScreenshot(std::string_view saveGameDir)
@@ -82,6 +84,7 @@ void BGE::TakeScreenshot(std::string_view saveGameDir)
 	
 	std::memcpy(pImage->pixels, pTemp->pixels, width * height * kColorBytes);
 	// Write image to file on disk (do not return on failure, so surfaces can be freed):
+	BGE_INFO("Screenshot filename: %s", GetScreenshotFilename(saveGameDir).c_str());
 	BGE_ERROR_IF(SDL_SaveBMP(pTemp, GetScreenshotFilename(saveGameDir).c_str()) < 0,
 				 "TakeScreenshot Failure: Could not save file (%s).", SDL_GetError());
 	// Free surfaces:
@@ -95,8 +98,17 @@ std::string GetScreenshotFilename(std::string_view saveGameDir)
 	constexpr bool kUSE_UNDERSCORES = true;
 	const auto kTimeString = GetSystemTimeString(kUSE_UNDERSCORES);
 	if (!kTimeString)
+	{
 		return std::string();
-	// TODO: Save screenshots to Screenshots/ directory in save game location.
-	// TODO: Create Screenshots/ path with std::filesystem & verify that it exists.
-	return std::string(saveGameDir) + "/Screenshots/snap_" + *kTimeString + ".bmp";
+	}
+	
+	namespace fs = std::filesystem;
+	fs::path screenshotsPath = fs::path(saveGameDir) / "Screenshots";
+	// Create Screenshots/ path with std::filesystem & verify that it exists
+	std::error_code errorCode;
+	fs::create_directories(screenshotsPath, errorCode);
+	//BGE_ERROR_IF(!errorCode, "Could not create screenshots directory: %s", errorCode.message().c_str());
+	// Save screenshots to Screenshots/ directory in save game location
+	const std::string kScreenshotFilename = ("snap_" + *kTimeString + ".bmp");
+	return (screenshotsPath / kScreenshotFilename).string();
 }

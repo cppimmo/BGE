@@ -22,12 +22,15 @@
 #ifndef _BGE_STRING_HPP_
 #define _BGE_STRING_HPP_
 
+#include <codecvt>
+
 namespace BGE
 {
 	// Alias for std::wstring_convert (between UTF-8 and Wide)
-	using WideConverter = std::wstring_convert<std::codecvt<wchar_t, char, std::mbstate_t>>;
+	using WideConverter = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>;
 
 	bool WildcardMatch(std::string_view pattern, std::string_view str); // Supports * & ? patterns
+	std::string SnakeCaseString(std::string_view str); // Convert to snake_case representation
 	std::string TrimLeft(std::string str); // Trim whitespace to the left of string
 	std::string TrimRight(std::string str); // Trim whitespace to the right of string
 	std::string TrimString(std::string str); // Trim whitespace to the left and right of string
