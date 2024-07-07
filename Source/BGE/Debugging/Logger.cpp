@@ -38,6 +38,7 @@
 #include <iomanip>
 #include <sstream>
 #include <map>
+#include <unordered_map>
 #include <list>
 
 using namespace BGE;
@@ -45,6 +46,12 @@ using namespace BGE;
 // Singleton
 class LogManager;
 static LogManager *s_pLogManager = nullptr;
+
+struct LogMessage
+{
+	std::string message;
+	int repeatCount;
+};
 
 class LogManager
 {
@@ -57,10 +64,13 @@ public:
 	};
 	using TagMap = std::map<std::string, std::uint8_t>;
 	using ErrorMessengerList = std::list<Logger::ErrorMessenger *>;
+	//! tagName -> LogMessage (stores previous message)
+	using LastMessageMap = std::unordered_map<std::string, LogMessage>;
 private:
 	TagMap m_tags;
 	ErrorMessengerList m_errorMessengers;
-	// thread mutexes:
+	LastMessageMap m_lastMessages; 
+	// Thread mutexes
 public:
 	LogManager(void);
 	LogManager(const LogManager &) = delete;
@@ -70,23 +80,23 @@ public:
 	~LogManager(void);
 
 	bool Init(std::string_view configFilename);
-	int Write(std::string_view tagName, std::string_view msgFormat, ...);
+	int Write(std::string_view tagName, std::string_view msgFormat, va_list args);
 	void SetDisplayFlags(std::string_view tagName, std::uint8_t flags);
 	void AddErrorMessenger(Logger::ErrorMessenger *pMessenger);
 	ErrorDialogResult Error(Logger::ErrorMessenger &pMessenger, std::string_view tagName, std::string_view msgFormat...);
 private:
 };
 
-Logger::ErrorMessenger::ErrorMessenger(bool isFatal)
-	: m_isEnabled(true),
-	  m_isFatal(isFatal)
+Logger::ErrorMessenger::ErrorMessenger(bool bFatal)
+	: m_bEnabled(true),
+	  m_bFatal(bFatal)
 {
 	::s_pLogManager->AddErrorMessenger(this);
 }
 
 int Logger::ErrorMessenger::Show(std::string_view tagName, std::string_view msgFormat, ...)
 {
-	if (m_isEnabled)
+	if (m_bEnabled)
 	{
 		va_list pArgList;
 		va_start(pArgList, msgFormat);
@@ -98,12 +108,12 @@ int Logger::ErrorMessenger::Show(std::string_view tagName, std::string_view msgF
 
 bool Logger::ErrorMessenger::Enabled(void) const noexcept
 {
-	return m_isEnabled;
+	return m_bEnabled;
 }
 
 bool Logger::ErrorMessenger::Fatal(void) const noexcept
 {
-	return m_isFatal;
+	return m_bFatal;
 }
 
 void Logger::Init(std::string_view configFilename)
@@ -122,21 +132,12 @@ void Logger::Destroy(void)
 
 int Logger::Write(std::string_view tagName, std::string_view msgFormat, ...)
 {
-	using BGE::Utils::GetSystemTimeString;
-	// just print for now
-	const auto kTimeString = GetSystemTimeString();
-	// check for null optional
-	if (!kTimeString)
-		return -1;
-
-	std::ostringstream fmtStream; // prepend items to arguments format
-	fmtStream << *kTimeString << " [" << tagName << "] " << msgFormat << '\n';
-
-	va_list pArgList;
-	va_start(pArgList, msgFormat);
-	std::vfprintf(stdout, fmtStream.str().c_str(), pArgList);
-	va_end(pArgList);
-	return 0;
+	va_list argList;
+	va_start(argList, msgFormat);
+	const int kWritten = s_pLogManager->Write(tagName, msgFormat, argList);
+	va_end(argList);
+	
+	return kWritten;
 }
 
 void Logger::SetMaxMessageLength(std::size_t length)
@@ -149,7 +150,7 @@ void Logger::SetDisplayFlags(std::string_view tagName, std::uint8_t flags)
 	::s_pLogManager->SetDisplayFlags(tagName, flags);
 }
 
-void BGE::Logger::LogOutputFunc_SDL(void *pUserData, int category, SDL_LogPriority priority, const char *pMessage)
+void BGE::Logger::LogOutputFunc_SDL(void *const pUserData, int category, SDL_LogPriority priority, const char *pMessage)
 {
 	using namespace std::literals::string_view_literals;
 	std::string_view categoryName = "";
@@ -255,9 +256,60 @@ bool LogManager::Init(std::string_view configFilename)
 	return true;
 }
 
-int LogManager::Write(std::string_view tagName, std::string_view msgFormat, ...)
+int LogManager::Write(std::string_view tagName, std::string_view msgFormat, va_list args)
 {
-	return 0;
+	using BGE::Utils::GetSystemTimeString;
+	// Just print for now
+	const auto kTimeString = GetSystemTimeString();
+	// Check for null optional
+	if (!kTimeString)
+	{
+		return -1;
+	}
+	// Calculate the required length of the formatted message
+    va_list copyOfArgs;
+    va_copy(copyOfArgs, args);
+    const int kMsgLength = std::vsnprintf(nullptr, 0, msgFormat.data(), copyOfArgs);
+    va_end(copyOfArgs);
+
+    if (kMsgLength < 0)
+    {
+        return -1;  // Error in formatting
+    }
+
+    // Create a buffer for the formatted message
+    std::vector<char> buffer(kMsgLength + 1);
+    std::vsnprintf(buffer.data(), buffer.size(), msgFormat.data(), args);
+	
+	std::ostringstream fmtStream; // Prepend items to arguments format
+	fmtStream << *kTimeString << " [" << tagName << "] " << buffer.data() << '\n';
+	
+	const std::string kMessage = fmtStream.str();
+	const std::string kTagNameStr = std::string(tagName);
+	// Check if this message is a duplicate
+	if (m_lastMessages.find(kTagNameStr) != m_lastMessages.end())
+	{
+		auto &lastMessage = m_lastMessages[kTagNameStr];
+		if (lastMessage.message == kMessage)
+		{
+			// Increment the message count
+			lastMessage.repeatCount++;
+			return 0;
+		}
+		else
+		{
+			if (lastMessage.repeatCount > 1)
+			{
+				// TODO: Put this in a seperate member function
+				std::fprintf(stdout, "%s [%s] %d duplicates detected, ommitting output...\n",
+							 kTimeString.value().c_str(), kTagNameStr.c_str(), lastMessage.repeatCount);
+			}
+		}
+	}
+	// Log the current message
+	const int kWritten = std::fprintf(stdout, "%s", kMessage.c_str());
+	m_lastMessages[kTagNameStr] = { kMessage, 1 }; // Update last message at this tag
+	return kWritten;
 }
 
 void LogManager::SetDisplayFlags(std::string_view tagName, std::uint8_t flags)
@@ -286,7 +338,7 @@ void LogManager::AddErrorMessenger(Logger::ErrorMessenger *pMessenger)
 LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMessenger, std::string_view tagName,
 												std::string_view msgFormat ...)
 {
-	int buttonId = 0; // Message box result
+	int buttonID = 0; // Message box result
 	{
 		SDL_MessageBoxData mbData;
 		// SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT prevents the error icon from being shown.
@@ -294,21 +346,21 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		mbData.window = nullptr;
 		mbData.title = "Error";
 
-		// just print for now
+		// Just print for now
 		const auto kTimeString = BGE::Utils::GetSystemTimeString();
-		// check for null optional
+		// Check for null optional
 		if (!kTimeString)
 			return ErrorDialogResult::Ignore;
 
-		std::ostringstream fmtStream; // prepend items to arguments format
+		std::ostringstream fmtStream; // Prepend items to arguments format
 		fmtStream << *kTimeString << " [" << tagName << "] " << msgFormat << '\n';
 
 		char buffer[512];
 		
-		va_list pArgList;
-		va_start(pArgList, msgFormat);
-		std::vsnprintf(buffer, 512, fmtStream.str().c_str(), pArgList);
-		va_end(pArgList);
+		va_list argList;
+		va_start(argList, msgFormat);
+		std::vsnprintf(buffer, 512, fmtStream.str().c_str(), argList);
+		va_end(argList);
 		
 		mbData.message = buffer;
 		mbData.numbuttons = 3;
@@ -329,10 +381,10 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		mbData.buttons = mbButtons;
 		mbData.colorScheme = nullptr;
 
-		SDL_ShowMessageBox(&mbData, &buttonId);
+		SDL_ShowMessageBox(&mbData, &buttonID);
 	}
 
-	switch (buttonId)
+	switch (buttonID)
 	{
 	case 1:
 		return ErrorDialogResult::Ignore;

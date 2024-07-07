@@ -40,14 +40,13 @@
 //! Logging facilities namespace.
 namespace BGE::Logger
 {
-	// Use flags to display output to console or file.
+	//! Use flags to display output to console or file.
 	enum DisplayFlag : std::uint8_t
 	{
 		kDISPLAY_FLAG_FILE = 0x01,
 		kDISPLAY_FLAG_CONSOLE = 0x02
 	};
-	
-	// Base logging levels:
+	//! Base logging levels.
 	enum struct Level
 	{
 		Fatal = 0,
@@ -59,23 +58,34 @@ namespace BGE::Logger
 		
 	class ErrorMessenger
 	{
-		bool m_isEnabled;
-		bool m_isFatal;
+		bool m_bEnabled;
+		bool m_bFatal; // Is the error fatal?
 	public:
-		explicit ErrorMessenger(bool isFatal);
+		explicit ErrorMessenger(bool bFatal);
 		int Show(std::string_view tagName, std::string_view msgFormat, ...);
 		bool Enabled(void) const noexcept;
 		bool Fatal(void) const noexcept;
 	};
-		
+	/**
+	 * Initialize the logger using the given configuration file.
+	 */
 	void Init(std::string_view configFilename);
+	/**
+	 * Free resources used by the logger.
+	 */
 	void Destroy(void);
+	/**
+	 * Convert a log level to a string representation.
+	 *
+	 * @arg level The log level.
+	 * @return String representation of the given log level.
+	 */
 	constexpr std::string_view LevelToString(Level level) noexcept;
 	int Write(std::string_view tagName, std::string_view msgFormat, ...);
 	void SetMaxMessageLength(std::size_t length);
 	// https://stackoverflow.com/questions/18803940/how-to-make-enum-class-to-work-with-the-bit-or-feature
 	void SetDisplayFlags(std::string_view tagName, std::uint8_t flags);
-	void LogOutputFunc_SDL(void *pUserData, int category, SDL_LogPriority priority, const char *pMessage);
+	void LogOutputFunc_SDL(void *const pUserData, int category, SDL_LogPriority priority, const char *pMessage);
 } // End namespace (BGE::Logger)
 
 inline constexpr std::string_view BGE::Logger::LevelToString(Level level) noexcept

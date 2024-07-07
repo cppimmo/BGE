@@ -468,7 +468,7 @@ void BGE::BGUTLogInfo(void)
 	{
 		int attribValue = 0;
 		SDL_GL_GetAttribute(attrib, &attribValue);
-		BGE_INFO("SDL_GLattr(%u): %d(0x%08X)", static_cast<int>(attrib), attribValue, attribValue);
+		BGE_INFO("SDL_GLattr(%2u): DEC: %10d, HEX: (0x%08X)", static_cast<int>(attrib), attribValue, attribValue);
 	};
 	logAttrib(SDL_GL_RED_SIZE);
     logAttrib(SDL_GL_GREEN_SIZE);

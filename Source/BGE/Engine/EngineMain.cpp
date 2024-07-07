@@ -90,13 +90,14 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	_CrtSetDbgFlag(tmpDbgFlag);
 	_CrtSetDumpClient(DebugDumpClient);
 #endif /* BGE_PLATFORM_WINDBG */
+	// Initialize logging system (needs to be done first)
+	Logger::Init("Logging.xml");
+	
 	if (!Prepare())
 	{
 		BGE_ERROR("Engine preparation failure.");
 		return 1;
 	}
-	// Initialize logging system
-	Logger::Init("Logging.xml");
 	// Try to initialize the utility toolkit
 	if (!BGUTInit("Engine.xml"))
 	{
@@ -124,7 +125,12 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	Shutdown(); // App shutdown
 	
 	BGUTShutdown(); // Shutdown upon exit of main loop
-	
+
+	BGE_INFO("Hi");
+	BGE_INFO("Hi");
+	BGE_INFO("Hi");
+	BGE_INFO("Howdy");
+	BGE_INFO("Hi");
 	// Destroy the logging system
 	Logger::Destroy();
 #if BGE_PLATFORM_WINDBG
