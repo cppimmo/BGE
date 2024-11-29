@@ -115,14 +115,14 @@ namespace BGE
 		INonCopyable &operator=(const INonCopyable &) = delete;
 		virtual ~INonCopyable(void) = default;
 	};
-	//! Interface for non-moveable class types.
-	class INonMoveable
+	//! Interface for non-movable class types.
+	class INonMovable
 	{
 	public:
-		INonMoveable(void) = default;
-		INonMoveable(const INonMoveable &) = delete;
-		INonMoveable &operator=(const INonMoveable &) = delete;
-		virtual ~INonMoveable(void) = default;
+		INonMovable(void) = default;
+		INonMovable(const INonMovable &) = delete;
+		INonMovable &operator=(const INonMovable &) = delete;
+		virtual ~INonMovable(void) = default;
 	};
 } // End namespace (BGE)
 

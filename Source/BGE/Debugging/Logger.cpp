@@ -43,49 +43,50 @@
 
 using namespace BGE;
 
-// Singleton
-class LogManager;
-static LogManager *s_pLogManager = nullptr;
-
-struct LogMessage
+namespace BGE
 {
-	std::string message;
-	int repeatCount;
-};
-
-class LogManager
-{
-public:
-	enum struct ErrorDialogResult
+    // Singleton
+	class LogManager;
+	BGE_DECLARE_PTR(LogManager);
+	
+	static LogManager *s_pLogManager = nullptr;
+	
+	struct LogMessage
 	{
-		Abort,
-		Retry,
-		Ignore
+		std::string message;
+		int repeatCount;
 	};
-	using TagMap = std::map<std::string, std::uint8_t>;
-	using ErrorMessengerList = std::list<Logger::ErrorMessenger *>;
-	//! tagName -> LogMessage (stores previous message)
-	using LastMessageMap = std::unordered_map<std::string, LogMessage>;
-private:
-	TagMap m_tags;
-	ErrorMessengerList m_errorMessengers;
-	LastMessageMap m_lastMessages; 
-	// Thread mutexes
-public:
-	LogManager(void);
-	LogManager(const LogManager &) = delete;
-	LogManager &operator=(const LogManager &) = delete;
-	LogManager(LogManager &&) noexcept = delete;
-	LogManager &operator=(LogManager &&) noexcept = delete;
-	~LogManager(void);
 
-	bool Init(std::string_view configFilename);
-	int Write(std::string_view tagName, std::string_view msgFormat, va_list args);
-	void SetDisplayFlags(std::string_view tagName, std::uint8_t flags);
-	void AddErrorMessenger(Logger::ErrorMessenger *pMessenger);
+	class LogManager : public INonCopyable, public INonMovable
+	{
+	public:
+		enum struct ErrorDialogResult
+		{
+			Abort,
+			Retry,
+			Ignore
+		};
+		using TagMap = std::map<std::string, std::uint8_t>;
+		using ErrorMessengerList = std::list<Logger::ErrorMessenger *>;
+		//! tagName -> LogMessage (stores previous message)
+		using LastMessageMap = std::unordered_map<std::string, LogMessage>;
+	private:
+		TagMap m_tags;
+		ErrorMessengerList m_errorMessengers;
+		LastMessageMap m_lastMessages; 
+		// Thread mutexes
+	public:
+		LogManager(void);
+		~LogManager(void);
+		
+		bool Init(std::string_view configFilename);
+		int Write(std::string_view tagName, std::string_view msgFormat, va_list args);
+		void SetDisplayFlags(std::string_view tagName, std::uint8_t flags);
+		void AddErrorMessenger(Logger::ErrorMessenger *pMessenger);
 	ErrorDialogResult Error(Logger::ErrorMessenger &pMessenger, std::string_view tagName, std::string_view msgFormat...);
-private:
-};
+	private:
+	};
+} // End namespace (BGE)
 
 Logger::ErrorMessenger::ErrorMessenger(bool bFatal)
 	: m_bEnabled(true),
@@ -150,7 +151,7 @@ void Logger::SetDisplayFlags(std::string_view tagName, std::uint8_t flags)
 	::s_pLogManager->SetDisplayFlags(tagName, flags);
 }
 
-void BGE::Logger::LogOutputFunc_SDL(void *const pUserData, int category, SDL_LogPriority priority, const char *pMessage)
+void Logger::LogOutputFunc_SDL(void *const pUserData, int category, SDL_LogPriority priority, const char *pMessage)
 {
 	using namespace std::literals::string_view_literals;
 	std::string_view categoryName = "";

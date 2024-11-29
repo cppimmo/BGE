@@ -34,13 +34,14 @@
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
+#include <Graphics/Screenshot.hpp>
 
 // Initialize global application instance pointer
 BGE::UniqueEngineAppPtr BGE::g_pApp = nullptr;
 
-BGE::UniqueEngineAppPtr &BGE::GetEngineAppPtr(void)
+BGE::EngineApp &BGE::GetEngineApp(void)
 {
-	return g_pApp;
+	return *g_pApp;
 }
 
 BGE::EngineApp::EngineApp(void)
@@ -56,7 +57,76 @@ BGE::EngineApp::~EngineApp(void)
 {
 	// Call the OnClose routine if the game wasn't exited properly.
 	if (!m_bHasQuit)
-		OnClose();
+		OnShutdown();
+}
+
+// Method named InitInstance since only one instance of the game is allowed in most cases.
+bool BGE::EngineApp::VInitInstance(void)
+{
+	// TODO: Implement intialization tasks.
+#ifdef BGE_CONFIG_DEBUG
+	HideConsole(); // TODO: This should be called by Logger based on configuration.
+#endif
+	if (m_bResourceCheck)
+	{
+		constexpr int kDISK_SPACE_MIB = 1'000;
+		constexpr int kMEMORY_MIB = 1'000;
+
+		if (!IsDiskSpaceAvailable(kDISK_SPACE_MIB))
+		{
+			BGE_ERROR("Not enough storage!");
+			return false;
+		}
+
+		if (!IsMemoryAvailable(kMEMORY_MIB))
+		{
+			BGE_ERROR("Not enough memory!");
+			return false;
+		}
+	}
+#ifdef BGE_CONFIG_DEBUG
+	BGE_INFO("Platform: %s", GetPlatform().data());
+	BGE_INFO("CPU speed: %dMHz", ReadCPUSpeed());
+	BGE_INFO("Logical CPU cores: %d", ReadLogicalCPUCores());
+#endif
+#ifdef BGE_CONFIG_RELEASE
+	if (!IsOnlyInstance("BGE"))
+	{
+		BGE_ERROR("Only one instance of the application is allowed!");
+		return false;
+	}
+
+	if (!IsDebuggerPresent())
+		return false;
+#endif
+	// Register all events
+    RegisterEngineEvents();
+    VRegisterGameEvents();
+
+	// Load localized strings:
+	if (!LoadStrings("English"))
+	{
+		BGE_ERROR("Couldn't load localized strings!");
+		return false;
+	}
+
+	// TODO: Setup event manager.
+
+	// Try to initialize the utility toolkit
+	if (!BGUTInit("Engine.xml"))
+	{
+		BGE_ERROR("Couldn't initialize engine!");
+		return false;
+	}
+
+	BGUTSetWindowTitle(VGetGameTitle());
+
+	m_pGameLogic = VCreateGameAndView();
+	if (!m_pGameLogic) return false;
+
+	m_bRunning = true;
+
+	return true;
 }
 
 bool BGE::EngineApp::LoadStrings(std::string_view language)
@@ -111,21 +181,47 @@ std::wstring BGE::EngineApp::GetString(std::wstring_view sID)
 void BGE::EngineApp::OnUpdate(float deltaTime, float elapsedTime)
 {
 	// TODO: Call update routines.
+	auto &app = GetEngineApp();
+	// TODO: Update event queue.
+	// TODO: Update network stuff.
+	app.m_pGameLogic->VOnUpdate(deltaTime, elapsedTime);
 }
 
 void BGE::EngineApp::OnRender(void)
 {
+	auto &app = GetEngineApp();
+
 	// TODO: Call rendering routines.
+
+	constexpr float kCLEAR_COLOR[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
+	glClearBufferfv(GL_COLOR, 0, kCLEAR_COLOR);
+
+	ImGui::ShowDemoWindow();
+	ImPlot::ShowDemoWindow();
 }
 
 void BGE::EngineApp::OnHandleEvent(const SDL_Event &event)
 {
+	auto &app = GetEngineApp();
 	// TODO: Handle necessary SDL events.
-	/*switch (event)
+	switch (event.type)
 	{
-	default:
+	case SDL_KEYDOWN:
+		if (event.key.keysym.sym == SDLK_ESCAPE)
+			BGUTSendExitCode(BGE_EXIT_SUCCESS);
+		if (event.key.keysym.sym == SDLK_s)
+		{
+			static bool c_initialized = false;
+			if (!c_initialized)
+			{
+				std::string saveGameDir = app.VGetGameAppDirectory();
+				TakeScreenshot(saveGameDir);
+				BGE_INFO("Tried to take screenshot!");
+				c_initialized = true;
+			}
+		}
 		break;
-	}*/
+	}
 }
 
 void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
@@ -133,7 +229,7 @@ void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
 	// TODO: Implement code which operates on renderer for display change.
 }
 
-void BGE::EngineApp::OnClose(void)
+void BGE::EngineApp::OnShutdown(void)
 {
 	// TODO: Perform destruction tasks.
 }
@@ -141,48 +237,6 @@ void BGE::EngineApp::OnClose(void)
 bool BGE::EngineApp::VLoadGame(void)
 {
 	return false;
-}
-// Method named InitInstance since only one instance of the game is allowed in most cases.
-bool BGE::EngineApp::VInitInstance(void)
-{
-	// TODO: Implement intialization tasks.
-#ifdef BGE_CONFIG_DEBUG
-	HideConsole(); // TODO: This should be called by Logger based on configuration.
-#endif
-	if (!IsDiskSpaceAvailable(1'000))
-	{
-		BGE_ERROR("Not enough storage!");
-		return false;
-	}
-
-	if (!IsMemoryAvailable(1'000))
-	{
-		BGE_ERROR("Not enough memory!");
-		return false;
-	}
-#ifdef BGE_CONFIG_DEBUG
-	BGE_INFO("Platform: %s", GetPlatform().data());
-	BGE_INFO("CPU speed: %dMHz", ReadCPUSpeed());
-	BGE_INFO("Logical CPU cores: %d", ReadLogicalCPUCores());
-#endif
-#ifdef BGE_CONFIG_RELEASE
-	if (!IsOnlyInstance("BGE"))
-	{
-		BGE_ERROR("Only one instance of the application is allowed!");
-		return false;
-	}
-
-	if (!IsDebuggerPresent())
-		return false;
-#endif
-	// Load localized strings:
-	if (!LoadStrings("English"))
-	{
-		BGE_ERROR("Couldn't load localized strings!");
-		return false;
-	}
-
-	return true;
 }
 
 void BGE::EngineApp::VRegisterGameEvents(void)

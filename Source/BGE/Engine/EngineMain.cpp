@@ -38,6 +38,8 @@
 using namespace BGE;
 
 static void DebugDumpClient(void *pUserPortion, std::size_t blockSize);
+
+#if 0
 static bool Prepare(void);
 static bool Init(void);
 static void Update(float deltaTime, float elapsedTime);
@@ -75,10 +77,21 @@ void main(void)
 	outColor = vec4(g_vertexColor, 1.0);
 }
 )fs";
+#endif
 
+/**
+ * @brief Entry point for the engine application.
+ *
+ * Initializes the logging system, application layer, and the utility callbacks.
+ * Starts the main loop and manages cleanup and shutdown processes upon exit.
+ *
+ * @param numArgs The number of command-line arguments.
+ * @param pArgs The array of command-line arguments.
+ * @return The application exit code, where 0 indicates success.
+ */
 int BGE::EngineMain(int numArgs, char *pArgs[])
 {
-	const auto kArgsSpan = GetArguments(numArgs, pArgs);
+	const auto kArgsSpan = GetArguments(numArgs, pArgs); // Collect command line args
 #if BGE_PLATFORM_WINDBG
 	int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Retrieve the current flags
 	// Don't actually free the blocks
@@ -92,45 +105,25 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 #endif /* BGE_PLATFORM_WINDBG */
 	// Initialize logging system (needs to be done first)
 	Logger::Init("Logging.xml");
-	
-	if (!Prepare())
+
+	// Set the utility callbacks to the static member functions
+	BGUTSetCallbackUpdate(EngineApp::OnUpdate);
+	BGUTSetCallbackRender(EngineApp::OnRender);
+	BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
+
+	auto &app = GetEngineApp();
+	// Initialize an instance of the application layer (also initializes BGUT)
+	if (!app.VInitInstance())
 	{
-		BGE_ERROR("Engine preparation failure.");
-		return 1;
-	}
-	// Try to initialize the utility toolkit
-	if (!BGUTInit("Engine.xml"))
-	{
-		BGE_ERROR("Couldn't initialize engine!");
+		BGE_ERROR("Failure to initialize instance of application!");
 		return BGE_EXIT_FAILURE;
 	}
-	// Set the utility callbacks
-	//BGUTSetCallbackUpdate(EngineApp::OnUpdate);
-	//BGUTSetCallbackRender(EngineApp::OnRender);
-	//BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
-	// Initialize an instance of the application layer
-	//if (!g_pApp->VInitInstance())
-	//{
-	//	BGE_ERROR("Failure to initialize instance of application!");
-	//	return BGE_EXIT_FAILURE;
-	//}
 
-	Init();
 	// TODO: Use SDL_Set/GetWindowData to set class object pointer.
-	BGUTSetCallbackUpdate(Update);
-	BGUTSetCallbackRender(Render);
-	BGUTSetCallbackEventHandler(HandleEvent);
 	BGUTMainLoop(); // Enter main loop
 	BGE_INFO("Main loop duration: %.2f seconds", BGUTGetMainLoopTimer().GetElapsedSecs());
-	Shutdown(); // App shutdown
 	
 	BGUTShutdown(); // Shutdown upon exit of main loop
-
-	BGE_INFO("Hi");
-	BGE_INFO("Hi");
-	BGE_INFO("Hi");
-	BGE_INFO("Howdy");
-	BGE_INFO("Hi");
 	// Destroy the logging system
 	Logger::Destroy();
 #if BGE_PLATFORM_WINDBG
@@ -138,8 +131,7 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	std::cout << "Press enter to exit.\n";
 	std::cin.get(); // Wait for enter key, so any leaks can be seen.
 #endif /* BGE_PLATFORM_WINDBG */
-	return BGUTGetExitCode(); // Return app exit code
-	// return g_pApp->GetExitCode(); // Return app exit code
+	return app.GetExitCode(); // Return app exit code
 }
 
 void DebugDumpClient(void *pUserPortion, std::size_t blockSize)
@@ -149,6 +141,7 @@ void DebugDumpClient(void *pUserPortion, std::size_t blockSize)
 	std::fprintf(stderr, "Memory leak at: %llu, bytes allocated: %llu", address, blockSize);
 }
 
+#if 0
 bool Prepare(void)
 {
 	HideConsole(); // TODO: This should be called by Logger based on configuration.
@@ -186,6 +179,11 @@ bool Prepare(void)
 	{
 		BGE_INFO("Save game directory: %s", (*kSaveGameDir).c_str());
 		s_saveGameDir = *kSaveGameDir;
+	}
+
+	if (!IsOnlyInstance("TestGame"))
+	{
+		BGE_WARNING("Not the only instance of the game.");
 	}
 	return true;
 }
@@ -296,3 +294,4 @@ void Shutdown(void)
 	glDeleteShader(s_fragmentShaderID);
 	glDeleteProgram(s_programID);
 }
+#endif

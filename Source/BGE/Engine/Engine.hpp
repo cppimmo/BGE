@@ -40,18 +40,19 @@ namespace BGE
 	// Set global application pointer to the instance of an app layer class.
 	extern UniqueEngineAppPtr g_pApp; // Global application layer pointer (use as singleton)
 	
-	UniqueEngineAppPtr &GetEngineAppPtr(void);
+	//! Return reference to the global EngineApp instance.
+	EngineApp &GetEngineApp(void);
 	// Call in game programs to create an instance of the EngineApp.
 	template <typename DerivedApp, typename... Args>
 	bool CreateEngineApp(Args... args) requires(std::derived_from<DerivedApp, EngineApp>)
 	{
-		GetEngineAppPtr() = std::make_unique<DerivedApp>(args...);
-		return GetEngineAppPtr().operator bool();
+		g_pApp = std::make_unique<DerivedApp>(args...);
+		return g_pApp.operator bool();
 	}
 	/**
 	 * Application layer class.
 	 */
-	class EngineApp : public INonCopyable, public INonMoveable
+	class EngineApp : public INonCopyable, public INonMovable
 	{
 	protected:
 		bool m_bRunning; // True if game is in the main loop
@@ -59,14 +60,16 @@ namespace BGE
 		bool m_bQuitting; // True if the exit sequence is being ran
 		bool m_bHasQuit; // true if the exit sequence has been run
 		bool m_bEditorRunning; // True if the game editor is running
+		bool m_bResourceCheck;
 		TextStringMap m_textStrings; // Localized string container
-		UniqueBaseGameLogicPtr m_pGame;
+		UniqueBaseGameLogicPtr m_pGameLogic;
+		// TODO: Add event manager.
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
 	
 		virtual bool VInitInstance(void);
-		virtual BaseGameLogic *VCreateGameAndView(void) = 0;
+		virtual UniqueBaseGameLogicPtr VCreateGameAndView(void) = 0;
 		virtual bool VLoadGame(void);
 		virtual std::string VGetGameTitle(void) = 0; // Application related data
 		virtual std::string VGetGameAppDirectory(void) = 0;
@@ -80,7 +83,9 @@ namespace BGE
 		static void OnRender(void);
 		static void OnHandleEvent(const SDL_Event &event);
 		static void OnDisplayChange(int colorDepth, int width, int height);
-		void OnClose(void);
+		void OnShutdown(void);
+		// Accessors:
+		//BaseGameLogic &GetGameLogic(void);
 		int GetExitCode(void) { return BGUTGetExitCode(); }
 	protected:
 		virtual void VRegisterGameEvents(void);

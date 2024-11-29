@@ -262,6 +262,13 @@ void BGE::BGUTShutdown(void)
 	SDL_Quit();
 }
 
+void BGE::BGUTSetWindowTitle(std::string_view title)
+{
+	if (!s_BGUT.pWindow) return;
+	SDL_SetWindowTitle(s_BGUT.pWindow, title.data());
+}
+
+
 void BGE::BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen)
 {
 

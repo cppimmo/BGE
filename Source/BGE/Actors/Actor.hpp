@@ -5,6 +5,8 @@
 
 namespace BGE
 {
+	class Actor; // Forward declare
+	using ActorMap = std::map<ActorID, StrongActorPtr>;
 	/**
 	 *
 	 */
