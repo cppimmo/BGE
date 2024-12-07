@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Random.cpp - Random number generation tools.
+/*******************************************************************************
+ * @file   Resource.hpp
+ * @author Brian Hoffpauir
+ * @date   11.29.2024
+ * @brief  .
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,26 +27,24 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
-#include "Engine/EngineStd.hpp"
-#include "Utilities/Random.hpp"
+ ******************************************************************************/
+#ifndef _BGE_RESOURCE_HPP_
+#define _BGE_RESOURCE_HPP_
 
-//#include <cstdint>
-//#include <cstddef>
+#include <string>
+#include <string_view>
 
-BGE::Math::Random::Random(std::uint64_t seedNum)
-	: m_seed(seedNum),
-	  m_engine(m_seed)
+namespace BGE
 {
-}
+	class Resource
+	{
+		std::string m_name;
+	public:
+		Resource(std::string_view name) : m_name(name) { }
+		// Accessors:
+		const std::string GetName(void) const { return m_name; }
+		void SetName(std::string_view name) { m_name = name; }
+	};
+} // End namespace (BGE)
 
-std::uint64_t BGE::Math::Random::GetSeed(void) const noexcept
-{
-	return m_seed;
-}
-
-void BGE::Math::Random::Reseed(std::uint64_t seedNum)
-{
-	m_seed = seedNum;
-	m_engine.seed(m_seed);
-}
+#endif /* !_BGE_RESOURCE_HPP_ */

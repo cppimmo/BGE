@@ -104,11 +104,13 @@ bool BGE::EngineApp::VInitInstance(void)
     VRegisterGameEvents();
 
 	// Load localized strings:
-	if (!LoadStrings("English"))
+	if (!m_localizer.LoadStrings(Localizer::Language::kEnglish))
 	{
 		BGE_ERROR("Couldn't load localized strings!");
 		return false;
 	}
+
+	BGE_INFO("(ID_HOWDY): %s",  BGE::WStringToString(GetLocalizer().GetString(L"ID_HOWDY")).c_str());
 
 	// TODO: Setup event manager.
 
@@ -127,55 +129,6 @@ bool BGE::EngineApp::VInitInstance(void)
 	m_bRunning = true;
 
 	return true;
-}
-
-bool BGE::EngineApp::LoadStrings(std::string_view language)
-{
-	using namespace tinyxml2;
-
-	std::string languageFilePath = "Assets/Strings/";
-	languageFilePath += language; // Specify language
-	languageFilePath += ".xml";
-
-	XMLDocument xmlDocument; // Document object
-	XMLError xmlResult; // Result object
-
-	xmlResult = xmlDocument.LoadFile(languageFilePath.c_str());
-	if (xmlResult != XML_SUCCESS)
-	{
-		BGE_ERROR("Strings are missing.");
-		return false;
-	}
-
-	auto *pRoot = xmlDocument.RootElement(); // Fetch the root element: Strings
-	if (!pRoot) return false;
-	
-	for (auto pElem = pRoot->FirstChildElement(); pElem; pElem = pElem->NextSiblingElement())
-	{
-		const char *pKey = pElem->Attribute("sID");
-		const char *pText = pElem->Attribute("value");
-
-		if (pKey && pText)
-		{
-			// Convert both attributes to wide character strings
-			auto wideKey = StringToWString(pKey);
-			auto wideText = StringToWString(pText);
-			// Set the text for the current ID:
-			m_textStrings[wideKey] = wideText;
-		}
-	}
-	return true;
-}
-
-std::wstring BGE::EngineApp::GetString(std::wstring_view sID)
-{
-	auto localizedStringIter = m_textStrings.find(sID.data());
-	if (localizedStringIter == m_textStrings.end())
-	{
-		BGE_ASSERT(0 && "String not found!");
-		return std::wstring();
-	}
-	return localizedStringIter->second; // Return contents at sID
 }
 
 void BGE::EngineApp::OnUpdate(float deltaTime, float elapsedTime)
@@ -232,6 +185,11 @@ void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
 void BGE::EngineApp::OnShutdown(void)
 {
 	// TODO: Perform destruction tasks.
+}
+
+const BGE::Localizer &BGE::EngineApp::GetLocalizer(void) const
+{
+	return m_localizer;
 }
 
 bool BGE::EngineApp::VLoadGame(void)

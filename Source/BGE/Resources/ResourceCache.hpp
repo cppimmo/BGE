@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Random.cpp - Random number generation tools.
+/*******************************************************************************
+ * @file   ResourceCache.hpp
+ * @author Brian Hoffpauir
+ * @date   11.29.2024
+ * @brief  .
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,26 +27,24 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
-#include "Engine/EngineStd.hpp"
-#include "Utilities/Random.hpp"
+ ******************************************************************************/
+#ifndef _BGE_RESOURCECACHE_HPP_
+#define _BGE_RESOURCECACHE_HPP_
 
-//#include <cstdint>
-//#include <cstddef>
+#include "Resources/Resource.hpp"
+#include "Resources/ResourceHandle.hpp"
 
-BGE::Math::Random::Random(std::uint64_t seedNum)
-	: m_seed(seedNum),
-	  m_engine(m_seed)
+namespace
 {
-}
+	class ResourceCache; // Forware declare
 
-std::uint64_t BGE::Math::Random::GetSeed(void) const noexcept
-{
-	return m_seed;
-}
 
-void BGE::Math::Random::Reseed(std::uint64_t seedNum)
-{
-	m_seed = seedNum;
-	m_engine.seed(m_seed);
-}
+	class ResourceCache
+	{
+		friend class ResourceHandle;
+	private:
+
+	};
+} // End namespace (BGE)
+
+#endif /* !_BGE_RESOURCECACHE_HPP_ */

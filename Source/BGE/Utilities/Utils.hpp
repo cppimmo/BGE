@@ -33,22 +33,31 @@ namespace BGE::Utils
 	// C++20 concept representing an enum type.
 	template <typename Type>
 	concept Enum = std::is_enum<Type>::value;
+
 	/**
 	 * Return the current system time in a string representation
 	 * useUnderscores argument makes the string suitable for filenames.
 	 */
 	std::optional<std::string> GetSystemTimeString(bool useUnderscores = false);
+
+	/**
+	 *
+	 */
+	std::string GenerateUUID(void);
+
 	// Cast an enum to its underyling type.
 	template <Enum Type>
 	inline constexpr auto ToUnderlying(Type tEnum)
 	{
 		return static_cast<std::underlying_type_t<Type>>(tEnum);
 	}
+
 	// Fetch a string representation of a boolean value.
 	inline constexpr std::string_view BoolToString(bool value)
 	{
 		return (value) ? "true" : "false";
 	}
+
 	// Grab the strong shared pointer of a weak pointer.
 	template <typename Type>
 	inline std::shared_ptr<Type> MakeStrongPtr(std::weak_ptr<Type> pWeak)

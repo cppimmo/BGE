@@ -28,6 +28,10 @@
 #ifndef _BGE_RANDOM_HPP_
 #define _BGE_RANDOM_HPP_
 
+#include <cstdint>
+#include <cstddef>
+#include <random>
+
 namespace BGE::Math
 {
 	// Structure to store a range for use with the Random class.
@@ -48,13 +52,24 @@ namespace BGE::Math
 		explicit Random(std::uint64_t seedNum = std::time(nullptr));
 	
 		template <Math::Numeric Type>
-		Type Generate(const RandomRange<Type> &range) const;
+		Type GenerateInt(const RandomRange<Type> &range) const;
+		template <Math::Numeric Type>
+		Type GenerateReal(const RandomRange<Type> &range) const;
 		void Reseed(std::uint64_t seedNum = std::time(nullptr));
 		std::uint64_t GetSeed(void) const noexcept;
 	};
 	
 	template <Math::Numeric Type>
-	inline Type Random::Generate(const RandomRange<Type> &range) const
+	inline Type Random::GenerateInt(const RandomRange<Type> &range) const
+	{
+		BGE_ASSERT(IsRandomRangeValid(range)); // Check for valid range
+
+		std::uniform_int_distribution<Type> distro(range.minValue, range.maxValue);
+		return distro(m_engine);
+	}
+
+	template <Math::Numeric Type>
+	inline Type Random::GenerateReal(const RandomRange<Type> &range) const
 	{
 		BGE_ASSERT(IsRandomRangeValid(range)); // Check for valid range
 	

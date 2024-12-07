@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
 #include "Engine/EngineStd.hpp"
-#include "Utils.hpp"
+#include "Utilities/Utils.hpp"
+
+#include "Utilities/Random.hpp"
 
 #include <chrono>
 #include <ctime>
@@ -54,4 +56,39 @@ std::optional<std::string> BGE::Utils::GetSystemTimeString(bool useUnderscores)
 				 << std::setw(2) <<  pNow->tm_min << ((useUnderscores) ? '-' : ':')
 				 << std::setw(2) << ((pNow->tm_sec == 60) ? 0 : pNow->tm_sec);
 	return stringStream.str();
+}
+
+std::string BGE::Utils::GenerateUUID(void)
+{
+	/*constexpr Math::RandomRange<int> kRANGE{ 0, 15 };
+	Math::Random random;
+
+	std::ostringstream oss;
+	for (int i = 0; i < 8; ++i) // 8 characters
+	{
+		oss << std::hex << random.GenerateInt(kRANGE);
+	}
+	oss << "-";
+	for (int i = 0; i < 4; ++i) // 4 characters
+	{
+		oss << std::hex << random.GenerateInt(kRANGE);
+	}
+	oss << "-4"; // 4 characters, version 4 UUID
+	for (int i = 0; i < 3; ++i) // 3 characters
+	{
+		oss << std::hex << random.GenerateInt(kRANGE);
+	}
+	oss << "-";
+	oss << std::hex << (random.GenerateInt(kRANGE) & (0x3 | 0x8)); // Variant bits
+	for (int i = 0; i < 3; ++i) // 3 characters
+	{
+		oss << std::hex << random.GenerateInt(kRANGE);
+	}
+	oss << "-";
+	for (int i = 0; i < 12; ++i) // 12 characters
+	{
+		oss << std::hex << random.GenerateInt(kRANGE);
+	}
+	return oss.str();*/
+	return "";
 }

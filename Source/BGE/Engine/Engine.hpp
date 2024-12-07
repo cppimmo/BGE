@@ -31,6 +31,7 @@
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
 #include "Engine/BaseGameLogic.hpp"
+#include "Resources/Localizer.hpp"
 
 #include <map>
 #include <string>
@@ -62,6 +63,7 @@ namespace BGE
 		bool m_bEditorRunning; // True if the game editor is running
 		bool m_bResourceCheck;
 		TextStringMap m_textStrings; // Localized string container
+		Localizer m_localizer; //!< Localization handler
 		UniqueBaseGameLogicPtr m_pGameLogic;
 		// TODO: Add event manager.
 	public:
@@ -86,6 +88,7 @@ namespace BGE
 		void OnShutdown(void);
 		// Accessors:
 		//BaseGameLogic &GetGameLogic(void);
+		const Localizer &GetLocalizer(void) const;
 		int GetExitCode(void) { return BGUTGetExitCode(); }
 	protected:
 		virtual void VRegisterGameEvents(void);
