@@ -87,6 +87,11 @@ add_library(ImPlot STATIC
   "${IMPLOT_DIR}/implot_items.cpp")
 target_include_directories(ImPlot PUBLIC ${IMGUI_DIR} ${IMPLOT_DIR})
 
+# CallMe library:
+set(FASTDELEGATE_DIR "Lib/FastDelegate")
+add_library(FastDelegate INTERFACE) # Header only library
+target_include_directories(FastDelegate INTERFACE ${FASTDELEGATE_DIR})
+
 # OpenAL-soft library:
 if(WIN32)
   # Must set the OPENALDIR environment variable on Windows
@@ -123,7 +128,7 @@ if(WIN32)
   target_compile_options(Engine PUBLIC "/MP")
 endif()
 
-target_link_libraries(Engine ${SDL2_LIBRARIES} ImGui ImPlot glad TinyXml2 ${OPENAL_LIBRARIES}) #${Boost_LIBRARIES})
+target_link_libraries(Engine ${SDL2_LIBRARIES} ImGui ImPlot glad TinyXml2 FastDelegate ${OPENAL_LIBRARIES}) #${Boost_LIBRARIES})
 
 if(WIN32)
   # Set the CWD for the debugger to start the program

@@ -31,6 +31,7 @@
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
 #include "Engine/BaseGameLogic.hpp"
+#include "Events/EventManager.hpp"
 #include "Resources/Localizer.hpp"
 
 #include <map>
@@ -63,13 +64,14 @@ namespace BGE
 		bool m_bEditorRunning; // True if the game editor is running
 		bool m_bResourceCheck;
 		TextStringMap m_textStrings; // Localized string container
-		Localizer m_localizer; //!< Localization handler
+		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler
+		UniqueEventManagerPtr m_pEventManager; //!< Main event manager
 		UniqueBaseGameLogicPtr m_pGameLogic;
 		// TODO: Add event manager.
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
-	
+		// EngineApp interface:
 		virtual bool VInitInstance(void);
 		virtual UniqueBaseGameLogicPtr VCreateGameAndView(void) = 0;
 		virtual bool VLoadGame(void);
@@ -78,8 +80,6 @@ namespace BGE
 		virtual std::string VGetIcon(void) = 0; // Icon filename
 		virtual int VGetRendererImpl(void) = 0; // Type of renderer
 
-		bool LoadStrings(std::string_view language);
-		std::wstring GetString(std::wstring_view sID);
 		// These are marked static so it will be easier to pass them as arguments:
 		static void OnUpdate(float deltaTime, float elsapsedTime);
 		static void OnRender(void);
@@ -88,8 +88,9 @@ namespace BGE
 		void OnShutdown(void);
 		// Accessors:
 		//BaseGameLogic &GetGameLogic(void);
-		const Localizer &GetLocalizer(void) const;
-		int GetExitCode(void) { return BGUTGetExitCode(); }
+		Localizer &GetLocalizer(void);
+		EventManager &GetEventManager(void);
+		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);
 		virtual void VCreateNetworkEventForwarder(void);

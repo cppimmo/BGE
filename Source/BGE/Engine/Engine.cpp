@@ -51,6 +51,9 @@ BGE::EngineApp::EngineApp(void)
 	  m_bHasQuit(false),
 	  m_bEditorRunning(false)
 {
+	m_pLocalizer = std::make_unique<Localizer>();
+	m_pEventManager = std::make_unique<EventManager>("Global");
+	std::cout << m_pEventManager->GetName() << '\n';
 }
 
 BGE::EngineApp::~EngineApp(void)
@@ -104,7 +107,7 @@ bool BGE::EngineApp::VInitInstance(void)
     VRegisterGameEvents();
 
 	// Load localized strings:
-	if (!m_localizer.LoadStrings(Localizer::Language::kEnglish))
+	if (!m_pLocalizer->LoadStrings(Localizer::Language::kEnglish))
 	{
 		BGE_ERROR("Couldn't load localized strings!");
 		return false;
@@ -138,6 +141,9 @@ void BGE::EngineApp::OnUpdate(float deltaTime, float elapsedTime)
 	// TODO: Update event queue.
 	// TODO: Update network stuff.
 	app.m_pGameLogic->VOnUpdate(deltaTime, elapsedTime);
+	// TODO: Set a reasonable event queue processing timeout.
+	// Allow event queue to process for up to ___ milliseconds
+	app.m_pEventManager->VUpdate(EventManager::kINFINITY);
 }
 
 void BGE::EngineApp::OnRender(void)
@@ -187,9 +193,21 @@ void BGE::EngineApp::OnShutdown(void)
 	// TODO: Perform destruction tasks.
 }
 
-const BGE::Localizer &BGE::EngineApp::GetLocalizer(void) const
+BGE::Localizer &BGE::EngineApp::GetLocalizer(void)
 {
-	return m_localizer;
+	BGE_ASSERT(m_pLocalizer);
+	return *m_pLocalizer.get();
+}
+
+BGE::EventManager &BGE::EngineApp::GetEventManager(void)
+{
+	BGE_ASSERT(m_pEventManager);
+	return *m_pEventManager.get();
+}
+
+int BGE::EngineApp::GetExitCode(void) const
+{
+	return BGUTGetExitCode();
 }
 
 bool BGE::EngineApp::VLoadGame(void)

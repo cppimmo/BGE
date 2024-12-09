@@ -33,6 +33,9 @@
 
 namespace BGE
 {
+	class Localizer; // Forward declare
+    BGE_DECLARE_PTR(Localizer);
+
 	/**
 	 * @brief .
 	 */

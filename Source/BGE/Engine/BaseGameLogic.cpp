@@ -9,10 +9,12 @@ BGE::BaseGameLogic::BaseGameLogic(void)
 
 BGE::BaseGameLogic::~BaseGameLogic(void)
 {
+    VDeregisterDelegates();
 }
 
 bool BGE::BaseGameLogic::Init(void)
 {
+    VRegisterDelegates();
     // TODO: Perform other logic here
     VChangeState(BaseGameState::kRunning);
     return true;
@@ -97,4 +99,12 @@ bool BGE::BaseGameLogic::IsProxy(void) const
 void BGE::BaseGameLogic::SetProxy(bool bProxy) noexcept
 {
     m_bProxy = bProxy;
+}
+
+void BGE::BaseGameLogic::VRegisterDelegates(void)
+{
+}
+
+void BGE::BaseGameLogic::VDeregisterDelegates(void)
+{
 }

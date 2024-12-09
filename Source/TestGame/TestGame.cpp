@@ -47,6 +47,8 @@ void TestGameApp::VDestroyNetworkEventForwarder(void)
 {
 }
 
+class EventData_Test; // Forware declare
+
 class TestProcess : public Process
 {
 	Timer m_timer;
@@ -64,6 +66,11 @@ public:
 		{
 			BGE_INFO("Process(%d) time elapsed", GetID());
 			m_timer.Reset();
+
+			auto &eventManager = GetEngineApp().GetEventManager();
+			// Create & queue a test event
+			auto pTestEvent = std::make_shared<EventData_Test>();
+			eventManager.VQueueEvent(std::static_pointer_cast<IEventData>(pTestEvent));
 		}
 	}
 	virtual void VOnSuccess(void) override
@@ -108,4 +115,61 @@ TestGameLogic::~TestGameLogic(void)
 void TestGameLogic::VChangeState(BGE::BaseGameState state)
 {
 	BaseGameLogic::VChangeState(state);
+}
+
+class EventData_Test : public BaseEventData
+{
+public:
+	static constexpr EventType kEVENT_TYPE = 0xDEADBEEF;
+public:
+	EventData_Test(void) = default;
+
+	virtual const EventType &VGetEventType(void) const override
+	{
+		return kEVENT_TYPE;
+	}
+
+	virtual StrongIEventDataPtr VCopy(void) const override
+	{
+		return nullptr; //std::make_shared<EventData_Test>(*this);
+	}
+
+	virtual void VSerialize(std::ostringstream &oss) const override
+	{
+	}
+
+	virtual void VDeserialize(std::istringstream &iss) override
+	{
+	}
+
+	virtual constexpr std::string_view VGetName(void) const override
+	{
+		return "EventData_Test";
+	}
+};
+
+void TestGameLogic::VRegisterDelegates(void)
+{
+	auto &eventManager = GetEngineApp().GetEventManager();
+	eventManager.VAddListener(fastdelegate::MakeDelegate(this, &TestGameLogic::TestDelegate), EventData_Test::kEVENT_TYPE);
+}
+
+void TestGameLogic::VDeregisterDelegates(void)
+{
+	auto &eventManager = GetEngineApp().GetEventManager();
+	eventManager.VRemoveListener(fastdelegate::MakeDelegate(this, &TestGameLogic::TestDelegate), EventData_Test::kEVENT_TYPE);
+}
+
+void TestGameLogic::TestDelegate(BGE::StrongIEventDataPtr pEventData)
+{
+	// Attempt to cast to EventData_Test
+	auto pEventDataTest = std::dynamic_pointer_cast<EventData_Test>(pEventData);
+	// Ensure valid pointer
+	if (!pEventDataTest)
+	{
+		BGE_ERROR("Could not cast to EventData_Test");
+		return;
+	}
+
+	BGE_LOG("TestDelegate", "Called listener for %s", pEventDataTest->VGetName().data());
 }

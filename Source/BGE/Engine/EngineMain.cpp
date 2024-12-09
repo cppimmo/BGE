@@ -111,6 +111,7 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	BGUTSetCallbackRender(EngineApp::OnRender);
 	BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
 
+	BGE_INFO("Initializing engine...");
 	auto &app = GetEngineApp();
 	// Initialize an instance of the application layer (also initializes BGUT)
 	if (!app.VInitInstance())
@@ -123,6 +124,7 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	BGUTMainLoop(); // Enter main loop
 	BGE_INFO("Main loop duration: %.2f seconds", BGUTGetMainLoopTimer().GetElapsedSecs());
 	
+	BGE_INFO("Shutting down engine...");
 	BGUTShutdown(); // Shutdown upon exit of main loop
 	// Destroy the logging system
 	Logger::Destroy();

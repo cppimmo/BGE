@@ -65,6 +65,9 @@ namespace BGE
 		const ProcessManager &GetProcessManager(void) const noexcept;
 		bool IsProxy(void) const;
 		void SetProxy(bool bProxy) noexcept;
+	protected:
+		virtual void VRegisterDelegates(void);
+		virtual void VDeregisterDelegates(void);
 	private:
 	};
 } // End namespace (BGE)

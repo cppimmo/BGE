@@ -22,3 +22,6 @@
 [submodule "Source/Lib/sol2"]
 	path = Source/Lib/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "Source/Lib/FastDelegate"]
+	path = Source/Lib/FastDelegate
+	url = https://github.com/kaidokert/FastDelegate.git

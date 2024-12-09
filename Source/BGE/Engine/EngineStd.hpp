@@ -106,7 +106,9 @@
 //! Primary engine namespace.
 namespace BGE
 {
-	//! Interface for non-copyable class types.
+	/**
+	 * @brief Interface for non-copyable class types.
+	 */
 	class INonCopyable
 	{
 	public:
@@ -115,7 +117,10 @@ namespace BGE
 		INonCopyable &operator=(const INonCopyable &) = delete;
 		virtual ~INonCopyable(void) = default;
 	};
-	//! Interface for non-movable class types.
+
+	/**
+	 * @brief Interface for non-movable class types.
+	 */
 	class INonMovable
 	{
 	public:

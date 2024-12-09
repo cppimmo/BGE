@@ -32,7 +32,7 @@
 
 namespace BGE
 {
-    class Process;
+    class Process; // Forward declare
     BGE_DECLARE_PTR(Process);
 
     /**

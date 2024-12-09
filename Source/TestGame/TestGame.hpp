@@ -25,7 +25,12 @@ public:
 	virtual ~TestGameLogic(void);
 	// BaseGameLogic's interface:
 	virtual void VChangeState(BGE::BaseGameState state) override;
+protected:
+	virtual void VRegisterDelegates(void) override;
+	virtual void VDeregisterDelegates(void) override;
 private:
+	// Event delegates:
+	void TestDelegate(BGE::StrongIEventDataPtr pEventData);
 };
 
 #endif /* !_TG_TESTGAME_HPP_ */
