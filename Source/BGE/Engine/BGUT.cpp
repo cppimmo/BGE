@@ -74,7 +74,7 @@ namespace BGE
 	static void BGUTShutdownImGui(void);
 	static void BGUTLogInfo(void);
 	static void BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuffered, bool bDebugEnabled);
-	static void BGUTDefEventHandler(const SDL_Event &event);
+	static bool BGUTDefEventHandler(const SDL_Event &event);
 	
 	static BGUTData s_BGUT = {};
 } // End namespace (BGE)
@@ -199,6 +199,7 @@ void BGE::BGUTMainLoop(void)
 			// Call default event handler
 			BGUTDefEventHandler(event);
 			// Call user event handler callback
+			// TODO: Do something with the result of the callback
 			if (s_BGUT.pEventHandlerCallback)
 				s_BGUT.pEventHandlerCallback(event);
 		}
@@ -540,13 +541,13 @@ void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuff
 	//glEnable(GL_MULTISAMPLE);
 }
 
-void BGE::BGUTDefEventHandler(const SDL_Event &kEvent)
+bool BGE::BGUTDefEventHandler(const SDL_Event &kEvent)
 {
 	switch (kEvent.type)
 	{
 	case SDL_QUIT:
 		s_BGUT.bRunning = false;
-		break;
+		return true;
 	case SDL_WINDOWEVENT:
 		switch (kEvent.window.event)
 		{
@@ -555,11 +556,12 @@ void BGE::BGUTDefEventHandler(const SDL_Event &kEvent)
 			BGUTSetViewport(0, 0, kEvent.window.data1, kEvent.window.data2);
 			break;
 		}
-		break;
+		return true;
 	}
 	// Call ImGui event handler when enabled
 	if (s_BGUT.bImGuiEnabled)
 	{
-		ImGui_ImplSDL2_ProcessEvent(&kEvent);
+		if (ImGui_ImplSDL2_ProcessEvent(&kEvent)) return true;
 	}
+	return false;
 }

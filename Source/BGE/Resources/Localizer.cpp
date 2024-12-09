@@ -75,6 +75,17 @@ bool BGE::Localizer::LoadStrings(Language language)
     return true;
 }
 
+bool BGE::Localizer::UnloadString(Language language)
+{
+    auto findIt = m_localizedStrings.find(language);
+    if (findIt != m_localizedStrings.end())
+    {
+        m_localizedStrings[language].clear();
+        return true;
+    }
+    return false;
+}
+
 const std::wstring &BGE::Localizer::GetString(std::wstring_view sID) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);

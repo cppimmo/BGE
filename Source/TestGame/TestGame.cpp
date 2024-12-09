@@ -67,10 +67,9 @@ public:
 			BGE_INFO("Process(%d) time elapsed", GetID());
 			m_timer.Reset();
 
-			auto &eventManager = GetEngineApp().GetEventManager();
 			// Create & queue a test event
 			auto pTestEvent = std::make_shared<EventData_Test>();
-			eventManager.VQueueEvent(std::static_pointer_cast<IEventData>(pTestEvent));
+			BGE_QUEUE_GEVENT(pTestEvent);
 		}
 	}
 	virtual void VOnSuccess(void) override
@@ -150,14 +149,12 @@ public:
 
 void TestGameLogic::VRegisterDelegates(void)
 {
-	auto &eventManager = GetEngineApp().GetEventManager();
-	eventManager.VAddListener(fastdelegate::MakeDelegate(this, &TestGameLogic::TestDelegate), EventData_Test::kEVENT_TYPE);
+	BGE_ADD_GEVENT_LISTENER(this, &TestGameLogic::TestDelegate, EventData_Test);
 }
 
 void TestGameLogic::VDeregisterDelegates(void)
 {
-	auto &eventManager = GetEngineApp().GetEventManager();
-	eventManager.VRemoveListener(fastdelegate::MakeDelegate(this, &TestGameLogic::TestDelegate), EventData_Test::kEVENT_TYPE);
+	BGE_REMOVE_GEVENT_LISTENER(this, &TestGameLogic::TestDelegate, EventData_Test);
 }
 
 void TestGameLogic::TestDelegate(BGE::StrongIEventDataPtr pEventData)

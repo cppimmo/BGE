@@ -2,7 +2,7 @@
  * @file   EventManagerImpl.hpp
  * @author Brian Hoffpauir
  * @date   12.08.2024
- * @brief  .
+ * @brief  Declaration of event manager implmentation.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -33,6 +33,7 @@
 
 #include "Events/EventData.hpp"
 #include "Events/EventManager.hpp"
+#include "Engine/Engine.hpp"
 
 namespace BGE
 {
@@ -75,5 +76,35 @@ namespace BGE
 		const std::string &GetName(void) const;
 	};
 } // End namespace (BGE)
+
+#define BGE_ADD_GEVENT_LISTENER(P_CLASS, P_FUNC, EVENT_CLASS) \
+{ \
+	auto &eventManager = GetEngineApp().GetEventManager(); \
+	eventManager.VAddListener(fastdelegate::MakeDelegate(P_CLASS, P_FUNC), EVENT_CLASS::kEVENT_TYPE); \
+} \
+
+#define BGE_REMOVE_GEVENT_LISTENER(P_CLASS, P_FUNC, EVENT_CLASS) \
+{ \
+	auto &eventManager = GetEngineApp().GetEventManager(); \
+	eventManager.VRemoveListener(fastdelegate::MakeDelegate(P_CLASS, P_FUNC), EVENT_CLASS::kEVENT_TYPE); \
+} \
+
+/**
+ * The leading G in event stands for global.
+ */
+#define BGE_QUEUE_GEVENT(P_EVENT) \
+{ \
+	auto &eventManager = GetEngineApp().GetEventManager(); \
+	eventManager.VQueueEvent(std::static_pointer_cast<IEventData>(P_EVENT)); \
+} \
+
+/**
+ *
+ */
+#define BGE_TRIGGER_GEVENT(P_EVENT) \
+{ \
+	auto &eventManager = GetEngineApp().GetEventManager(); \
+	eventManager.VTriggerEvent(std::static_pointer_cast<IEventData>(P_EVENT)); \
+} \
 
 #endif /* !_BGE_EVENTMANAGERIMPL_HPP_ */

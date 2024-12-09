@@ -30,70 +30,86 @@
 
 namespace BGE
 {
+	using JoystickID = SDL_JoystickID;
 
-using JoystickId = int;
-	
-class IJoystick
-{
-public:
-	virtual bool VIsConnected(void) = 0;
-	virtual JoystickId VGetId(void) = 0;
-	virtual std::string VGetName(void) = 0;
-	virtual std::string VGetSerial(void) = 0;
-protected:
-	virtual float VApplyDeadzone(float value, float maxValue, float deadzone) = 0;
-};
+	enum GamepadAxis : int
+	{
+		kGAMEPAD_AXIS_LEFT_X = SDL_CONTROLLER_AXIS_LEFTX,
+		kGAMEPAD_AXIS_LEFT_Y = SDL_CONTROLLER_AXIS_LEFTY,
+		kGAMEPAD_AXIS_RIGHT_X = SDL_CONTROLLER_AXIS_RIGHTX,
+		kGAMEPAD_AXIS_RIGHT_Y = SDL_CONTROLLER_AXIS_RIGHTY,
+		kGAMEPAD_AXIS_TRIGGER_LEFT = SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+		kGAMEPAD_AXIS_TRIGGER_RIGHT = SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
+		kGAMEPAD_AXIS_COUNT = SDL_CONTROLLER_AXIS_MAX
+	};
+	constexpr int kGAMEPAD_AXIS_INVALID = SDL_CONTROLLER_AXIS_INVALID;
 
-enum class GamepadAxis : int
-{
-	LeftX = SDL_CONTROLLER_AXIS_LEFTX,
-	LeftY = SDL_CONTROLLER_AXIS_LEFTY,
-	RightX = SDL_CONTROLLER_AXIS_RIGHTX,
-	RightY = SDL_CONTROLLER_AXIS_RIGHTY,
-	TriggerLeft = SDL_CONTROLLER_AXIS_TRIGGERLEFT,
-	TriggerRight = SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
-	Count = SDL_CONTROLLER_AXIS_MAX
-};
-constexpr int kGAMEPAD_AXIS_INVALID = SDL_CONTROLLER_AXIS_INVALID;
-	
-enum class GamepadButton : int
-{
-	A = SDL_CONTROLLER_BUTTON_A,
-	B = SDL_CONTROLLER_BUTTON_B,
-	X = SDL_CONTROLLER_BUTTON_X,
-	Y = SDL_CONTROLLER_BUTTON_Y,
-	Back = SDL_CONTROLLER_BUTTON_BACK,
-	Guide = SDL_CONTROLLER_BUTTON_GUIDE,
-	Start = SDL_CONTROLLER_BUTTON_START,
-	LeftStick = SDL_CONTROLLER_BUTTON_LEFTSTICK,
-	RightStick = SDL_CONTROLLER_BUTTON_RIGHTSTICK,
-	LeftShoulder = SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
-	RightShoulder = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
-	DPadUp = SDL_CONTROLLER_BUTTON_DPAD_UP,
-	DPadDown = SDL_CONTROLLER_BUTTON_DPAD_DOWN,
-	DPadLeft = SDL_CONTROLLER_BUTTON_DPAD_LEFT,
-	DPadRight = SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
-	Misc1 = SDL_CONTROLLER_BUTTON_MISC1,
-	Paddle1 = SDL_CONTROLLER_BUTTON_PADDLE1,
-	Paddle2 = SDL_CONTROLLER_BUTTON_PADDLE2,
-	Paddle3 = SDL_CONTROLLER_BUTTON_PADDLE3,
-	Paddle4 = SDL_CONTROLLER_BUTTON_PADDLE4,
-	Touchpad = SDL_CONTROLLER_BUTTON_TOUCHPAD,
-	Count = SDL_CONTROLLER_BUTTON_MAX
-};
-constexpr int kGAMEPAD_BUTTON_INVALID = SDL_CONTROLLER_BUTTON_INVALID;
+	enum GamepadButton : int
+	{
+		kGAMEPAD_BUTTON_A = SDL_CONTROLLER_BUTTON_A,
+		kGAMEPAD_BUTTON_B = SDL_CONTROLLER_BUTTON_B,
+		kGAMEPAD_BUTTON_X = SDL_CONTROLLER_BUTTON_X,
+		kGAMEPAD_BUTTON_Y = SDL_CONTROLLER_BUTTON_Y,
+		kGAMEPAD_BUTTON_BACK = SDL_CONTROLLER_BUTTON_BACK,
+		kGAMEPAD_BUTTON_GUIDE = SDL_CONTROLLER_BUTTON_GUIDE,
+		kGAMEPAD_BUTTON_START = SDL_CONTROLLER_BUTTON_START,
+		kGAMEPAD_BUTTON_LEFT_STICK = SDL_CONTROLLER_BUTTON_LEFTSTICK,
+		kGAMEPAD_BUTTON_RIGHT_STICK = SDL_CONTROLLER_BUTTON_RIGHTSTICK,
+		kGAMEPAD_BUTTON_LEFT_SHOULDER = SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+		kGAMEPAD_BUTTON_RIGHT_SHOULDER = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+		kGAMEPAD_BUTTON_DPAD_UP = SDL_CONTROLLER_BUTTON_DPAD_UP,
+		kGAMEPAD_BUTTON_DPAD_DOWN = SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+		kGAMEPAD_BUTTON_DPAD_LEFT = SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+		kGAMEPAD_BUTTON_DPAD_RIGHT = SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+		kGAMEPAD_BUTTON_MISC_1 = SDL_CONTROLLER_BUTTON_MISC1,
+		kGAMEPAD_BUTTON_PADDLE_1 = SDL_CONTROLLER_BUTTON_PADDLE1,
+		kGAMEPAD_BUTTON_PADDLE_2 = SDL_CONTROLLER_BUTTON_PADDLE2,
+		kGAMEPAD_BUTTON_PADDLE_3 = SDL_CONTROLLER_BUTTON_PADDLE3,
+		kGAMEPAD_BUTTON_PADDLE_4 = SDL_CONTROLLER_BUTTON_PADDLE4,
+		kGAMEPAD_BUTTON_TOUCHPAD = SDL_CONTROLLER_BUTTON_TOUCHPAD,
+		kGAMEPAD_BUTTON_COUNT = SDL_CONTROLLER_BUTTON_MAX
+	};
+	constexpr int kGAMEPAD_BUTTON_INVALID = SDL_CONTROLLER_BUTTON_INVALID;
 
-class Gamepad : public IJoystick, public ISDLEventHandler
-{
-public:
-	virtual void VHandleEvent_SDL(const SDL_Event &event) {}
-	virtual bool VIsConnected(void) { return false; }
-	virtual JoystickId VGetId(void) { return 0; }
-	virtual std::string VGetName(void) { return ""; }
-	virtual std::string VGetSerial(void) { return ""; }
-	virtual float VApplyDeadzone(float value, float maxValue, float deadzone) { return 0.0f; }
-};
+	class IGamepadHandler; // Forward declare
+	BGE_DECLARE_PTR(IGamepadHandler);
 
+	using GamepadHandlerList = std::list<StrongIGamepadHandlerPtr>;
+
+	class IGamepadHandler
+	{
+	public:
+		virtual ~IGamepadHandler(void) = default;
+
+		virtual bool VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value) = 0;
+		virtual bool VOnButtonDown(JoystickID ID, GamepadButton button) = 0;
+		virtual bool VOnButtonUp(JoystickID ID, GamepadButton button) = 0;
+	};
+
+	using JoystickId = int;
+
+	class IJoystick
+	{
+	public:
+		virtual bool VIsConnected(void) = 0;
+		virtual JoystickId VGetId(void) = 0;
+		virtual std::string VGetName(void) = 0;
+		virtual std::string VGetSerial(void) = 0;
+	protected:
+		virtual float VApplyDeadzone(float value, float maxValue, float deadzone) = 0;
+	};
+
+
+	class Gamepad : public IJoystick, public ISDLEventHandler
+	{
+	public:
+		virtual void VHandleEvent_SDL(const SDL_Event &event) {}
+		virtual bool VIsConnected(void) { return false; }
+		virtual JoystickId VGetId(void) { return 0; }
+		virtual std::string VGetName(void) { return ""; }
+		virtual std::string VGetSerial(void) { return ""; }
+		virtual float VApplyDeadzone(float value, float maxValue, float deadzone) { return 0.0f; }
+	};
 } // End namespace (BGE)
 
 #endif /* !_BGE_JOYSTICK_HPP_ */

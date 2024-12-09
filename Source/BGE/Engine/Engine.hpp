@@ -83,13 +83,13 @@ namespace BGE
 		// These are marked static so it will be easier to pass them as arguments:
 		static void OnUpdate(float deltaTime, float elsapsedTime);
 		static void OnRender(void);
-		static void OnHandleEvent(const SDL_Event &event);
+		static bool OnHandleEvent(const SDL_Event &kEvent);
 		static void OnDisplayChange(int colorDepth, int width, int height);
 		void OnShutdown(void);
 		// Accessors:
-		//BaseGameLogic &GetGameLogic(void);
 		Localizer &GetLocalizer(void);
 		EventManager &GetEventManager(void);
+		BaseGameLogic &GetGameLogic(void);
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

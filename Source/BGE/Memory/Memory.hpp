@@ -1,5 +1,8 @@
-/*=============================================================================*
- * ProcessManager.hpp - .
+/*******************************************************************************
+ * @file   Memory.hpp
+ * @author Brian Hoffpauir
+ * @date   12.09.2024
+ * @brief  .
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -24,40 +27,42 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
-#ifndef _BGE_PROCESSMANAGER_HPP_
-#define _BGE_PROCESSMANAGER_HPP_
-
-#include "MainLoop/Process.hpp"
+ ******************************************************************************/
+#ifndef _BGE_MEMORY_HPP_
+#define _BGE_MEMORY_HPP_
 
 namespace BGE
 {
-    class Process; // Forware declare
-    class ProcessManager; // Forwar declare
-    BGE_DECLARE_PTR(ProcessManager);
+	class MemoryManager; // Foward declare
+	BGE_DECLARE_PTR(MemoryManager);
 
-    /**
-     * @brief Base class for representing processes.
-     */
-    class ProcessManager final : public INonCopyable, public INonMovable, public IStringable
-    {
-        using ProcessList = std::list<StrongProcessPtr>;
-        ProcessList m_processList;
-        ProcessID m_nextID = 1; //!< ID counter for assigning new process IDs
-    public:
-        ~ProcessManager(void);
-        // IStringable's interface:
-        virtual std::string VToString(void) const override;
-        // Interface:
-        std::uint32_t UpdateProcesses(unsigned long deltaMS);
-        WeakProcessPtr AttachProcess(StrongProcessPtr pProcess, int priority = Process::kDEFAULT_PRIORITY);
-        void AbortAllProcesses(bool bImmediate);
-        // Accessors:
-        std::size_t GetProcessCount(void) const;
-        StrongProcessPtr GetProcessByID(ProcessID ID) const;
-    private:
-        void ClearAllProcesses(void); // Should only be called by the destructor.
-    };
+	// Memory size constants:
+    constexpr std::uint64_t k1_KiB = 1024;
+    constexpr std::uint64_t k1_MiB = k1_KiB * 1024;
+    constexpr std::uint64_t k1_GiB = k1_MiB * 1024;
+
+    inline std::uint64_t operator""_KiB(unsigned long long value)
+	{
+		return value * 1024;
+	}
+
+    inline std::uint64_t operator""_MiB(unsigned long long value)
+	{
+		return value * 1024 * 1024;
+
+	}
+
+	class MemoryManager
+	{
+		static UniqueMemoryManagerPtr s_pInstance;
+	public:
+
+	public:
+		static MemoryManager &Get(void);
+	private:
+		MemoryManager(void); // Hide constructor to prevent instances from being made
+	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_PROCESSMANAGER_HPP_ */
+#endif /* !_BGE_MEMORY_HPP_ */
+

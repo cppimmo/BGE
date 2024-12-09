@@ -1,5 +1,8 @@
-/*=============================================================================*
- * ProcessManager.hpp - .
+/*******************************************************************************
+ * @file   GameView.hpp
+ * @author Brian Hoffpauir
+ * @date   12.09.2024
+ * @brief  .
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -24,40 +27,46 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
-#ifndef _BGE_PROCESSMANAGER_HPP_
-#define _BGE_PROCESSMANAGER_HPP_
+ ******************************************************************************/
+#ifndef _BGE_GAMEVIEW_HPP_
+#define _BGE_GAMEVIEW_HPP_
 
-#include "MainLoop/Process.hpp"
+#include <cstddef>
 
 namespace BGE
 {
-    class Process; // Forware declare
-    class ProcessManager; // Forwar declare
-    BGE_DECLARE_PTR(ProcessManager);
+	class IGameView; // Forware declare
+	BGE_DECLARE_PTR(IGameView);
 
-    /**
-     * @brief Base class for representing processes.
-     */
-    class ProcessManager final : public INonCopyable, public INonMovable, public IStringable
-    {
-        using ProcessList = std::list<StrongProcessPtr>;
-        ProcessList m_processList;
-        ProcessID m_nextID = 1; //!< ID counter for assigning new process IDs
-    public:
-        ~ProcessManager(void);
-        // IStringable's interface:
-        virtual std::string VToString(void) const override;
-        // Interface:
-        std::uint32_t UpdateProcesses(unsigned long deltaMS);
-        WeakProcessPtr AttachProcess(StrongProcessPtr pProcess, int priority = Process::kDEFAULT_PRIORITY);
-        void AbortAllProcesses(bool bImmediate);
-        // Accessors:
-        std::size_t GetProcessCount(void) const;
-        StrongProcessPtr GetProcessByID(ProcessID ID) const;
-    private:
-        void ClearAllProcesses(void); // Should only be called by the destructor.
-    };
+	using GameViewList = std::list<StrongIGameViewPtr>;
+
+	enum struct GameViewType
+	{
+		kHuman,
+		kRemote,
+		kAI,
+		kRecorder,
+		kOther
+	};
+
+	using GameViewID = std::uint32_t;
+	/**
+	 * @brief .
+	 */
+	class IGameView
+	{
+	public:
+		virtual ~IGameView(void) = default;
+
+		virtual void VOnRestore(void) = 0;
+		virtual void VOnRender(float deltaTime, float elapsedTime) = 0;
+		virtual void VOnLostDevice(void) = 0;
+		virtual GameViewType VGetType(void) = 0;
+		virtual GameViewID VGetID(void) = 0;
+		virtual void VOnAttach(GameViewID vID, ActorID aID) = 0;
+		virtual bool VOnHandleEvent(const SDL_Event &kEvent) = 0;
+		virtual void VOnUpdate(float deltaTime) = 0;
+	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_PROCESSMANAGER_HPP_ */
+#endif /* !_BGE_GAMEVIEW_HPP_ */

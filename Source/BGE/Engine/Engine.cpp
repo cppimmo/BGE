@@ -28,13 +28,14 @@
 #include "Engine/EngineStd.hpp"
 #include "Engine/Engine.hpp"
 
+#include "Events/Events.hpp"
 #include "MainLoop/Initialization.hpp"
 #include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
-#include <Graphics/Screenshot.hpp>
+#include "Graphics/Screenshot.hpp"
 
 // Initialize global application instance pointer
 BGE::UniqueEngineAppPtr BGE::g_pApp = nullptr;
@@ -53,7 +54,6 @@ BGE::EngineApp::EngineApp(void)
 {
 	m_pLocalizer = std::make_unique<Localizer>();
 	m_pEventManager = std::make_unique<EventManager>("Global");
-	std::cout << m_pEventManager->GetName() << '\n';
 }
 
 BGE::EngineApp::~EngineApp(void)
@@ -106,12 +106,15 @@ bool BGE::EngineApp::VInitInstance(void)
     RegisterEngineEvents();
     VRegisterGameEvents();
 
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
+
 	// Load localized strings:
 	if (!m_pLocalizer->LoadStrings(Localizer::Language::kEnglish))
 	{
 		BGE_ERROR("Couldn't load localized strings!");
 		return false;
 	}
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_LocalizationStarted>());
 
 	BGE_INFO("(ID_HOWDY): %s",  BGE::WStringToString(GetLocalizer().GetString(L"ID_HOWDY")).c_str());
 
@@ -123,11 +126,13 @@ bool BGE::EngineApp::VInitInstance(void)
 		BGE_ERROR("Couldn't initialize engine!");
 		return false;
 	}
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_GraphicsStarted>());
 
 	BGUTSetWindowTitle(VGetGameTitle());
 
 	m_pGameLogic = VCreateGameAndView();
 	if (!m_pGameLogic) return false;
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_GameLogicStarted>());
 
 	m_bRunning = true;
 
@@ -159,28 +164,114 @@ void BGE::EngineApp::OnRender(void)
 	ImPlot::ShowDemoWindow();
 }
 
-void BGE::EngineApp::OnHandleEvent(const SDL_Event &event)
+bool BGE::EngineApp::OnHandleEvent(const SDL_Event &kEvent)
 {
+	bool bResult = false;
 	auto &app = GetEngineApp();
 	// TODO: Handle necessary SDL events.
-	switch (event.type)
+	switch (kEvent.type)
 	{
-	case SDL_KEYDOWN:
-		if (event.key.keysym.sym == SDLK_ESCAPE)
-			BGUTSendExitCode(BGE_EXIT_SUCCESS);
-		if (event.key.keysym.sym == SDLK_s)
+	case SDL_QUIT:
+		app.OnShutdown();
+		bResult = true;
+		break;
+	case SDL_APP_TERMINATING:
+		break;
+	case SDL_APP_LOWMEMORY:
+		break;
+	case SDL_APP_WILLENTERBACKGROUND:
+		break;
+	case SDL_APP_DIDENTERBACKGROUND:
+		break;
+	case SDL_APP_WILLENTERFOREGROUND:
+		break;
+	case SDL_APP_DIDENTERFOREGROUND:
+		break;
+	case SDL_LOCALECHANGED:
+		break;
+	case SDL_DISPLAYEVENT:
+		break;
+	case SDL_WINDOWEVENT:
+		break;
+	case SDL_SYSWMEVENT:
+		break;
+	// Remaining cases forwarded to GameLogic/GameViews:
+	case SDL_KEYDOWN: // Keyboard events
+	case SDL_KEYUP:
+	case SDL_TEXTEDITING:
+	case SDL_TEXTINPUT:
+	case SDL_KEYMAPCHANGED:
+	case SDL_TEXTEDITING_EXT:
+	case SDL_MOUSEMOTION: // Mouse events
+	case SDL_MOUSEBUTTONDOWN:
+	case SDL_MOUSEBUTTONUP:
+	case SDL_MOUSEWHEEL:
+	case SDL_JOYAXISMOTION: // Joystick events
+	case SDL_JOYBALLMOTION:
+	case SDL_JOYHATMOTION:
+	case SDL_JOYBUTTONDOWN:
+	case SDL_JOYBUTTONUP:
+	case SDL_JOYDEVICEADDED:
+	case SDL_JOYDEVICEREMOVED:
+	case SDL_JOYBATTERYUPDATED:
+	case SDL_CONTROLLERAXISMOTION: // Game controller events
+	case SDL_CONTROLLERBUTTONDOWN:
+	case SDL_CONTROLLERBUTTONUP:
+	case SDL_CONTROLLERDEVICEADDED:
+	case SDL_CONTROLLERDEVICEREMOVED:
+	case SDL_CONTROLLERDEVICEREMAPPED:
+	case SDL_CONTROLLERTOUCHPADDOWN:
+	case SDL_CONTROLLERTOUCHPADMOTION:
+	case SDL_CONTROLLERTOUCHPADUP:
+	case SDL_CONTROLLERSENSORUPDATE:
+	case SDL_CONTROLLERUPDATECOMPLETE_RESERVED_FOR_SDL3:
+	case SDL_CONTROLLERSTEAMHANDLEUPDATED:
+	case SDL_FINGERDOWN: // Touch events
+	case SDL_FINGERUP:
+	case SDL_FINGERMOTION:
+	case SDL_DOLLARGESTURE: // Gesture events
+	case SDL_DOLLARRECORD:
+	case SDL_MULTIGESTURE:
+	case SDL_CLIPBOARDUPDATE: // Clipboard events
+	case SDL_DROPFILE: // Drag and drop events
+	case SDL_DROPTEXT:
+	case SDL_DROPBEGIN:
+	case SDL_DROPCOMPLETE:
+	case SDL_AUDIODEVICEADDED: // Audio hotplug events
+	case SDL_AUDIODEVICEREMOVED:
+	{
+		auto &gameViews = app.GetGameLogic().GetGameViews();
+		// Iterate through the game views in reverse
+		for (auto it = gameViews.rbegin(); it != gameViews.rend(); ++it)
 		{
-			static bool c_initialized = false;
-			if (!c_initialized)
+			if ((*it)->VOnHandleEvent(kEvent))
 			{
-				std::string saveGameDir = app.VGetGameAppDirectory();
-				TakeScreenshot(saveGameDir);
-				BGE_INFO("Tried to take screenshot!");
-				c_initialized = true;
+				bResult = true;
+				break; // Breaks out of loop
 			}
 		}
 		break;
 	}
+	default:
+		break;
+	}
+	//case SDL_KEYDOWN:
+	//	if (kEvent.key.keysym.sym == SDLK_ESCAPE)
+	//		BGUTSendExitCode(BGE_EXIT_SUCCESS);
+	//	if (kEvent.key.keysym.sym == SDLK_s)
+	//	{
+	//		static bool c_initialized = false;
+	//		if (!c_initialized)
+	//		{
+	//			std::string saveGameDir = app.VGetGameAppDirectory();
+	//			TakeScreenshot(saveGameDir);
+	//			BGE_INFO("Tried to take screenshot!");
+	//			c_initialized = true;
+	//		}
+	//	}
+	//	break;
+	//}
+	return bResult;
 }
 
 void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
@@ -203,6 +294,12 @@ BGE::EventManager &BGE::EngineApp::GetEventManager(void)
 {
 	BGE_ASSERT(m_pEventManager);
 	return *m_pEventManager.get();
+}
+
+BGE::BaseGameLogic &BGE::EngineApp::GetGameLogic(void)
+{
+	BGE_ASSERT(m_pGameLogic);
+	return *m_pGameLogic.get();
 }
 
 int BGE::EngineApp::GetExitCode(void) const

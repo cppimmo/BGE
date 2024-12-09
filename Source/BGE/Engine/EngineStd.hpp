@@ -103,34 +103,6 @@
 // BGE_CONFIG_PROFILE // For profiling (disables certain parts of DEBUG config)
 // BGE_CONFIG_RELEASE // For final versions
 
-//! Primary engine namespace.
-namespace BGE
-{
-	/**
-	 * @brief Interface for non-copyable class types.
-	 */
-	class INonCopyable
-	{
-	public:
-		INonCopyable(void) = default;
-		INonCopyable(const INonCopyable &) = delete;
-		INonCopyable &operator=(const INonCopyable &) = delete;
-		virtual ~INonCopyable(void) = default;
-	};
-
-	/**
-	 * @brief Interface for non-movable class types.
-	 */
-	class INonMovable
-	{
-	public:
-		INonMovable(void) = default;
-		INonMovable(const INonMovable &) = delete;
-		INonMovable &operator=(const INonMovable &) = delete;
-		virtual ~INonMovable(void) = default;
-	};
-} // End namespace (BGE)
-
 #if defined(_DEBUG) // Only on Windows IIRC
 #define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator
 #else
@@ -147,6 +119,7 @@ namespace BGE
 
 #include "Engine/Engine.hpp"
 
+//! Primary engine namespace.
 namespace BGE
 {
 	// Engine entry point:

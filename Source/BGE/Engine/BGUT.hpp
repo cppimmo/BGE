@@ -35,7 +35,7 @@ namespace BGE
 	// 1st Arg (delta time milliseconds), 2nd Arg (elapsed time milliseconds)
 	using BGUTUpdateCallback = std::add_pointer_t<void(float, float)>;
 	using BGUTRenderCallback = std::add_pointer_t<void()>;
-	using BGUTEventHandlerCallback = std::add_pointer_t<void(const SDL_Event &)>;
+	using BGUTEventHandlerCallback = std::add_pointer_t<bool(const SDL_Event &)>;
 	using BGUTWindowPtr = SDL_Window *;
 	using BGUTWindowID = std::size_t;
 

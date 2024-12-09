@@ -31,7 +31,31 @@
 namespace BGE
 {
 	/**
-	 * IImGuiable implements methods for classes that require ImGui widgets.
+	 * @brief Interface for non-copyable class types.
+	 */
+	class INonCopyable
+	{
+	public:
+		INonCopyable(void) = default;
+		INonCopyable(const INonCopyable &) = delete;
+		INonCopyable &operator=(const INonCopyable &) = delete;
+		virtual ~INonCopyable(void) = default;
+	};
+
+	/**
+	 * @brief Interface for non-movable class types.
+	 */
+	class INonMovable
+	{
+	public:
+		INonMovable(void) = default;
+		INonMovable(const INonMovable &) = delete;
+		INonMovable &operator=(const INonMovable &) = delete;
+		virtual ~INonMovable(void) = default;
+	};
+
+	/**
+	 * @brief IImGuiable implements methods for classes that require ImGui widgets.
 	 */
 	class IImGuiable
 	{
@@ -42,8 +66,9 @@ namespace BGE
 		// return the root name of your widget (for use with collapsing header widget)
 		virtual constexpr std::string_view VImGuiWidgetName(void) const noexcept = 0;
 	};
+
 	/**
-	 * IStringable implements a method for converting an object to a string representation.
+	 * @brief IStringable implements a method for converting an object to a string representation.
 	 */
 	class IStringable
 	{
@@ -51,6 +76,7 @@ namespace BGE
 		virtual ~IStringable(void) = default;
 		virtual std::string VToString(void) const = 0;
 	};
+
 	/**
 	 *
 	 */
@@ -59,14 +85,6 @@ namespace BGE
 	public:
 		virtual ~ISDLEventHandler(void) = default;
 		virtual void VHandleEvent_SDL(const SDL_Event &event) = 0; // 
-	};
-	/**
-	 *
-	 */
-	class IGameView
-	{
-	public:
-		virtual ~IGameView(void) = default;
 	};
 } // end namespace (BGE)
 

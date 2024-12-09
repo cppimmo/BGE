@@ -4,6 +4,7 @@
 #include "Actors/Actor.hpp"
 #include "Actors/ActorFactory.hpp"
 #include "MainLoop/ProcessManager.hpp"
+#include "UI/GameView.hpp"
 #include "Utilities/Timer.hpp"
 
 namespace BGE
@@ -45,14 +46,15 @@ namespace BGE
 		Timer m_lifetimeTimer;
 		ProcessManager m_processManager;
 		ActorFactory m_actorFactory;
+		GameViewList m_gameViews;
 	public:
 		BaseGameLogic(void);
 		virtual ~BaseGameLogic(void);
 
 		bool Init(void);
 		// BaseGameLogic interface:
-		virtual void VAddView(void);
-		virtual void VRemoveView(void);
+		virtual void VAddView(StrongIGameViewPtr pView, ActorID aID = kINVALID_ACTOR_ID);
+		virtual void VRemoveView(StrongIGameViewPtr pView);
 		// IGameLogic interface:
 		virtual WeakActorPtr VGetActor(ActorID ID);
 		virtual void VDestroyActor(ActorID ID);
@@ -63,6 +65,8 @@ namespace BGE
 		// Accessors:
 		ProcessManager &GetProcessManager(void) noexcept;
 		const ProcessManager &GetProcessManager(void) const noexcept;
+		GameViewList &GetGameViews(void) noexcept;
+		const GameViewList &GetGameViews(void) const noexcept;
 		bool IsProxy(void) const;
 		void SetProxy(bool bProxy) noexcept;
 	protected:

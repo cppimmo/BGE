@@ -2,7 +2,7 @@
  * @file   EventManagerImpl.cpp
  * @author Brian Hoffpauir
  * @date   12.08.2024
- * @brief  .
+ * @brief  Definition of event manager implmentation.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *

@@ -65,13 +65,15 @@ namespace BGE
 	public:
 		Localizer(void) = default;
 
-		//! Load strings for a specific language
+		//! Load strings for a specific language.
 		bool LoadStrings(Language language);
-		//! Get a localized string by ID
+		//! Unload strings for a specific language.
+		bool UnloadString(Language language);
+		//! Get a localized string by ID.
 		const std::wstring &GetString(std::wstring_view sID) const;
-		//! Change the current language
+		//! Change the current language.
 		void SetLanguage(Language language);
-		//! Get the current language
+		//! Get the current language.
 		Language GetCurrentLanguage(void) const;
 	private:
 		// Convert enum to language string (e.g., "English")

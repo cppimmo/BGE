@@ -20,12 +20,18 @@ bool BGE::BaseGameLogic::Init(void)
     return true;
 }
 
-void BGE::BaseGameLogic::VAddView(void)
+void BGE::BaseGameLogic::VAddView(StrongIGameViewPtr pView, ActorID aID)
 {
+    // This makes sure that all views have a non-zero view id
+	auto viewID = static_cast<GameViewID>(m_gameViews.size());
+	m_gameViews.push_back(pView);
+	pView->VOnAttach(viewID, aID);
+	pView->VOnRestore();
 }
 
-void BGE::BaseGameLogic::VRemoveView(void)
+void BGE::BaseGameLogic::VRemoveView(StrongIGameViewPtr pView)
 {
+    m_gameViews.remove(pView);
 }
 
 BGE::WeakActorPtr BGE::BaseGameLogic::VGetActor(ActorID ID)
@@ -72,6 +78,12 @@ void BGE::BaseGameLogic::VOnUpdate(float time, float elapsedTime)
         BGE_ERROR("Unrecognized game state.");
     }
 
+    // Update all game views
+    for (auto &view : m_gameViews)
+    {
+        view->VOnUpdate(deltaMS);
+    }
+
     m_lifetimeTimer.Stop();
 }
 
@@ -89,6 +101,16 @@ BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) noexcept
 const BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) const noexcept
 {
     return m_processManager;
+}
+
+BGE::GameViewList &BGE::BaseGameLogic::GetGameViews(void) noexcept
+{
+    return m_gameViews;
+}
+
+const BGE::GameViewList &BGE::BaseGameLogic::GetGameViews(void) const noexcept
+{
+    return m_gameViews;
 }
 
 bool BGE::BaseGameLogic::IsProxy(void) const
