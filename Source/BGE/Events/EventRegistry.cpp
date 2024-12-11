@@ -31,7 +31,10 @@
 #include "Engine/EngineStd.hpp"
 #include "Events/EventRegistry.hpp"
 
-BGE::UniqueEventRegistryPtr BGE::EventRegistry::s_pInstance; // Define static member
+BGE::EventRegistry::EventRegistry(std::string_view name)
+	: m_name(name)
+{
+}
 
 std::string BGE::EventRegistry::VToString(void) const
 {
@@ -56,10 +59,10 @@ std::string BGE::EventRegistry::VToString(void) const
 			<< ", Name: " << kMetadata.name
 			<< ", Spec: " << EventSpecToString(kMetadata.spec) << '\n';
 	};
-	oss << "Registered Engine Events:\n";
+	oss << "Registered Engine Events (" << m_name << "):\n";
 	std::ranges::for_each(internalEvents, log);
 
-	oss << "Registered Game Events:\n";
+	oss << "Registered Game Events (" << m_name << "):\n";
 	std::ranges::for_each(externalEvents, log);
 	return oss.str();
 }
@@ -75,12 +78,7 @@ void BGE::EventRegistry::LogRegisteredEvents(void) const
 	BGE_LOG("Events", "%s", VToString().c_str());
 }
 
-BGE::EventRegistry &BGE::EventRegistry::Get(void)
+const std::string &BGE::EventRegistry::GetName(void) const
 {
-	if (!s_pInstance)
-	{
-		s_pInstance = std::unique_ptr<EventRegistry>(BGE_NEW EventRegistry);
-	}
-
-	return *s_pInstance.get();
+	return m_name;
 }

@@ -81,6 +81,10 @@ namespace BGE::Logger
 	 * @return String representation of the given log level.
 	 */
 	constexpr std::string_view LevelToString(Level level) noexcept;
+	/**
+	 * Use the following CLI command to see the common tag names:
+	 * grep -rn --include="*.cpp" --include="*.hpp" 'BGE_LOG(' Source/BGE | awk '{$1=$1; print}'
+	 */
 	int Write(std::string_view tagName, std::string_view msgFormat, ...);
 	void SetMaxMessageLength(std::size_t length);
 	// https://stackoverflow.com/questions/18803940/how-to-make-enum-class-to-work-with-the-bit-or-feature

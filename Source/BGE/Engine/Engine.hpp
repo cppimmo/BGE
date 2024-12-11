@@ -32,6 +32,7 @@
 #include "Utilities/Types.hpp"
 #include "Engine/BaseGameLogic.hpp"
 #include "Events/EventManager.hpp"
+#include "Events/EventRegistry.hpp"
 #include "Resources/Localizer.hpp"
 
 #include <map>
@@ -48,7 +49,15 @@ namespace BGE
 	template <typename DerivedApp, typename... Args>
 	bool CreateEngineApp(Args... args) requires(std::derived_from<DerivedApp, EngineApp>)
 	{
-		g_pApp = std::make_unique<DerivedApp>(args...);
+		if (!g_pApp)
+		{
+			g_pApp = std::make_unique<DerivedApp>(args...);
+		}
+		else
+		{
+			BGE_ASSERT(false && "Attempted to create multiple app instances!");
+			return false;
+		}
 		return g_pApp.operator bool();
 	}
 	/**
@@ -66,6 +75,7 @@ namespace BGE
 		TextStringMap m_textStrings; // Localized string container
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler
 		UniqueEventManagerPtr m_pEventManager; //!< Main event manager
+		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar
 		UniqueBaseGameLogicPtr m_pGameLogic;
 		// TODO: Add event manager.
 	public:
@@ -89,6 +99,7 @@ namespace BGE
 		// Accessors:
 		Localizer &GetLocalizer(void);
 		EventManager &GetEventManager(void);
+		EventRegistry &GetEventRegistry(void);
 		BaseGameLogic &GetGameLogic(void);
 		int GetExitCode(void) const;
 	protected:

@@ -14,9 +14,25 @@ namespace BGE
 	class HumanView; // Forward declare
 	BGE_DECLARE_PTR(HumanView);
 
+	/**
+	 * @brief .
+	 */
 	class HumanView : public IGameView
 	{
 		friend class EngineApp;
+
+		/**
+		 * @brief Handle keyboard inputs that should be processed for all human views.
+		 */
+		class DefaultKeyboardHandler : public IKeyboardHandler
+		{
+			HumanView &m_humanView;
+		public:
+			DefaultKeyboardHandler(HumanView &humanView);
+
+			virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override;
+			virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override;
+		};
 	protected:
 		GameViewID m_viewID;
 		ActorID m_actorID;
@@ -41,6 +57,10 @@ namespace BGE
 		virtual void VOnAttach(GameViewID vID, ActorID aID) override;
 		virtual bool VOnHandleEvent(const SDL_Event &kEvent) override;
 		virtual void VOnUpdate(float deltaTime) override;
+
+		void AddGamepadHandler(StrongIGamepadHandlerPtr pGamepadHandler);
+		void AddKeyboardHandler(StrongIKeyboardHandlerPtr pKeyboardHandler);
+		void AddMouseHandler(StrongIMouseHandlerPtr pMouseHandler);
 		// Accessors:
 		ProcessManager &GetProcessManager(void);
 		// Event delegates:

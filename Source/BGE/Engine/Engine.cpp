@@ -55,6 +55,7 @@ BGE::EngineApp::EngineApp(void)
 {
 	m_pLocalizer = std::make_unique<Localizer>();
 	m_pEventManager = std::make_unique<EventManager>("Global");
+	m_pEventRegistry = std::make_unique<EventRegistry>("Global");
 }
 
 BGE::EngineApp::~EngineApp(void)
@@ -107,7 +108,7 @@ bool BGE::EngineApp::VInitInstance(void)
     RegisterEngineEvents();
     VRegisterGameEvents();
 	// Log the registered events
-	EventRegistry::Get().LogRegisteredEvents();
+	m_pEventRegistry->LogRegisteredEvents();
 
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
 
@@ -247,6 +248,7 @@ bool BGE::EngineApp::OnHandleEvent(const SDL_Event &kEvent)
 		// Iterate through the game views in reverse
 		for (auto it = gameViews.rbegin(); it != gameViews.rend(); ++it)
 		{
+			BGE_LOG("SDL Events", "Sending event to game view");
 			if ((*it)->VOnHandleEvent(kEvent))
 			{
 				bResult = true;
@@ -258,22 +260,6 @@ bool BGE::EngineApp::OnHandleEvent(const SDL_Event &kEvent)
 	default:
 		break;
 	}
-	//case SDL_KEYDOWN:
-	//	if (kEvent.key.keysym.sym == SDLK_ESCAPE)
-	//		BGUTSendExitCode(BGE_EXIT_SUCCESS);
-	//	if (kEvent.key.keysym.sym == SDLK_s)
-	//	{
-	//		static bool c_initialized = false;
-	//		if (!c_initialized)
-	//		{
-	//			std::string saveGameDir = app.VGetGameAppDirectory();
-	//			TakeScreenshot(saveGameDir);
-	//			BGE_INFO("Tried to take screenshot!");
-	//			c_initialized = true;
-	//		}
-	//	}
-	//	break;
-	//}
 	return bResult;
 }
 
@@ -297,6 +283,12 @@ BGE::EventManager &BGE::EngineApp::GetEventManager(void)
 {
 	BGE_ASSERT(m_pEventManager);
 	return *m_pEventManager.get();
+}
+
+BGE::EventRegistry &BGE::EngineApp::GetEventRegistry(void)
+{
+	BGE_ASSERT(m_pEventRegistry);
+	return *m_pEventRegistry.get();
 }
 
 BGE::BaseGameLogic &BGE::EngineApp::GetGameLogic(void)

@@ -5,6 +5,7 @@
 
 #include "TestEvents.hpp"
 #include "TestProcesses.hpp"
+#include "TestGameView.hpp"
 
 using namespace BGE;
 using namespace TestGame;
@@ -79,6 +80,8 @@ int TestGameApp::VGetRendererImpl(void)
 // Start of TestGameLogic implementation:
 TestGameLogic::TestGameLogic(void)
 {
+	auto pHumanView = std::make_shared<TestGameView>();
+	VAddView(pHumanView);
 }
 
 TestGameLogic::~TestGameLogic(void)

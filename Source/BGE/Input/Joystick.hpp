@@ -44,7 +44,28 @@ namespace BGE
 	};
 	constexpr int kGAMEPAD_AXIS_INVALID = SDL_CONTROLLER_AXIS_INVALID;
 
-	enum GamepadButton : int
+	inline constexpr std::string_view GamepadAxisToString(GamepadAxis axis)
+	{
+		switch (axis)
+		{
+		case kGAMEPAD_AXIS_LEFT_X:
+			return "GAMEPAD_AXIS_LEFT_X";
+		case kGAMEPAD_AXIS_LEFT_Y:
+			return "GAMEPAD_AXIS_LEFT_Y";
+		case kGAMEPAD_AXIS_RIGHT_X:
+			return "GAMEPAD_AXIS_RIGHT_X";
+		case kGAMEPAD_AXIS_RIGHT_Y:
+			return "GAMEPAD_AXIS_RIGHT_Y";
+		case kGAMEPAD_AXIS_TRIGGER_LEFT:
+			return "GAMEPAD_AXIS_TRIGGER_LEFT";
+		case kGAMEPAD_AXIS_TRIGGER_RIGHT:
+			return "GAMEPAD_AXIS_TRIGGER_RIGHT";
+		default:
+			return "Unknown";
+		}
+	}
+
+	enum GamepadButton : std::uint8_t
 	{
 		kGAMEPAD_BUTTON_A = SDL_CONTROLLER_BUTTON_A,
 		kGAMEPAD_BUTTON_B = SDL_CONTROLLER_BUTTON_B,

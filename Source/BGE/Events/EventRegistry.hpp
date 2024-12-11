@@ -39,12 +39,12 @@ namespace BGE
 	BGE_DECLARE_PTR(EventRegistry);
 
 	/**
-	 * @brief .
+	 * @brief Used to keep track of events registered by the game application.
 	 */
 	class EventRegistry final : public INonCopyable, public INonMovable, public IStringable
 	{
 	public:
-		//!
+		//! Seperate storage for event metadata.
 		struct EventMetadata
 		{
 			EventSpecification spec;
@@ -52,12 +52,12 @@ namespace BGE
 		};
 	private:
 		using EventMap = std::map<EventType, EventMetadata>; // Map event types to metadata
-		static UniqueEventRegistryPtr s_pInstance;
 
+		std::string m_name;
+		EventMap m_events; //!< Event metadata storage map
 		mutable std::mutex m_mutex;
-		EventMap m_events;
 	public:
-		~EventRegistry(void) = default; // Public default destructor
+		explicit EventRegistry(std::string_view name);
 		// IStringable's interface:
 		virtual std::string VToString(void) const override;
 		//!
@@ -65,15 +65,13 @@ namespace BGE
 		//!
 		void LogRegisteredEvents(void) const;
 		// Accessors:
-		static EventRegistry &Get(void);
-	private:
-		EventRegistry(void) = default;  // Private default constructor
+		const std::string &GetName(void) const;
 	};
 } // End namespace (BGE)
 
 // Macros for registering/creating events:
 #define BGE_REGISTER_EVENT(EVENT_CLASS) \
-	BGE::EventRegistry::Get().RegisterEvent(EVENT_CLASS::kEVENT_TYPE, \
-											EVENT_CLASS::kEVENT_SPEC, EVENT_CLASS::kEVENT_NAME) \
+	BGE::GetEngineApp().GetEventRegistry().RegisterEvent(EVENT_CLASS::kEVENT_TYPE, \
+		EVENT_CLASS::kEVENT_SPEC, EVENT_CLASS::kEVENT_NAME) \
 
 #endif /* !_BGE_EVENTREGISTRY_HPP_ */
