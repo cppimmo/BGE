@@ -1,5 +1,5 @@
 /*=============================================================================*
- * Engine.hpp - Definition of the application layer.
+ * EngineApp.hpp - Definition of the application layer.
  *
  * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
@@ -25,8 +25,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
-#ifndef _BGE_ENGINE_HPP_
-#define _BGE_ENGINE_HPP_
+#ifndef _BGE_ENGINEAPP_HPP_
+#define _BGE_ENGINEAPP_HPP_
 
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
@@ -111,4 +111,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_ENGINE_HPP_ */
+#endif /* !_BGE_ENGINEAPP_HPP_ */

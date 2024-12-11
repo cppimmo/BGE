@@ -17,18 +17,18 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
-	class HumanView : public IGameView
+	class HumanView : public IGameView, public INonCopyable, public INonMovable
 	{
 		friend class EngineApp;
 
 		/**
 		 * @brief Handle keyboard inputs that should be processed for all human views.
 		 */
-		class DefaultKeyboardHandler : public IKeyboardHandler
+		class DefaultInputHandler final : public IKeyboardHandler
 		{
 			HumanView &m_humanView;
 		public:
-			DefaultKeyboardHandler(HumanView &humanView);
+			DefaultInputHandler(HumanView &humanView);
 
 			virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override;
 			virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override;

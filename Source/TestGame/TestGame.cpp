@@ -21,10 +21,10 @@ int main(int numArgs, char *pArgs[])
 
 class EventData_Test; // Forware declare
 
-// Start of Tank Battles application layer implementation:
+// Start of Test Game application layer implementation:
 std::string TestGameApp::VGetGameTitle(void)
 {
-	return "Tank Battles";
+	return "Test Game";
 }
 
 std::string TestGameApp::VGetGameAppDirectory(void)
@@ -41,7 +41,7 @@ std::string TestGameApp::VGetGameAppDirectory(void)
 
 std::string TestGameApp::VGetIcon(void)
 {
-	return "TankBattles.ico";
+	return "TestGame.ico";
 }
 
 void TestGameApp::VRegisterGameEvents(void)

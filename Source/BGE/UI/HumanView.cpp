@@ -3,12 +3,12 @@
 
 #include "Graphics/Screenshot.hpp"
 
-BGE::HumanView::DefaultKeyboardHandler::DefaultKeyboardHandler(HumanView &humanView)
+BGE::HumanView::DefaultInputHandler::DefaultInputHandler(HumanView &humanView)
 	: m_humanView(humanView)
 {
 }
 
-bool BGE::HumanView::DefaultKeyboardHandler::VOnKeyDown(SDL_Keysym key, bool bRepeat)
+bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepeat)
 {
 	if (key.sym == SDLK_ESCAPE)
 	{
@@ -32,7 +32,7 @@ bool BGE::HumanView::DefaultKeyboardHandler::VOnKeyDown(SDL_Keysym key, bool bRe
 	return false;
 }
 
-bool BGE::HumanView::DefaultKeyboardHandler::VOnKeyUp(SDL_Keysym key, bool bRepeat)
+bool BGE::HumanView::DefaultInputHandler::VOnKeyUp(SDL_Keysym key, bool bRepeat)
 {
 	return false;
 }
@@ -40,8 +40,8 @@ bool BGE::HumanView::DefaultKeyboardHandler::VOnKeyUp(SDL_Keysym key, bool bRepe
 BGE::HumanView::HumanView(void)
 {
 	// Add default keyboard handler
-	auto pDefaultKeyboardHandler = std::make_shared<DefaultKeyboardHandler>(*this);
-	AddKeyboardHandler(pDefaultKeyboardHandler);
+	auto pDefaultInputHandler = std::make_shared<DefaultInputHandler>(*this);
+	AddKeyboardHandler(pDefaultInputHandler);
 }
 
 BGE::HumanView::~HumanView(void)

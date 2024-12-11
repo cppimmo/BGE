@@ -1,7 +1,7 @@
 #ifndef _TG_TESTGAME_HPP_
 #define _TG_TESTGAME_HPP_
 
-#include <Engine/Engine.hpp>
+#include <Engine/EngineApp.hpp>
 #include <Engine/BaseGameLogic.hpp>
 
 namespace TestGame

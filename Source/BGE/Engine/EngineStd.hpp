@@ -117,7 +117,7 @@
 #define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = nullptr; }
 #endif
 
-#include "Engine/Engine.hpp"
+#include "Engine/EngineApp.hpp"
 
 //! Primary engine namespace.
 namespace BGE

@@ -32,12 +32,12 @@ namespace TestGame
 		// IKeyboardHandler's interface
 		virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override
 		{
-			BGE_LOG("Input", "Key down (%d), repeat %b", key, bRepeat);
+			BGE_LOG("Input", "Key down (%d), repeat %d", key, bRepeat);
 			return true;
 		}
 		virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override
 		{
-			BGE_LOG("Input", "Key up (%d), repeat %b", key, bRepeat);
+			BGE_LOG("Input", "Key up (%d), repeat %d", key, bRepeat);
 			return true;
 		}
 	};

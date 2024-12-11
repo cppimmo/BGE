@@ -33,7 +33,7 @@
 
 #include "Events/EventData.hpp"
 #include "Events/EventManager.hpp"
-#include "Engine/Engine.hpp"
+#include "Engine/EngineApp.hpp"
 
 namespace BGE
 {

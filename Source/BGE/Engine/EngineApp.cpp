@@ -1,5 +1,5 @@
 /*=============================================================================*
- * Engine.cpp - Implementation of the application layer.
+ * EngineApp.cpp - Implementation of the application layer.
  *
  * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
 #include "Engine/EngineStd.hpp"
-#include "Engine/Engine.hpp"
+#include "Engine/EngineApp.hpp"
 
 #include "Events/Events.hpp"
 #include "Events/EventRegistry.hpp"
