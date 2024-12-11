@@ -44,15 +44,16 @@ namespace BGE
 	class EventData_GraphicsStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0xF0750CE9;
+		BGE_DEFINE_EVENTDATA(0xF0750CE9, kInternal, "EventData_GraphicsStarted");
 	public:
 		EventData_GraphicsStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_GraphicsStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -61,15 +62,16 @@ namespace BGE
 	class EventData_PhysicsStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x4659EB7D;
+		BGE_DEFINE_EVENTDATA(0x4659EB7D, kInternal, "EventData_PhysicsStarted");
 	public:
 		EventData_PhysicsStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_PhysicsStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -78,15 +80,16 @@ namespace BGE
 	class EventData_EventSystemStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x70125747;
+		BGE_DEFINE_EVENTDATA(0x70125747, kInternal, "EventData_EventSystemStarted");
 	public:
 		EventData_EventSystemStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_EventSystemStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -95,15 +98,16 @@ namespace BGE
 	class EventData_SoundSystemStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x76936881;
+		BGE_DEFINE_EVENTDATA(0x76936881, kInternal, "EventData_SoundSystemStarted");
 	public:
 		EventData_SoundSystemStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_SoundSystemStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -112,15 +116,16 @@ namespace BGE
 	class EventData_LocalizationStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x9ABF60A3;
+		BGE_DEFINE_EVENTDATA(0x9ABF60A3, kInternal, "EventData_LocalizationStarted");
 	public:
 		EventData_LocalizationStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_LocalizationStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -129,15 +134,16 @@ namespace BGE
 	class EventData_ResourceCacheStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x72AF1E61;
+		BGE_DEFINE_EVENTDATA(0x72AF1E61, kInternal, "EventData_ResourceCacheStarted");
 	public:
 		EventData_ResourceCacheStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_ResourceCacheStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -146,15 +152,16 @@ namespace BGE
 	class EventData_NetworkStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x3B75371B;
+		BGE_DEFINE_EVENTDATA(0x3B75371B, kInternal, "EventData_NetworkStarted");
 	public:
 		EventData_NetworkStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_NetworkStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -163,15 +170,16 @@ namespace BGE
 	class EventData_GameLogicStarted : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0xBC9E18FA;
+		BGE_DEFINE_EVENTDATA(0xBC9E18FA, kInternal, "EventData_GameLogicStarted");
 	public:
 		EventData_GameLogicStarted(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_GameLogicStarted"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -180,15 +188,16 @@ namespace BGE
 	class EventData_GamePaused : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x490CD74B;
+		BGE_DEFINE_EVENTDATA(0x490CD74B, kInternal, "EventData_GamePaused");
 	public:
 		EventData_GamePaused(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_GamePaused"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 
 	/**
@@ -197,15 +206,16 @@ namespace BGE
 	class EventData_GameResumed : public BaseEventData
 	{
 	public:
-		static constexpr EventType kEVENT_TYPE = 0x894319F7;
+		BGE_DEFINE_EVENTDATA(0x894319F7, kInternal, "EventData_GameResumed");
 	public:
 		EventData_GameResumed(void) = default;
 		// IEventData's interface:
-		virtual const EventType &VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
 		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
 		virtual void VSerialize(std::ostringstream &oss) const override { }
 		virtual void VDeserialize(std::istringstream &iss) override { }
-		virtual constexpr std::string_view VGetName(void) const override { return "EventData_GameResumed"; }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
 	};
 } // End namespace (BGE)
 

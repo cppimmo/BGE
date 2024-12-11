@@ -1,7 +1,13 @@
-#include <Engine/EngineStd.hpp>
+#include "TestGameStd.hpp"
 #include "TestGame.hpp"
 
+#include <Events/EventRegistry.hpp>
+
+#include "TestEvents.hpp"
+#include "TestProcesses.hpp"
+
 using namespace BGE;
+using namespace TestGame;
 
 int main(int numArgs, char *pArgs[])
 {
@@ -11,6 +17,8 @@ int main(int numArgs, char *pArgs[])
 
 	return EngineMain(numArgs, pArgs);
 }
+
+class EventData_Test; // Forware declare
 
 // Start of Tank Battles application layer implementation:
 std::string TestGameApp::VGetGameTitle(void)
@@ -37,6 +45,7 @@ std::string TestGameApp::VGetIcon(void)
 
 void TestGameApp::VRegisterGameEvents(void)
 {
+	BGE_REGISTER_EVENT(EventData_Test);
 }
 
 void TestGameApp::VCreateNetworkEventForwarder(void)
@@ -46,41 +55,6 @@ void TestGameApp::VCreateNetworkEventForwarder(void)
 void TestGameApp::VDestroyNetworkEventForwarder(void)
 {
 }
-
-class EventData_Test; // Forware declare
-
-class TestProcess : public Process
-{
-	Timer m_timer;
-public:
-	virtual bool VOnInit(void) override
-	{
-		const bool kbResult = Process::VOnInit();
-		BGE_INFO("Process(%d) created", GetID());
-		m_timer.Start();
-		return kbResult;
-	}
-	virtual void VOnUpdate(float deltaTime) override
-	{
-		if (m_timer.GetElapsedSecs() >= 3.0)
-		{
-			BGE_INFO("Process(%d) time elapsed", GetID());
-			m_timer.Reset();
-
-			// Create & queue a test event
-			auto pTestEvent = std::make_shared<EventData_Test>();
-			BGE_QUEUE_GEVENT(pTestEvent);
-		}
-	}
-	virtual void VOnSuccess(void) override
-	{
-		BGE_INFO("Process(%d) successed", GetID());
-	}
-	virtual void VOnAbort(void) override
-	{
-		BGE_INFO("Process(%d) aborted", GetID());
-	}
-};
 
 UniqueBaseGameLogicPtr TestGameApp::VCreateGameAndView(void)
 {
@@ -115,37 +89,6 @@ void TestGameLogic::VChangeState(BGE::BaseGameState state)
 {
 	BaseGameLogic::VChangeState(state);
 }
-
-class EventData_Test : public BaseEventData
-{
-public:
-	static constexpr EventType kEVENT_TYPE = 0xDEADBEEF;
-public:
-	EventData_Test(void) = default;
-
-	virtual const EventType &VGetEventType(void) const override
-	{
-		return kEVENT_TYPE;
-	}
-
-	virtual StrongIEventDataPtr VCopy(void) const override
-	{
-		return nullptr; //std::make_shared<EventData_Test>(*this);
-	}
-
-	virtual void VSerialize(std::ostringstream &oss) const override
-	{
-	}
-
-	virtual void VDeserialize(std::istringstream &iss) override
-	{
-	}
-
-	virtual constexpr std::string_view VGetName(void) const override
-	{
-		return "EventData_Test";
-	}
-};
 
 void TestGameLogic::VRegisterDelegates(void)
 {

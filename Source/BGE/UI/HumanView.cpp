@@ -44,6 +44,8 @@ void BGE::HumanView::VOnUpdate(float deltaTime)
 
 BGE::ProcessManager &BGE::HumanView::GetProcessManager(void)
 {
+	BGE_ASSERT(m_pProcessManager);
+	return *m_pProcessManager.get();
 }
 
 void BGE::HumanView::PlaySoundDelegate(StrongIEventDataPtr pEventData)

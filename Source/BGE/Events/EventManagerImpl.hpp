@@ -79,13 +79,13 @@ namespace BGE
 
 #define BGE_ADD_GEVENT_LISTENER(P_CLASS, P_FUNC, EVENT_CLASS) \
 { \
-	auto &eventManager = GetEngineApp().GetEventManager(); \
+	auto &eventManager = BGE::GetEngineApp().GetEventManager(); \
 	eventManager.VAddListener(fastdelegate::MakeDelegate(P_CLASS, P_FUNC), EVENT_CLASS::kEVENT_TYPE); \
 } \
 
 #define BGE_REMOVE_GEVENT_LISTENER(P_CLASS, P_FUNC, EVENT_CLASS) \
 { \
-	auto &eventManager = GetEngineApp().GetEventManager(); \
+	auto &eventManager = BGE::GetEngineApp().GetEventManager(); \
 	eventManager.VRemoveListener(fastdelegate::MakeDelegate(P_CLASS, P_FUNC), EVENT_CLASS::kEVENT_TYPE); \
 } \
 
@@ -94,8 +94,8 @@ namespace BGE
  */
 #define BGE_QUEUE_GEVENT(P_EVENT) \
 { \
-	auto &eventManager = GetEngineApp().GetEventManager(); \
-	eventManager.VQueueEvent(std::static_pointer_cast<IEventData>(P_EVENT)); \
+	auto &eventManager = BGE::GetEngineApp().GetEventManager(); \
+	eventManager.VQueueEvent(std::static_pointer_cast<BGE::IEventData>(P_EVENT)); \
 } \
 
 /**
@@ -103,8 +103,8 @@ namespace BGE
  */
 #define BGE_TRIGGER_GEVENT(P_EVENT) \
 { \
-	auto &eventManager = GetEngineApp().GetEventManager(); \
-	eventManager.VTriggerEvent(std::static_pointer_cast<IEventData>(P_EVENT)); \
+	auto &eventManager = BGE::GetEngineApp().GetEventManager(); \
+	eventManager.VTriggerEvent(std::static_pointer_cast<BGE::IEventData>(P_EVENT)); \
 } \
 
 #endif /* !_BGE_EVENTMANAGERIMPL_HPP_ */

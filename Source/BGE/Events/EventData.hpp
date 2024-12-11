@@ -44,15 +44,25 @@ namespace BGE
 	//! Event listener delegate.
 	using EventListenerDelegate = fastdelegate::FastDelegate<void(StrongIEventDataPtr)>;
 
+	enum struct EventSpecification
+	{
+		kInternal, /**< Events defined in the engine */
+		kExternal  /**< Events defined by a game */
+	};
+	inline constexpr std::string_view EventSpecToString(EventSpecification spec);
+
 	/**
 	 * @brief .
 	 */
 	class IEventData
 	{
+		friend class EventRegistry;
 	public:
 		virtual ~IEventData(void) = default;
 		//!
-		virtual const EventType &VGetEventType(void) const = 0;
+		virtual EventType VGetEventType(void) const = 0;
+		//!
+		virtual EventSpecification VGetEventSpec(void) const = 0;
 		//!
 		virtual const Timestamp &VGetTimestamp(void) const = 0;
 		//!
@@ -83,10 +93,25 @@ namespace BGE
 		virtual void VSerialize(std::ostringstream &oss) const override;
 		virtual void VDeserialize(std::istringstream &iss) override;
 	};
+
+	inline constexpr std::string_view EventSpecToString(EventSpecification spec)
+	{
+		using enum EventSpecification;
+		switch (spec)
+		{
+		case kInternal:
+			return "Internal";
+		case kExternal:
+			return "External";
+		default:
+			return "Unknown";
+		}
+	}
 } // End namespace (BGE)
 
-// Macros for registering/creating events:
-#define BGE_REGISTER_EVENT(EVENT_CLASS) 0
-#define BGE_CREATE_EVENT(EVENT_TYPE) 0
+#define BGE_DEFINE_EVENTDATA(TYPE, SPEC, NAME) \
+	static constexpr BGE::EventType kEVENT_TYPE = TYPE; \
+	static constexpr BGE::EventSpecification kEVENT_SPEC = BGE::EventSpecification::SPEC; \
+	static constexpr std::string_view kEVENT_NAME = NAME; \
 
 #endif /* !_BGE_EVENTDATA_HPP_ */

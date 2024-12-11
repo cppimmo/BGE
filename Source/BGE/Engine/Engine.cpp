@@ -29,6 +29,7 @@
 #include "Engine/Engine.hpp"
 
 #include "Events/Events.hpp"
+#include "Events/EventRegistry.hpp"
 #include "MainLoop/Initialization.hpp"
 #include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
@@ -105,6 +106,8 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Register all events
     RegisterEngineEvents();
     VRegisterGameEvents();
+	// Log the registered events
+	EventRegistry::Get().LogRegisteredEvents();
 
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
 
@@ -326,4 +329,14 @@ void BGE::EngineApp::VDestroyNetworkEventForwarder(void)
 
 void BGE::EngineApp::RegisterEngineEvents(void)
 {
+	BGE_REGISTER_EVENT(EventData_EventSystemStarted);
+	BGE_REGISTER_EVENT(EventData_GameLogicStarted);
+	BGE_REGISTER_EVENT(EventData_GamePaused);
+	BGE_REGISTER_EVENT(EventData_GameResumed);
+	BGE_REGISTER_EVENT(EventData_GraphicsStarted);
+	BGE_REGISTER_EVENT(EventData_LocalizationStarted);
+	BGE_REGISTER_EVENT(EventData_NetworkStarted);
+	BGE_REGISTER_EVENT(EventData_PhysicsStarted);
+	BGE_REGISTER_EVENT(EventData_ResourceCacheStarted);
+	BGE_REGISTER_EVENT(EventData_SoundSystemStarted);
 }
