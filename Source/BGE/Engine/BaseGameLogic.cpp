@@ -36,6 +36,7 @@ void BGE::BaseGameLogic::VRemoveView(StrongIGameViewPtr pView)
 
 BGE::WeakActorPtr BGE::BaseGameLogic::VGetActor(ActorID ID)
 {
+    return WeakActorPtr{};
 }
 
 void BGE::BaseGameLogic::VDestroyActor(ActorID ID)
@@ -44,6 +45,7 @@ void BGE::BaseGameLogic::VDestroyActor(ActorID ID)
 
 bool BGE::BaseGameLogic::VLoadGame(std::string_view levelResource)
 {
+    return true;
 }
 
 void BGE::BaseGameLogic::VSetProxy(void)

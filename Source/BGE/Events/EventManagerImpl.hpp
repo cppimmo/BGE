@@ -35,6 +35,8 @@
 #include "Events/EventManager.hpp"
 #include "Engine/EngineApp.hpp"
 
+#include <array>
+
 namespace BGE
 {
 	class IEventManager; // Forward declare

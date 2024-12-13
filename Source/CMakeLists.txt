@@ -59,11 +59,24 @@ endfunction()
 
 set(LIB_DIR "../Source/Lib")
 
+
 # SDL library:
+set(SDL_VENDORED "Use vendored (non-system) version of SDL" OFF)
+set(SDL_LIB_DIR "Lib/SDL")
 if(WIN32)
-  set(SDL2_DIR "Lib/SDL2-2.26.3/cmake")
+  set(SDL_VENDORED ON)
 endif()
-find_package(SDL2 REQUIRED)
+
+if(SDL_VENDORED)
+	add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
+	set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
+	#set(SDL2_INCLUDE_DIRS "Lib/SDL/include/SDL3")
+else()
+  find_package(SDL2 REQUIRED)
+  include_directories(${SDL2_INCLUDE_DIRS})
+endif()
+#message("SDL2_LIBRARIES: ${SDL_LIBRARIES}")
+#message("SDL2_INCLUDE_DIRS: ${SDL_INCLUDE_DIRS}")
 include_directories(${SDL2_INCLUDE_DIRS})
 
 # ImGui library:
