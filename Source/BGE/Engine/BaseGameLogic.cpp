@@ -5,6 +5,8 @@ BGE::BaseGameLogic::BaseGameLogic(void)
     : m_state(BaseGameState::kInitializing),
       m_bProxy(false)
 {
+    m_pProcessManager = std::make_unique<ProcessManager>();
+    m_pLuaScriptManager = std::make_unique<LuaScriptManager>();
 }
 
 BGE::BaseGameLogic::~BaseGameLogic(void)
@@ -74,7 +76,7 @@ void BGE::BaseGameLogic::VOnUpdate(float time, float elapsedTime)
     case kWaitingForPlayers:
         break;
     case kRunning:
-        m_processManager.UpdateProcesses(deltaMS);
+        m_pProcessManager->UpdateProcesses(deltaMS);
         break;
     default:
         BGE_ERROR("Unrecognized game state.");
@@ -97,12 +99,26 @@ void BGE::BaseGameLogic::VChangeState(BaseGameState state)
 
 BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) noexcept
 {
-    return m_processManager;
+    BGE_ASSERT(m_pProcessManager);
+    return *m_pProcessManager.get();
 }
 
 const BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) const noexcept
 {
-    return m_processManager;
+    BGE_ASSERT(m_pProcessManager);
+    return *m_pProcessManager.get();
+}
+
+BGE::LuaScriptManager &BGE::BaseGameLogic::GetLuaScriptManager(void) noexcept
+{
+    BGE_ASSERT(m_pLuaScriptManager);
+    return *m_pLuaScriptManager.get();
+}
+
+const BGE::LuaScriptManager &BGE::BaseGameLogic::GetLuaScriptManager(void) const noexcept
+{
+    BGE_ASSERT(m_pLuaScriptManager);
+    return *m_pLuaScriptManager.get();
 }
 
 BGE::GameViewList &BGE::BaseGameLogic::GetGameViews(void) noexcept

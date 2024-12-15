@@ -128,7 +128,7 @@ void Logger::Init(std::string_view configFilename)
 
 void Logger::Destroy(void)
 {
-	SAFE_DELETE(::s_pLogManager);
+	BGE_SAFE_DELETE(::s_pLogManager);
 }
 
 int Logger::Write(std::string_view tagName, std::string_view msgFormat, ...)
@@ -219,7 +219,7 @@ LogManager::~LogManager(void)
 	for (auto iter = m_errorMessengers.begin(); iter != m_errorMessengers.end(); ++iter)
 	{
 		ErrorMessenger *pMessenger = (*iter);
-		SAFE_DELETE(pMessenger);
+		BGE_SAFE_DELETE(pMessenger);
 	}
 	m_errorMessengers.clear();
 }

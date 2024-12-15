@@ -7,11 +7,22 @@
 #include "TestProcesses.hpp"
 #include "TestGameView.hpp"
 
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
+
 using namespace BGE;
 using namespace TestGame;
 
+/**
+ * NOTE: The main function should only serve to create the engine app & call the
+ * engine main function.
+ */
 int main(int numArgs, char *pArgs[])
 {
+	sol::state lua;
+	lua.open_libraries(sol::lib::base, sol::lib::table);
+	lua.script_file("Assets/Scripts/Test.lua");
+
 	// Create the application layer:
 	if (!CreateEngineApp<TestGameApp>())
 		return BGE_EXIT_FAILURE;

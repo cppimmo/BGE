@@ -68,13 +68,12 @@ if(WIN32)
 endif()
 
 if(SDL_VENDORED)
-	add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
-	set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
+	#add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
+	#set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
 	#set(SDL2_INCLUDE_DIRS "Lib/SDL/include/SDL3")
 else()
-  find_package(SDL2 REQUIRED)
-  include_directories(${SDL2_INCLUDE_DIRS})
 endif()
+find_package(SDL2 REQUIRED)
 #message("SDL2_LIBRARIES: ${SDL_LIBRARIES}")
 #message("SDL2_INCLUDE_DIRS: ${SDL_INCLUDE_DIRS}")
 include_directories(${SDL2_INCLUDE_DIRS})
@@ -100,10 +99,14 @@ add_library(ImPlot STATIC
   "${IMPLOT_DIR}/implot_items.cpp")
 target_include_directories(ImPlot PUBLIC ${IMGUI_DIR} ${IMPLOT_DIR})
 
-# CallMe library:
+# FastDelegate library:
 set(FASTDELEGATE_DIR "Lib/FastDelegate")
 add_library(FastDelegate INTERFACE) # Header only library
 target_include_directories(FastDelegate INTERFACE ${FASTDELEGATE_DIR})
+
+# GLM:
+set(GLM_DIR "Lib/glm")
+add_subdirectory(${GLM_DIR})
 
 # OpenAL-soft library:
 if(WIN32)
@@ -126,6 +129,18 @@ set(TINYXML_DIR "Lib/tinyxml2")
 add_library(TinyXml2 STATIC "${TINYXML_DIR}/tinyxml2.cpp")
 target_include_directories(TinyXml2 PUBLIC ${TINYXML_DIR})
 
+# See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
+find_package(Lua 5.3 REQUIRED)
+include_directories(${LUA_INCLUDE_DIR})
+add_definitions(-DLUA)
+
+### sol2
+set(SOL2_DIR "Lib/sol2")
+set(SOL2_LUA_VERSION "5.3.4" CACHE STRING "The version of Lua used")
+# we build Lua manually
+set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
+add_subdirectory(${SOL2_DIR})
+
 # Engine Project:
 set(ENGINE_SRC_DIR "BGE")
 
@@ -141,7 +156,8 @@ if(WIN32)
   target_compile_options(Engine PUBLIC "/MP")
 endif()
 
-target_link_libraries(Engine ${SDL2_LIBRARIES} ImGui ImPlot glad TinyXml2 FastDelegate ${OPENAL_LIBRARIES}) #${Boost_LIBRARIES})
+target_link_libraries(Engine ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
+  FastDelegate ${OPENAL_LIBRARIES} ${LUA_LIBRARY} sol2::sol2) #${Boost_LIBRARIES})
 
 if(WIN32)
   # Set the CWD for the debugger to start the program

@@ -8,6 +8,21 @@ BGE::HumanView::DefaultInputHandler::DefaultInputHandler(HumanView &humanView)
 {
 }
 
+bool BGE::HumanView::DefaultInputHandler::VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnButtonDown(JoystickID ID, GamepadButton button)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnButtonUp(JoystickID ID, GamepadButton button)
+{
+	return false;
+}
+
 bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepeat)
 {
 	if (key.sym == SDLK_ESCAPE)
@@ -37,11 +52,38 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyUp(SDL_Keysym key, bool bRepeat)
 	return false;
 }
 
+bool BGE::HumanView::DefaultInputHandler::VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::ivec2 &kPreciseScroll)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks)
+{
+	return false;
+}
+
+int BGE::HumanView::DefaultInputHandler::VGetPointerRadius(void)
+{
+	return 0;
+}
+
 BGE::HumanView::HumanView(void)
 {
 	// Add default keyboard handler
 	auto pDefaultInputHandler = std::make_shared<DefaultInputHandler>(*this);
+	AddGamepadHandler(pDefaultInputHandler);
 	AddKeyboardHandler(pDefaultInputHandler);
+	AddMouseHandler(pDefaultInputHandler);
 }
 
 BGE::HumanView::~HumanView(void)
@@ -142,6 +184,11 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &kEvent)
 	case SDL_JOYBATTERYUPDATED:
 		break;
 	case SDL_CONTROLLERAXISMOTION: // Game controller events
+		for (auto &handler : m_gamepadHandlers)
+		{
+			// TODO: Handle return value.
+			handler->VOnAxis(kEvent.caxis.which, static_cast<GamepadAxis>(kEvent.caxis.axis), kEvent.caxis.value);
+		}
 		break;
 	case SDL_CONTROLLERBUTTONDOWN:
 		for (auto &handler : m_gamepadHandlers)

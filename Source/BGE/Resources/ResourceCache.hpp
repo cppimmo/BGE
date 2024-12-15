@@ -33,17 +33,63 @@
 
 #include "Resources/Resource.hpp"
 #include "Resources/ResourceHandle.hpp"
+#include "Resources/ResourceLoader.hpp"
+#include "Resources/ResourceFile.hpp"
 
-namespace
+namespace BGE
 {
 	class ResourceCache; // Forware declare
-
+	BGE_DECLARE_PTR(ResourceCache);
 
 	class ResourceCache
 	{
-		friend class ResourceHandle;
+	public:
+		//! Progess callback used when preloading resources.
+		using ProgressCallback = std::function<void(int, bool &)>;
 	private:
+		friend class ResourceHandle;
 
+		StrongIResourceFilePtr m_pResourceFile;
+		std::size_t m_cacheSize; //!< Total memory size (bytes)
+		std::size_t m_allocated; //!< Total memory allocated (bytes)
+
+		ResourceHandleList m_resourceHandles; //!< LRU resource handle list
+		ResourceHandleMap m_resources;
+		ResourceLoaderList m_resourceLoaders;
+	public:
+		/**
+		 * @brief Constructs a ResourceCache with the specified size and resource file.
+		 *
+		 * This constructor initializes the resource cache with a maximum allowed size in bytes
+		 * and a pointer to the resource file to manage cached resources.
+		 *
+		 * @param size The maximum size of the resource cache, in bytes.
+		 * @param pResourceFile A strong pointer to the resource file used by the cache.
+		 */
+		ResourceCache(std::size_t size, StrongIResourceFilePtr pResourceFile);
+		virtual ~ResourceCache(void);
+
+		bool Init(void);
+		void RegisterLoader(StrongIResourceLoaderPtr pLoader);
+		StrongResourceHandlePtr GetHandle(const Resource &kResource);
+
+		std::size_t Preload(const std::string &kPattern, ProgressCallback progressCallback);
+		std::vector<std::string> Match(const std::string &kPattern);
+
+		void Flush(void);
+		bool IsUsingDevelopmentDirectories(void) const;
+	protected:
+		bool MakeRoom(std::size_t size);
+		char *Allocate(std::size_t size);
+		void Free(StrongResourceHandlePtr pResourceHandle);
+
+		StrongResourceHandlePtr Load(const Resource &kResource);
+		std::optional<StrongResourceHandlePtr> Find(const Resource &kResource) const;
+		void Update(StrongResourceHandlePtr pResourceHandle);
+
+		void FreeResources(std::size_t count = 1);
+		//! Called when memory associated with a resource is freed.
+		void MemoryHasBeenFreed(std::size_t size);
 	};
 } // End namespace (BGE)
 

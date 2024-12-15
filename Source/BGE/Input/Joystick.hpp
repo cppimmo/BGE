@@ -65,7 +65,7 @@ namespace BGE
 		}
 	}
 
-	enum GamepadButton : std::uint8_t
+	enum GamepadButton : int
 	{
 		kGAMEPAD_BUTTON_A = SDL_CONTROLLER_BUTTON_A,
 		kGAMEPAD_BUTTON_B = SDL_CONTROLLER_BUTTON_B,

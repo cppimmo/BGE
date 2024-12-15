@@ -24,9 +24,61 @@
 
 static bool IsNotBlank(int ch); // Helper function for std::isblank
 
-bool BGE::WildcardMatch(std::string_view pattern, std::string_view str)
-{
-	return false;
+#include <string_view>
+
+bool BGE::WildcardMatch(std::string_view pattern, std::string_view str) {
+	std::string_view::size_type i = 0;
+	bool bStar = false;
+new_segment:
+	bStar = false;
+	if (!pattern.empty() && pattern[0] == '*')
+	{
+		bStar = true;
+		do
+		{
+			pattern.remove_prefix(1); // Skip '*' characters
+		} while (!pattern.empty() && pattern[0] == '*');
+	}
+test_match:
+	for (i = 0; i < pattern.size() && pattern[i] != '*'; i++)
+	{
+		if (i >= str.size() || (pattern[i] != str[i] && (pattern[i] != '?' || str[i] == '.')))
+		{
+			if (!bStar) return false;
+
+			str.remove_prefix(1); // Consume one character of str
+			goto test_match;
+		}
+	}
+
+	if (i < pattern.size() && pattern[i] == '*')
+	{
+		// Advance both pattern and string
+		str.remove_prefix(i);
+		pattern.remove_prefix(i);
+		goto new_segment;
+	}
+
+	// If we reached the end of the string
+	if (i == str.size())
+	{
+		return true;
+	}
+
+	// Handle case where pattern ends with '*' or no more stars to handle
+	if (i > 0 && pattern[i - 1] == '*')
+	{
+		return true;
+	}
+
+	// If no star, we have a mismatch
+	if (!bStar)
+	{
+		return false;
+	}
+	// Retry with the next character of the string
+	str.remove_prefix(1);
+	goto test_match;
 }
 
 std::string BGE::SnakeCaseString(std::string_view str)
@@ -72,6 +124,26 @@ std::string BGE::WStringToString(const std::wstring &wstr)
 {
 	WideConverter converter;
 	return converter.to_bytes(wstr); // Wide to UTF-8
+}
+
+std::string BGE::StringToLower(std::string_view str)
+{
+	std::string result(str); // Create a modifiable copy of the input
+	std::ranges::transform(result, result.begin(), [](unsigned char ch)
+	{
+		return std::tolower(ch);
+	});
+	return result;
+}
+
+std::string BGE::StringToUpper(std::string_view str)
+{
+	std::string result(str); // Create a modifiable copy of the input
+	std::ranges::transform(result, result.begin(), [](unsigned char ch)
+	{
+		return std::toupper(ch);
+	});
+	return result;
 }
 
 bool IsNotBlank(int ch)

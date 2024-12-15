@@ -34,9 +34,7 @@
 #include "Events/EventManager.hpp"
 #include "Events/EventRegistry.hpp"
 #include "Resources/Localizer.hpp"
-
-#include <map>
-#include <string>
+#include "Resources/ResourceCache.hpp"
 
 namespace BGE
 {
@@ -71,13 +69,13 @@ namespace BGE
 		bool m_bQuitting; // True if the exit sequence is being ran
 		bool m_bHasQuit; // true if the exit sequence has been run
 		bool m_bEditorRunning; // True if the game editor is running
-		bool m_bResourceCheck;
+		bool m_bResourceCheck; //!< Check system resources for availability
 		TextStringMap m_textStrings; // Localized string container
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler
 		UniqueEventManagerPtr m_pEventManager; //!< Main event manager
 		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar
-		UniqueBaseGameLogicPtr m_pGameLogic;
-		// TODO: Add event manager.
+		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic
+		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
@@ -101,6 +99,7 @@ namespace BGE
 		EventManager &GetEventManager(void);
 		EventRegistry &GetEventRegistry(void);
 		BaseGameLogic &GetGameLogic(void);
+		ResourceCache &GetResourceCache(void);
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

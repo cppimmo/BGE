@@ -24,14 +24,24 @@ namespace BGE
 		/**
 		 * @brief Handle keyboard inputs that should be processed for all human views.
 		 */
-		class DefaultInputHandler final : public IKeyboardHandler
+		class DefaultInputHandler final : public IGamepadHandler, public IKeyboardHandler, public IMouseHandler
 		{
 			HumanView &m_humanView;
 		public:
 			DefaultInputHandler(HumanView &humanView);
-
+			// IGamepadHandler's interface:
+			virtual bool VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value) override;
+			virtual bool VOnButtonDown(JoystickID ID, GamepadButton button) override;
+			virtual bool VOnButtonUp(JoystickID ID, GamepadButton button) override;
+			// IKeyboardHandler's interface:
 			virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override;
 			virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override;
+			// IMouseHandler's interface:
+			virtual bool VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos) override;
+			virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::ivec2 &kPreciseScroll) override;
+			virtual bool VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) override;
+			virtual bool VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) override;
+			virtual int VGetPointerRadius(void) override;
 		};
 	protected:
 		GameViewID m_viewID;

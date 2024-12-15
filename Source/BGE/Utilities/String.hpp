@@ -29,13 +29,24 @@ namespace BGE
 	// Alias for std::wstring_convert (between UTF-8 and Wide)
 	using WideConverter = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>;
 
-	bool WildcardMatch(std::string_view pattern, std::string_view str); // Supports * & ? patterns
-	std::string SnakeCaseString(std::string_view str); // Convert to snake_case representation
-	std::string TrimLeft(std::string str); // Trim whitespace to the left of string
-	std::string TrimRight(std::string str); // Trim whitespace to the right of string
-	std::string TrimString(std::string str); // Trim whitespace to the left and right of string
-	std::wstring StringToWString(const std::string &str); // Convert string to wide string
-	std::string WStringToString(const std::wstring &wstr); // Convert wide string to string
+	//! Supports * & ? patterns.
+	bool WildcardMatch(std::string_view pattern, std::string_view str);
+	//! Convert to snake_case representation.
+	std::string SnakeCaseString(std::string_view str);
+	//! Trim whitespace to the left of string.
+	std::string TrimLeft(std::string str);
+	//! Trim whitespace to the right of string.
+	std::string TrimRight(std::string str);
+	//! Trim whitespace to the left and right of string.
+	std::string TrimString(std::string str);
+	//! Convert string to wide string.
+	std::wstring StringToWString(const std::string &str);
+	//! Convert wide string to string.
+	std::string WStringToString(const std::wstring &wstr);
+	//! Convert string to lowercase.
+	std::string StringToLower(std::string_view str);
+	//! Convert string to UPPERCASE.
+	std::string StringToUpper(std::string_view str);
 } // End namespace (BGE)
 
 #endif /* !_BGE_STRING_HPP_ */

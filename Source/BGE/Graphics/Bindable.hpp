@@ -1,7 +1,7 @@
 /*******************************************************************************
- * @file   Resource.hpp
+ * @file   Bindable.hpp
  * @author Brian Hoffpauir
- * @date   11.29.2024
+ * @date   12.14.2024
  * @brief  .
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
@@ -28,36 +28,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#ifndef _BGE_RESOURCE_HPP_
-#define _BGE_RESOURCE_HPP_
-
-#include <string>
-#include <string_view>
+#ifndef _BGE_BINDABLE_HPP_
+#define _BGE_BINDABLE_HPP_
 
 namespace BGE
 {
-	class Resource; // Forward declare
-	BGE_DECLARE_PTR(Resource);
-	class IResourceExtraData; // Forward declare
-	BGE_DECLARE_PTR(IResourceExtraData);
+	class IBindable; // Forware declare
+	BGE_DECLARE_PTR(IBindable);
 
-	class Resource
-	{
-		std::string m_name;
-	public:
-		Resource(std::string_view name) : m_name(name) { }
-		// Accessors:
-		const std::string &GetName(void) const { return m_name; }
-		void SetName(std::string_view name) { m_name = name; }
-	};
-
-	class IResourceExtraData
+	class IBindable
 	{
 	public:
-		virtual ~IResourceExtraData(void) = default;
+		virtual ~IBindable(void) = default;
 
-		virtual std::string VGetExtraData(void) = 0;
+		virtual void VBind(void) const = 0;
+		virtual void VUnbind(void) const = 0;
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_RESOURCE_HPP_ */
+#endif /* !_BGE_BINDABLE_HPP_ */

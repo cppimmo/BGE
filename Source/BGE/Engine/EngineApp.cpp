@@ -33,6 +33,7 @@
 #include "MainLoop/Initialization.hpp"
 #include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
+#include "Memory/Memory.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -51,7 +52,8 @@ BGE::EngineApp::EngineApp(void)
 	  m_bQuitRequested(false),
 	  m_bQuitting(false),
 	  m_bHasQuit(false),
-	  m_bEditorRunning(false)
+	  m_bEditorRunning(false),
+	  m_bResourceCheck(true)
 {
 	m_pLocalizer = std::make_unique<Localizer>();
 	m_pEventManager = std::make_unique<EventManager>("Global");
@@ -110,7 +112,26 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Log the registered events
 	m_pEventRegistry->LogRegisteredEvents();
 
+	// Queue event system started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
+
+	// Initialize the resource cache
+	// TODO: Setup resource file
+
+	// TODO: Replace temporary nullptr argument.
+	m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, nullptr);
+	//if (!m_pResourceCache->Init())
+	//{
+	//	BGE_ERROR("Failed to initialize the resource cache!");
+	//	return false;
+	//}
+
+	// Register loaders for the resource cache
+	// NOTE: Loaders should be registered from least to most specific.
+	//m_pResourceCache->RegisterLoader();
+
+	// Queue resource cache started event
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_ResourceCacheStarted>());
 
 	// Load localized strings:
 	if (!m_pLocalizer->LoadStrings(Localizer::Language::kEnglish))
@@ -295,6 +316,12 @@ BGE::BaseGameLogic &BGE::EngineApp::GetGameLogic(void)
 {
 	BGE_ASSERT(m_pGameLogic);
 	return *m_pGameLogic.get();
+}
+
+BGE::ResourceCache &BGE::EngineApp::GetResourceCache(void)
+{
+	BGE_ASSERT(m_pResourceCache);
+	return *m_pResourceCache.get();
 }
 
 int BGE::EngineApp::GetExitCode(void) const

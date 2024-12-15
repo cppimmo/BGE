@@ -32,11 +32,12 @@
 #define _BGE_ENGINESTD_HPP_
 
 // Common library headers:
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <imgui.h>
 #include <implot.h>
 #include <glad/glad.h>
 #include <tinyxml2.h>
+
 // Common standard headers:
 #include <cstddef>
 #include <cstdint>
@@ -67,6 +68,7 @@
 #include <source_location>
 #include <iostream>
 #include <system_error>
+
 // Common project headers:
 #include "Utilities/Types.hpp"
 #include "Utilities/Templates.hpp"
@@ -77,6 +79,7 @@
 #include "Utilities/String.hpp"
 #include "Utilities/Timer.hpp"
 #include "Utilities/Math.hpp"
+
 //#include "Utilities/Random.hpp"
 #include "Engine/BGUT.hpp"
 // Useful macros:
@@ -109,12 +112,12 @@
 #define BGE_NEW new
 #endif
 
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(X) if (X) { delete X; X = nullptr; }
+#ifndef BGE_SAFE_DELETE
+#define BGE_SAFE_DELETE(X) if (X) { delete X; X = nullptr; }
 #endif
 
-#ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = nullptr; }
+#ifndef BGE_SAFE_DELETE_ARRAY
+#define BGE_SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = nullptr; }
 #endif
 
 #include "Engine/EngineApp.hpp"
@@ -122,7 +125,7 @@
 //! Primary engine namespace.
 namespace BGE
 {
-	// Engine entry point:
+	//! Engine entry point.
 	extern int EngineMain(int numArgs, char *pArgs[]);
 } // End namespace (BGE)
 

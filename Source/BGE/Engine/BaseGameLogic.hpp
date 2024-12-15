@@ -6,6 +6,7 @@
 #include "MainLoop/ProcessManager.hpp"
 #include "UI/GameView.hpp"
 #include "Utilities/Timer.hpp"
+#include "Scripting/LuaScriptManager.hpp"
 
 namespace BGE
 {
@@ -44,7 +45,8 @@ namespace BGE
 		BaseGameState m_state;
 		bool m_bProxy;
 		Timer m_lifetimeTimer;
-		ProcessManager m_processManager;
+		UniqueProcessManagerPtr m_pProcessManager;
+		UniqueLuaScriptManagerPtr m_pLuaScriptManager;
 		ActorFactory m_actorFactory;
 		GameViewList m_gameViews;
 	public:
@@ -65,6 +67,8 @@ namespace BGE
 		// Accessors:
 		ProcessManager &GetProcessManager(void) noexcept;
 		const ProcessManager &GetProcessManager(void) const noexcept;
+		LuaScriptManager &GetLuaScriptManager(void) noexcept;
+		const LuaScriptManager &GetLuaScriptManager(void) const noexcept;
 		GameViewList &GetGameViews(void) noexcept;
 		const GameViewList &GetGameViews(void) const noexcept;
 		bool IsProxy(void) const;

@@ -28,6 +28,8 @@
 #ifndef _BGE_MATH_HPP_
 #define _BGE_MATH_HPP_
 
+#include <glm/glm.hpp>
+
 namespace BGE::Math
 {
 	// Concept for use with integral types.
@@ -533,6 +535,39 @@ namespace BGE::Math
 	{
 	public:
 	};
+
+	/**
+	 *
+	 */
+	template <Numeric Type>
+	Type Normalize(Type value, Type min, Type max)
+	{
+		const Type average = (min + max) / static_cast<Type>(2);
+		const Type range = (max - min) / static_cast<Type>(2);
+		return (value - average) / range;
+	}
+
+	/**
+	 *
+	 */
+	template <Numeric Type>
+	Type ApplyDeadzone(Type value, Type maxValue, Type deadzone)
+	{
+		if (value < -(deadzone))
+		{
+			value += deadzone; // Increase neg vals to remove deadzone discontinuity
+		}
+		else if (value > deadzone)
+		{
+			value -= deadzone; // Decrease pos vals to remove deadzone discontinuity
+		}
+		else
+		{
+			return static_cast<Type>(0); // Hey values are zero for once
+		}
+		const Type kNormValue = value / (maxValue - deadzone);
+		return std::clamp(kNormValue, static_cast<Type>(-1), static_cast<Type>(1));
+	}
 } // End namespace (BGE::Math)
 
 #endif /* !_BGE_MATH_HPP_ */
