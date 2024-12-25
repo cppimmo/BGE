@@ -27,6 +27,7 @@ namespace BGE
 	public:
 		virtual ~IGameLogic(void) = default;
 
+		virtual bool VInit(void) = 0;
 		virtual WeakActorPtr VGetActor(ActorID ID) = 0;
 		//virtual StrongActorPtr VCreateActor(const std::string &actorResource, TiXmlElement *overrides, const Mat4x4 *initialTransform=NULL, const ActorId serversActorId=INVALID_ACTOR_ID)=0;
 		virtual void VDestroyActor(ActorID ID) = 0;
@@ -53,17 +54,17 @@ namespace BGE
 		BaseGameLogic(void);
 		virtual ~BaseGameLogic(void);
 
-		bool Init(void);
 		// BaseGameLogic interface:
 		virtual void VAddView(StrongIGameViewPtr pView, ActorID aID = kINVALID_ACTOR_ID);
 		virtual void VRemoveView(StrongIGameViewPtr pView);
 		// IGameLogic interface:
-		virtual WeakActorPtr VGetActor(ActorID ID);
-		virtual void VDestroyActor(ActorID ID);
-		virtual bool VLoadGame(std::string_view levelResource);
-		virtual void VSetProxy(void);
-		virtual void VOnUpdate(float time, float elapsedTime);
-		virtual void VChangeState(BaseGameState state);
+		virtual bool VInit(void) override;
+		virtual WeakActorPtr VGetActor(ActorID ID) override;
+		virtual void VDestroyActor(ActorID ID) override;
+		virtual bool VLoadGame(std::string_view levelResource) override;
+		virtual void VSetProxy(void) override;
+		virtual void VOnUpdate(float time, float elapsedTime) override;
+		virtual void VChangeState(BaseGameState state) override;
 		// Accessors:
 		ProcessManager &GetProcessManager(void) noexcept;
 		const ProcessManager &GetProcessManager(void) const noexcept;
@@ -73,6 +74,8 @@ namespace BGE
 		const GameViewList &GetGameViews(void) const noexcept;
 		bool IsProxy(void) const;
 		void SetProxy(bool bProxy) noexcept;
+		bool CanRunScripts(void) const;
+		BaseGameState GetState(void) const;
 	protected:
 		virtual void VRegisterDelegates(void);
 		virtual void VDeregisterDelegates(void);

@@ -58,6 +58,7 @@ namespace BGE
 	public:
 		virtual ~IGameView(void) = default;
 
+		virtual bool VInit(void) = 0;
 		virtual void VOnRestore(void) = 0;
 		virtual void VOnRender(float deltaTime, float elapsedTime) = 0;
 		virtual void VOnLostDevice(void) = 0;

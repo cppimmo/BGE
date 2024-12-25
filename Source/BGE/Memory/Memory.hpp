@@ -37,9 +37,9 @@ namespace BGE
 	BGE_DECLARE_PTR(MemoryManager);
 
 	// Memory size constants:
-    constexpr std::uint64_t k1_KiB = 1024;
-    constexpr std::uint64_t k1_MiB = k1_KiB * 1024;
-    constexpr std::uint64_t k1_GiB = k1_MiB * 1024;
+    constexpr std::uint64_t kONE_KILOBYTE = 1024;
+    constexpr std::uint64_t kONE_MEGABYTE = kONE_KILOBYTE * 1024;
+    constexpr std::uint64_t kONE_GIGABYTE = kONE_MEGABYTE * 1024;
 
     inline std::uint64_t operator""_KiB(unsigned long long value)
 	{
@@ -49,20 +49,34 @@ namespace BGE
     inline std::uint64_t operator""_MiB(unsigned long long value)
 	{
 		return value * 1024 * 1024;
-
 	}
 
-	class MemoryManager
+	inline std::uint64_t operator""_GiB(unsigned long long value)
 	{
-		static UniqueMemoryManagerPtr s_pInstance;
-	public:
+		return value * 1024 * 1024 * 1024;
+	}
 
+	class MemoryManager final : public INonCopyable, public INonMovable
+	{
 	public:
-		static MemoryManager &Get(void);
-	private:
-		MemoryManager(void); // Hide constructor to prevent instances from being made
+		MemoryManager(void);
+		~MemoryManager(void) {}
 	};
 } // End namespace (BGE)
+
+#if defined(_DEBUG) // Only on Windows IIRC
+#define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator
+#else
+#define BGE_NEW new
+#endif
+
+#ifndef BGE_SAFE_DELETE
+#define BGE_SAFE_DELETE(X) if (X) { delete X; X = nullptr; }
+#endif
+
+#ifndef BGE_SAFE_DELETE_ARRAY
+#define BGE_SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = nullptr; }
+#endif
 
 #endif /* !_BGE_MEMORY_HPP_ */
 

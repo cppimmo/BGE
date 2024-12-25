@@ -9,14 +9,18 @@ namespace TestGame
 {
 	class TestGameView : public BGE::HumanView
 	{
+		GLuint m_vbo;
 	public:
 		TestGameView(void)
 		{
 			auto pController = std::make_shared<TestController>();
 			AddGamepadHandler(pController);
 			AddKeyboardHandler(pController);
+			VInit();
 		}
 		//! IGameView's interface:
+		virtual bool VInit(void) override;
+		virtual void VOnRender(float deltaTime, float elapsedTime) override;
 	protected:
 		virtual void VRegisterDelegates(void) override;
 		virtual void VDeregisterDelegates(void) override;

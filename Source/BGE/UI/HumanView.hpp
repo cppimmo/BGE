@@ -59,6 +59,7 @@ namespace BGE
 		HumanView(void);
 		virtual ~HumanView(void);
 		//! IGameView's interface:
+		virtual bool VInit(void) override;
 		virtual void VOnRestore(void) override;
 		virtual void VOnRender(float deltaTime, float elapsedTime) override;
 		virtual void VOnLostDevice(void) override;

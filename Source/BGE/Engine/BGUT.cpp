@@ -87,6 +87,7 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		BGE_ERROR("BGUTInit Failure: Couldn't parse config file!");
 		return false;
 	}
+
 	// Decide which parts of SDL should be initialized
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
@@ -94,8 +95,10 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		return false;
 	}
 
+	// Set SDL log output callback
 	SDL_LogSetOutputFunction(Logger::LogOutputFunc_SDL, nullptr);
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
+
 	// Set OpenGL attributes before window creation
 	BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
 	// Set basic window flags
@@ -212,7 +215,7 @@ void BGE::BGUTMainLoop(void)
 				deltaTimeMS = kTicksMinStepMillis;
 			// Call update callback
 			if (s_BGUT.pUpdateCallback)
-				s_BGUT.pUpdateCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedMillis());
+				s_BGUT.pUpdateCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
 
 			kTicksLastStepMillis = kTicksNowMillis; // Set previous step
 			// When ImGui is enabled, prepare the new frame
@@ -224,7 +227,7 @@ void BGE::BGUTMainLoop(void)
 			}
 
 			if (s_BGUT.pRenderCallback) // Call render callback
-				s_BGUT.pRenderCallback();
+				s_BGUT.pRenderCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
 			// When ImGui is enabled, call end of frame routines
 			if (s_BGUT.bImGuiEnabled)
 			{

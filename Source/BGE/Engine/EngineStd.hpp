@@ -69,21 +69,6 @@
 #include <iostream>
 #include <system_error>
 
-// Common project headers:
-#include "Utilities/Types.hpp"
-#include "Utilities/Templates.hpp"
-#include "Engine/Interfaces.hpp"
-#include "Utilities/Utils.hpp"
-#include "Debugging/Logger.hpp"
-#include "Utilities/Exception.hpp"
-#include "Utilities/String.hpp"
-#include "Utilities/Timer.hpp"
-#include "Utilities/Math.hpp"
-
-//#include "Utilities/Random.hpp"
-#include "Engine/BGUT.hpp"
-// Useful macros:
-
 // Platform macro constants (use #if, etc.):
 // Article about platform detection: https://iq.opengenus.org/detect-operating-system-in-c/
 #define BGE_PLATFORM_WIN _WIN32
@@ -106,19 +91,20 @@
 // BGE_CONFIG_PROFILE // For profiling (disables certain parts of DEBUG config)
 // BGE_CONFIG_RELEASE // For final versions
 
-#if defined(_DEBUG) // Only on Windows IIRC
-#define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator
-#else
-#define BGE_NEW new
-#endif
+// Common project headers:
+#include "Utilities/Types.hpp"
+#include "Utilities/Templates.hpp"
+#include "Engine/Interfaces.hpp"
+#include "Utilities/Utils.hpp"
+#include "Memory/Memory.hpp"
+#include "Debugging/Logger.hpp"
+#include "Utilities/Exception.hpp"
+#include "Utilities/String.hpp"
+#include "Utilities/Timer.hpp"
+#include "Utilities/Math.hpp"
 
-#ifndef BGE_SAFE_DELETE
-#define BGE_SAFE_DELETE(X) if (X) { delete X; X = nullptr; }
-#endif
-
-#ifndef BGE_SAFE_DELETE_ARRAY
-#define BGE_SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = nullptr; }
-#endif
+//#include "Utilities/Random.hpp"
+#include "Engine/BGUT.hpp"
 
 #include "Engine/EngineApp.hpp"
 

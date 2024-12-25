@@ -14,9 +14,16 @@ BGE::BaseGameLogic::~BaseGameLogic(void)
     VDeregisterDelegates();
 }
 
-bool BGE::BaseGameLogic::Init(void)
+bool BGE::BaseGameLogic::VInit(void)
 {
     VRegisterDelegates();
+
+    // Init Lua script manager
+    if (!m_pLuaScriptManager->VInit())
+    {
+        BGE_ERROR("Could not initialize Lua state");
+        return false;
+    }
     // TODO: Perform other logic here
     VChangeState(BaseGameState::kRunning);
     return true;
@@ -139,6 +146,16 @@ bool BGE::BaseGameLogic::IsProxy(void) const
 void BGE::BaseGameLogic::SetProxy(bool bProxy) noexcept
 {
     m_bProxy = bProxy;
+}
+
+bool BGE::BaseGameLogic::CanRunScripts(void) const
+{
+    return !IsProxy() && GetState() != BaseGameState::kRunning;
+}
+
+BGE::BaseGameState BGE::BaseGameLogic::GetState() const
+{
+    return m_state;
 }
 
 void BGE::BaseGameLogic::VRegisterDelegates(void)

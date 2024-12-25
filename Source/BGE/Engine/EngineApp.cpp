@@ -34,6 +34,7 @@
 #include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
 #include "Memory/Memory.hpp"
+#include "Resources/ResourceLoader.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -55,6 +56,7 @@ BGE::EngineApp::EngineApp(void)
 	  m_bEditorRunning(false),
 	  m_bResourceCheck(true)
 {
+	m_pMemoryManager = std::make_unique<MemoryManager>();
 	m_pLocalizer = std::make_unique<Localizer>();
 	m_pEventManager = std::make_unique<EventManager>("Global");
 	m_pEventRegistry = std::make_unique<EventRegistry>("Global");
@@ -128,7 +130,9 @@ bool BGE::EngineApp::VInitInstance(void)
 
 	// Register loaders for the resource cache
 	// NOTE: Loaders should be registered from least to most specific.
-	//m_pResourceCache->RegisterLoader();
+	DefaultResourceLoaderFactory rlFactory;
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateXMLResourceLoader());
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateScriptResourceLoader());
 
 	// Queue resource cache started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_ResourceCacheStarted>());
@@ -176,14 +180,20 @@ void BGE::EngineApp::OnUpdate(float deltaTime, float elapsedTime)
 	app.m_pEventManager->VUpdate(EventManager::kINFINITY);
 }
 
-void BGE::EngineApp::OnRender(void)
+void BGE::EngineApp::OnRender(float deltaTime, float elapsedTime)
 {
 	auto &app = GetEngineApp();
-
 	// TODO: Call rendering routines.
 
 	constexpr float kCLEAR_COLOR[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, kCLEAR_COLOR);
+
+	// Render each view
+	auto &gameViews = app.GetGameLogic().GetGameViews();
+	for (auto &pView : gameViews)
+	{
+		pView->VOnRender(deltaTime, elapsedTime);
+	}
 
 	ImGui::ShowDemoWindow();
 	ImPlot::ShowDemoWindow();
@@ -292,33 +302,40 @@ void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
 void BGE::EngineApp::OnShutdown(void)
 {
 	// TODO: Perform destruction tasks.
+	VDestroyNetworkEventForwarder();
 }
 
-BGE::Localizer &BGE::EngineApp::GetLocalizer(void)
+BGE::MemoryManager &BGE::EngineApp::GetMemoryManager(void) noexcept
+{
+	BGE_ASSERT(m_pMemoryManager);
+	return *m_pMemoryManager.get();
+}
+
+BGE::Localizer &BGE::EngineApp::GetLocalizer(void) noexcept
 {
 	BGE_ASSERT(m_pLocalizer);
 	return *m_pLocalizer.get();
 }
 
-BGE::EventManager &BGE::EngineApp::GetEventManager(void)
+BGE::EventManager &BGE::EngineApp::GetEventManager(void) noexcept
 {
 	BGE_ASSERT(m_pEventManager);
 	return *m_pEventManager.get();
 }
 
-BGE::EventRegistry &BGE::EngineApp::GetEventRegistry(void)
+BGE::EventRegistry &BGE::EngineApp::GetEventRegistry(void) noexcept
 {
 	BGE_ASSERT(m_pEventRegistry);
 	return *m_pEventRegistry.get();
 }
 
-BGE::BaseGameLogic &BGE::EngineApp::GetGameLogic(void)
+BGE::BaseGameLogic &BGE::EngineApp::GetGameLogic(void) noexcept
 {
 	BGE_ASSERT(m_pGameLogic);
 	return *m_pGameLogic.get();
 }
 
-BGE::ResourceCache &BGE::EngineApp::GetResourceCache(void)
+BGE::ResourceCache &BGE::EngineApp::GetResourceCache(void) noexcept
 {
 	BGE_ASSERT(m_pResourceCache);
 	return *m_pResourceCache.get();

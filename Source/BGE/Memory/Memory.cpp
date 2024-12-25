@@ -31,18 +31,6 @@
 #include "Engine/EngineStd.hpp"
 #include "Memory/Memory.hpp"
 
-BGE::UniqueMemoryManagerPtr BGE::MemoryManager::s_pInstance; // Initialize static class instance
-
-BGE::MemoryManager &BGE::MemoryManager::Get(void)
-{
-	if (!s_pInstance)
-	{
-		s_pInstance = std::unique_ptr<MemoryManager>(BGE_NEW MemoryManager);
-	}
-
-	return *s_pInstance.get();
-}
-
 BGE::MemoryManager::MemoryManager(void)
 {
 }

@@ -2,6 +2,8 @@
 #define _BGE_RESOURCELOADER_HPP_
 
 #include "Resources/ResourceHandle.hpp"
+// Individual loaders:
+//#include "Scripting/ScriptResourceLoader.hpp"
 
 namespace BGE
 {
@@ -56,7 +58,19 @@ namespace BGE
 	public:
 		virtual ~IResourceLoaderFactory(void) = default;
 		// Interface:
-		virtual StrongDefaultResourceLoaderPtr VCreateDefaultResourceLoader(void) const = 0;
+		virtual StrongIResourceLoaderPtr VCreateDefaultResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateXMLResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateScriptResourceLoader(void) = 0;
+	};
+
+	class DefaultResourceLoaderFactory : public IResourceLoaderFactory
+	{
+	public:
+		virtual ~DefaultResourceLoaderFactory(void) = default;
+		// IResourceLoaderFactory's interface:
+		virtual StrongIResourceLoaderPtr VCreateDefaultResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateXMLResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateScriptResourceLoader(void) override;
 	};
 } // End namespace (BGE)
 

@@ -35,6 +35,7 @@
 #include "Events/EventRegistry.hpp"
 #include "Resources/Localizer.hpp"
 #include "Resources/ResourceCache.hpp"
+#include "Memory/Memory.hpp"
 
 namespace BGE
 {
@@ -71,6 +72,8 @@ namespace BGE
 		bool m_bEditorRunning; // True if the game editor is running
 		bool m_bResourceCheck; //!< Check system resources for availability
 		TextStringMap m_textStrings; // Localized string container
+
+		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler
 		UniqueEventManagerPtr m_pEventManager; //!< Main event manager
 		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar
@@ -88,18 +91,18 @@ namespace BGE
 		virtual std::string VGetIcon(void) = 0; // Icon filename
 		virtual int VGetRendererImpl(void) = 0; // Type of renderer
 
-		// These are marked static so it will be easier to pass them as arguments:
-		static void OnUpdate(float deltaTime, float elsapsedTime);
-		static void OnRender(void);
+		static void OnUpdate(float deltaTime, float elapsedTime);
+		static void OnRender(float deltaTime, float elsapsedTime);
 		static bool OnHandleEvent(const SDL_Event &kEvent);
 		static void OnDisplayChange(int colorDepth, int width, int height);
 		void OnShutdown(void);
 		// Accessors:
-		Localizer &GetLocalizer(void);
-		EventManager &GetEventManager(void);
-		EventRegistry &GetEventRegistry(void);
-		BaseGameLogic &GetGameLogic(void);
-		ResourceCache &GetResourceCache(void);
+		MemoryManager &GetMemoryManager(void) noexcept;
+		Localizer &GetLocalizer(void) noexcept;
+		EventManager &GetEventManager(void) noexcept;
+		EventRegistry &GetEventRegistry(void) noexcept;
+		BaseGameLogic &GetGameLogic(void) noexcept;
+		ResourceCache &GetResourceCache(void) noexcept;
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

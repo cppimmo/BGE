@@ -90,6 +90,11 @@ BGE::HumanView::~HumanView(void)
 {
 }
 
+bool BGE::HumanView::VInit(void)
+{
+	return true;
+}
+
 void BGE::HumanView::VOnRestore(void)
 {
 }

@@ -1,6 +1,10 @@
 #include "Engine/EngineStd.hpp"
 #include "Resources/ResourceLoader.hpp"
 
+// Resource loaders:
+#include "Resources/XMLResourceLoader.hpp"
+#include "Scripting/ScriptResourceLoader.hpp"
+
 BGE::DefaultResourceLoader::DefaultResourceLoader(void)
 	: m_pattern("*")
 {
@@ -34,4 +38,19 @@ std::size_t BGE::DefaultResourceLoader::VGetLoadedResourceSize(char *pRawBuffer,
 bool BGE::DefaultResourceLoader::VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle)
 {
 	return true;
+}
+
+BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateDefaultResourceLoader(void)
+{
+	return std::make_shared<DefaultResourceLoader>();
+}
+
+BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateXMLResourceLoader(void)
+{
+	return std::make_shared<XMLResourceLoader>();
+}
+
+BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateScriptResourceLoader(void)
+{
+	return std::make_shared<ScriptResourceLoader>();
 }

@@ -92,3 +92,11 @@ end
 
 -- Run the main function
 Main()
+
+-- Test LuaScriptManager::OnPanic
+-- Cause a panic by exceeding the stack limit
+--debug.sethook(function() end, "", 1)  -- Set a debug hook with a very small step
+--function cause_panic()
+--    return cause_panic()
+--end
+--cause_panic()

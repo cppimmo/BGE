@@ -19,9 +19,9 @@ using namespace TestGame;
  */
 int main(int numArgs, char *pArgs[])
 {
-	sol::state lua;
-	lua.open_libraries(sol::lib::base, sol::lib::table);
-	lua.script_file("Assets/Scripts/Test.lua");
+	//sol::state lua;
+	//lua.open_libraries(sol::lib::base, sol::lib::table);
+	//lua.script_file("Assets/Scripts/Test.lua");
 
 	// Create the application layer:
 	if (!CreateEngineApp<TestGameApp>())
@@ -29,8 +29,6 @@ int main(int numArgs, char *pArgs[])
 
 	return EngineMain(numArgs, pArgs);
 }
-
-class EventData_Test; // Forware declare
 
 // Start of Test Game application layer implementation:
 std::string TestGameApp::VGetGameTitle(void)
@@ -71,7 +69,7 @@ void TestGameApp::VDestroyNetworkEventForwarder(void)
 UniqueBaseGameLogicPtr TestGameApp::VCreateGameAndView(void)
 {
 	auto pGameLogic = std::make_unique<TestGameLogic>();
-	if (!pGameLogic->Init())
+	if (!pGameLogic->VInit())
 	{
 		BGE_ERROR("Failure initializing game logic");
 		return nullptr;
@@ -97,6 +95,14 @@ TestGameLogic::TestGameLogic(void)
 
 TestGameLogic::~TestGameLogic(void)
 {
+}
+
+bool TestGameLogic::VInit(void)
+{
+	bool bResult = BaseGameLogic::VInit();
+
+	m_pLuaScriptManager->VExecuteFile("Assets/Scripts/Test.lua");
+	return bResult;
 }
 
 void TestGameLogic::VChangeState(BGE::BaseGameState state)

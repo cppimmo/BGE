@@ -30,33 +30,33 @@
 
 namespace BGE
 {
-/**
- * Exception class inherited from std::exception.
- */
-class Exception : public std::exception
-{   // Not necessary to access from sub-classes:
-	std::string_view m_filename;
-	std::string_view m_functionName;
-	std::size_t m_lineNum;
-protected:
-	mutable std::string_view m_message;
-public: // Constructor & default special member functions.
-	Exception(std::string_view message, std::string_view filename,
-			  std::string_view functionName, std::size_t lineNum);
-	Exception(const Exception &) = default;
-	Exception &operator=(const Exception &) = default;
-	Exception(Exception &&) noexcept = default;
-	Exception &operator=(Exception &&) noexcept = default;
+	/**
+	* @brief Exception class inherited from std::exception.
+	*/
+	class Exception : public std::exception
+	{   // Not necessary to access from sub-classes:
+	protected:
+		mutable std::string_view m_message;
+	private:
+		std::string_view m_filename;
+		std::string_view m_functionName;
+		std::size_t m_lineNum;
+	public: // Constructor & default special member functions.
+		Exception(std::string_view message, std::string_view filename,
+				std::string_view functionName, std::size_t lineNum);
+		Exception(const Exception &) = default;
+		Exception &operator=(const Exception &) = default;
+		Exception(Exception &&) noexcept = default;
+		Exception &operator=(Exception &&) noexcept = default;
 
-	virtual std::string_view VWhat(void) const noexcept; // Message
-	virtual std::string_view VType(void) const noexcept; // Exception type as string
-	std::string_view GetFunctionName(void) const noexcept; // Function name
-	std::string_view GetFilename(void) const noexcept; // Filename
-	std::size_t GetLineNum(void) const noexcept; // Line in file
-protected: // Subs can override standard what() if needed.
-	virtual const char *what(void) const noexcept { return m_message.data(); }
-};
-
+		virtual std::string_view VWhat(void) const noexcept; // Message
+		virtual std::string_view VType(void) const noexcept; // Exception type as string
+		std::string_view GetFunctionName(void) const noexcept; // Function name
+		std::string_view GetFilename(void) const noexcept; // Filename
+		std::size_t GetLineNum(void) const noexcept; // Line in file
+	protected: // Subs can override standard what() if needed.
+		virtual const char *what(void) const noexcept { return m_message.data(); }
+	};
 } // End namespace (BGE)
 
 // __FUNCTION__ is non-standard; use __func__.  __FILE__ & __LINE__

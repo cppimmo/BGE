@@ -28,92 +28,58 @@
 #include "Engine/EngineStd.hpp"
 #include "Shaders.hpp"
 
-BGE::ShaderProgram::ShaderProgram(void)
-    : m_programID(0)
+BGE::Shader::~Shader(void)
 {
+    VDestroy();
 }
 
-BGE::ShaderProgram::~ShaderProgram(void)
+GLuint BGE::Shader::VGetID(void) const
 {
-    if (VIsValid()) VDestroy(); // Ensure the program is destroyed
+    return m_shaderID;
 }
 
-GLuint BGE::ShaderProgram::VCreate(void)
+void BGE::Shader::VDestroy(void)
 {
-    return GLuint();
+    glDeleteShader(m_shaderID);
 }
 
-GLuint BGE::ShaderProgram::VGetID(void) const
+bool BGE::Shader::VIsValid(void) const
 {
-    return m_programID;
+    return glIsShader(m_shaderID);
 }
 
-void BGE::ShaderProgram::VAttachShader(const IShader &shader)
+bool BGE::VertexShader::VCreate(void)
 {
+    m_shaderID = glCreateShader(GL_VERTEX_SHADER);
+    return m_shaderID != 0;
 }
 
-void BGE::ShaderProgram::VDetachShader(const IShader &shader)
+bool BGE::VertexShader::VCompile(std::string_view source)
 {
-}
+    const char *pSourceData = source.data();
+    const GLint kSourceLength = static_cast<GLint>(source.size());
 
-bool BGE::ShaderProgram::VLink(void)
-{
-    // TODO: Link all attached shader objects to this program.
-    return false;
-}
+    // Attach the source to the shader
+    glShaderSource(m_shaderID, 1, &pSourceData, &kSourceLength);
+    glCompileShader(m_shaderID); // Compile the shader
 
-void BGE::ShaderProgram::VBind(void)
-{
-    glUseProgram(m_programID);
-}
+    // Check the shader compilation status
+    GLint status{};
+    glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE)
+    {
+        // Get the length of the shader info log
+        GLint infoLogLength{};
+        glGetShaderiv(m_shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-void BGE::ShaderProgram::VDestroy(void)
-{
-    glDeleteProgram(m_programID);
-}
+        // Retrieve the shader info log
+        std::string infoLog(infoLogLength, '\0');
+        GLsizei length{};
+        glGetShaderInfoLog(m_shaderID, infoLogLength, &length, infoLog.data());
 
-bool BGE::ShaderProgram::VIsValid(void) const
-{
-    return glIsProgram(m_programID);
-}
-
-void BGE::ShaderProgram::SetBool(std::string_view uniformName, bool value)
-{
-    auto result = GetShaderUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result) glProgramUniform1i(m_programID, *result, static_cast<bool>(value));
-}
-
-void BGE::ShaderProgram::SetInt(std::string_view uniformName, GLint value)
-{
-    auto result = GetShaderUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result) glProgramUniform1i(m_programID, *result, value);
-}
-
-void BGE::ShaderProgram::SetUnsignedInt(std::string_view uniformName, GLuint value)
-{
-    auto result = GetShaderUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result) glProgramUniform1ui(m_programID, *result, value);
-}
-
-void BGE::ShaderProgram::SetFloat(std::string_view uniformName, GLfloat value)
-{
-    auto result = GetShaderUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result) glProgramUniform1f(m_programID, *result, value);
-}
-
-void BGE::ShaderProgram::SetDouble(std::string_view uniformName, GLdouble value)
-{
-    auto result = GetShaderUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result) glProgramUniform1d(m_programID, *result, value);
-}
-
-std::optional<GLuint> BGE::GetShaderUniformLocation(GLuint programID, std::string_view uniformName) noexcept
-{
-    auto result = glGetUniformLocation(programID, uniformName.data());
-    return (result < 0) ? std::nullopt : std::optional<GLuint>(result);
+        // Log the error message
+        BGE_LOG("Graphics", "Shader compilation failed: %s", infoLog.c_str());
+        return false;
+    }
+    return true;
 }
