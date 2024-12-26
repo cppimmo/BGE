@@ -5,11 +5,66 @@ using namespace TestGame;
 
 bool TestGame::TestGameView::VInit(void)
 {
-	glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
+	m_pShaderProgram = std::make_unique<BGE::ShaderProgram>();
 
-	glGenBuffers(1, &m_vbo);
+	m_pShaderProgram->VCreate();
+
+	BGE::StrongIShaderPtr pVertexShader = std::make_shared<BGE::VertexShader>();
+	pVertexShader->VCreate();
+	pVertexShader->VCompile(R"vs(
+#version 420 compatibility
+
+layout (location = 0) in vec3 inPosition;
+layout (location = 1) in vec3 inColor;
+
+out vec3 g_vertexColor;
+
+void main(void)
+{
+	gl_Position = vec4(inPosition, 1.0);
+	g_vertexColor = inColor;
+}
+)vs");
+
+	BGE::StrongIShaderPtr pFragmentShader = std::make_shared<BGE::FragmentShader>();
+	pFragmentShader->VCreate();
+	pFragmentShader->VCompile(R"fs(
+#version 420 compatibility
+
+layout (location = 0) out vec4 outColor;
+
+in vec3 g_vertexColor;
+
+void main(void)
+{
+	outColor = vec4(g_vertexColor, 1.0);
+}
+)fs");
+
+	m_pShaderProgram->VAttachShader(pVertexShader);
+	m_pShaderProgram->VAttachShader(pFragmentShader);
+	m_pShaderProgram->VLink();
+
+	//glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
+	static constexpr GLfloat vertices[3][3 + 3] =
+	{
+		{ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f },
+		{  0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f },
+		{  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f }
+	};
+
+	glCreateBuffers(1, &m_vbo);
+	glNamedBufferStorage(m_vbo, sizeof(vertices), vertices, 0);
+
+	glCreateVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::fvec3), &vertex, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 	return true;
 }
 
@@ -17,20 +72,17 @@ void TestGame::TestGameView::VOnRender(float deltaTime, float elapsedTime)
 {
 	HumanView::VOnRender(deltaTime, elapsedTime);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glEnableVertexAttribArray(0);
+	m_pShaderProgram->VBind();
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, static_cast<void *>(0));
-	glDrawArrays(GL_POINTS, 0, 1);
-
-	glDisableVertexAttribArray(0);
+	glBindVertexArray(m_vao);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void TestGame::TestGameView::VRegisterDelegates(void)
 {
 }
 
-void TestGame::TestGameView::VDeregisterDelegates()
+void TestGame::TestGameView::VDeregisterDelegates(void)
 {
 }
 

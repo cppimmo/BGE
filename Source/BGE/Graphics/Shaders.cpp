@@ -28,9 +28,49 @@
 #include "Engine/EngineStd.hpp"
 #include "Shaders.hpp"
 
+bool BGE::IShader::Compile(GLuint shaderID, std::string_view source)
+{
+    const char *pSourceData = source.data();
+    const GLint kSourceLength = static_cast<GLint>(source.size());
+
+    // Attach the source to the shader
+    glShaderSource(shaderID, 1, &pSourceData, &kSourceLength);
+    glCompileShader(shaderID); // Compile the shader
+
+    // Check the shader compilation status
+    GLint status{};
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
+    if (status != GL_TRUE)
+    {
+        // Get the length of the shader info log
+        GLint infoLogLength{};
+        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+        // Retrieve the shader info log
+        std::string infoLog(infoLogLength, '\0');
+        GLsizei length{};
+        glGetShaderInfoLog(shaderID, infoLogLength, &length, infoLog.data());
+
+        // Log the error message
+        BGE_LOG("Graphics", "Shader compilation failed: %s", infoLog.c_str());
+        return false;
+    }
+    return true;
+}
+
+BGE::Shader::Shader(void)
+    : m_shaderID(0)
+{
+}
+
 BGE::Shader::~Shader(void)
 {
     VDestroy();
+}
+
+bool BGE::Shader::VCompile(std::string_view source)
+{
+    return IShader::Compile(m_shaderID, source);
 }
 
 GLuint BGE::Shader::VGetID(void) const
@@ -54,32 +94,32 @@ bool BGE::VertexShader::VCreate(void)
     return m_shaderID != 0;
 }
 
-bool BGE::VertexShader::VCompile(std::string_view source)
+bool BGE::TessControlShader::VCreate(void)
 {
-    const char *pSourceData = source.data();
-    const GLint kSourceLength = static_cast<GLint>(source.size());
+    m_shaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
+    return m_shaderID != 0;
+}
 
-    // Attach the source to the shader
-    glShaderSource(m_shaderID, 1, &pSourceData, &kSourceLength);
-    glCompileShader(m_shaderID); // Compile the shader
+bool BGE::TessEvalShader::VCreate(void)
+{
+    m_shaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
+    return m_shaderID != 0;
+}
 
-    // Check the shader compilation status
-    GLint status{};
-    glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE)
-    {
-        // Get the length of the shader info log
-        GLint infoLogLength{};
-        glGetShaderiv(m_shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+bool BGE::GeometryShader::VCreate(void)
+{
+    m_shaderID = glCreateShader(GL_GEOMETRY_SHADER);
+    return m_shaderID != 0;
+}
 
-        // Retrieve the shader info log
-        std::string infoLog(infoLogLength, '\0');
-        GLsizei length{};
-        glGetShaderInfoLog(m_shaderID, infoLogLength, &length, infoLog.data());
+bool BGE::FragmentShader::VCreate(void)
+{
+    m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	return m_shaderID != 0;
+}
 
-        // Log the error message
-        BGE_LOG("Graphics", "Shader compilation failed: %s", infoLog.c_str());
-        return false;
-    }
-    return true;
+bool BGE::ComputeShader::VCreate(void)
+{
+	m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
+	return m_shaderID != 0;
 }

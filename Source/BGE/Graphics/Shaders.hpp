@@ -32,6 +32,12 @@ namespace BGE
 {
 	class IShader; // Forward declare
 	BGE_DECLARE_PTR(IShader);
+	class Shader; // Forward declare
+	BGE_DECLARE_PTR(Shader);
+	class VertexShader; // Forward declare
+	BGE_DECLARE_PTR(VertexShader);
+	class FragmentShader; // Forward declare
+	BGE_DECLARE_PTR(FragmentShader);
 
 	//! List of shaders.
 	using ShaderList = std::list<StrongIShaderPtr>;
@@ -55,6 +61,8 @@ namespace BGE
 		virtual void VDestroy(void) = 0;
 		//! .
 		virtual bool VIsValid(void) const = 0;
+	protected:
+		static bool Compile(GLuint shaderID, std::string_view source);
 	};
 	
 	// TODO: Shaders should use resource cache handles for shader source code.
@@ -67,8 +75,10 @@ namespace BGE
 	protected:
 		GLuint m_shaderID;
 	public:
+		Shader(void);
 		virtual ~Shader(void);
 		// IShader's interface:
+		virtual bool VCompile(std::string_view source) override;
 		virtual GLuint VGetID(void) const override;
 		virtual void VDestroy(void) override;
 		virtual bool VIsValid(void) const override;
@@ -77,75 +87,49 @@ namespace BGE
 	class VertexShader final : public Shader
 	{
 	public:
-		VertexShader(void);
-
+		VertexShader(void) = default;
+		// IShader's interface:
 		virtual bool VCreate(void) override;
-		virtual bool VCompile(std::string_view source) override;
 	};
 
 	class TessControlShader final : public Shader
 	{
 	public:
-		TessControlShader(void) {}
-
-		virtual bool VCreate(void) override
-		{
-			m_shaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
-			return m_shaderID != 0;
-		}
-		virtual bool VCompile(std::string_view source) override { return false; }
+		TessControlShader(void) = default;
+		// IShader's interface:
+		virtual bool VCreate(void) override;
 	};
 
 	class TessEvalShader final : public Shader
 	{
 	public:
-		TessEvalShader(void) {}
-
-		virtual bool VCreate(void) override
-		{
-			m_shaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
-			return m_shaderID != 0;
-		}
-		virtual bool VCompile(std::string_view source) override { return false; }
+		TessEvalShader(void) = default;
+		// IShader's interface:
+		virtual bool VCreate(void) override;
 	};
 
 	class GeometryShader final : public Shader
 	{
 	public:
-		GeometryShader(void) {}
-
-		virtual bool VCreate(void) override
-		{
-			m_shaderID = glCreateShader(GL_GEOMETRY_SHADER);
-			return m_shaderID != 0;
-		}
-		virtual bool VCompile(std::string_view source) override { return false; }
+		GeometryShader(void) = default;
+		// IShader's interface:
+		virtual bool VCreate(void) override;
 	};
 
 	class FragmentShader final : public Shader
 	{
 	public:
-		FragmentShader(void) {}
-
-		virtual bool VCreate(void) override
-		{
-			m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
-			return m_shaderID != 0;
-		}
-		virtual bool VCompile(std::string_view source) override { return false; }
+		FragmentShader(void) = default;
+		// IShader's interface:
+		virtual bool VCreate(void) override;
 	};
 
 	class ComputeShader final : public Shader
 	{
 	public:
-		ComputeShader(void);
-
-		virtual bool VCreate(void) override
-		{
-			m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
-			return m_shaderID != 0;
-		}
-		virtual bool VCompile(std::string_view source) override { return false; }
+		ComputeShader(void) = default;
+		// IShader's interface:
+		virtual bool VCreate(void) override;
 	};
 } // End namespace (BGE)
 

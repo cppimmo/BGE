@@ -2,6 +2,8 @@
 #define _TG_TESTGAMEVIEW_HPP_
 
 #include <UI/HumanView.hpp>
+#include <Graphics/Shaders.hpp>
+#include <Graphics/ShaderProgram.hpp>
 
 #include "TestController.hpp"
 
@@ -9,7 +11,8 @@ namespace TestGame
 {
 	class TestGameView : public BGE::HumanView
 	{
-		GLuint m_vbo;
+		BGE::UniqueShaderProgramPtr m_pShaderProgram;
+		GLuint m_vao, m_vbo;
 	public:
 		TestGameView(void)
 		{

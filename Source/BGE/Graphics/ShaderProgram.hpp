@@ -7,6 +7,8 @@ namespace BGE
 {
 	class IShaderProgram; // Forward declare
 	BGE_DECLARE_PTR(IShaderProgram);
+	class ShaderProgram; // Forward declare
+	BGE_DECLARE_PTR(ShaderProgram);
 
 	/**
 	 * @brief .
@@ -103,7 +105,7 @@ namespace BGE
 			BGE_ASSERT(!result.has_value());
 		}
 	};
-
+#if 0
 	// Template specializations for Math:: types:
 	template <> // Int
 	void ShaderProgram::SetVec2(std::string_view uniformName, const Math::Vec2i &vec2)
@@ -176,6 +178,7 @@ namespace BGE
 		BGE_ASSERT(!result.has_value());
 		if (result) glProgramUniform4d(m_programID, *result, vec4.x, vec4.y, vec4.z, vec4.w);
 	}
+#endif
 } // End namespace (BGE)
 
 #endif /* !_BGE_SHADERPROGRAM_HPP_ */

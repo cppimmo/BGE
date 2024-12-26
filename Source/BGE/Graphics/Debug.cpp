@@ -31,7 +31,7 @@
 void BGE::GL::ClearErrors(void)
 {
 	GLenum error;
-	// pop all errors off the internal stack
+	// Pop all errors off the internal stack
 	while ((error = glGetError()) != GL_NO_ERROR);
 }
 
@@ -39,11 +39,11 @@ void BGE::GL::DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 									const GLchar *pMessage, const void *pUserParam)
 {
 	using namespace std::literals::string_view_literals;
-	// assign strings for enums
+	// Assign strings for enums
 	std::string_view sourceName;
 	std::string_view typeName;
 	std::string_view severityName;
-	// decide source string
+	// Decide source string
 	switch (source)
 	{
 	case GL_DEBUG_SOURCE_API:
@@ -61,13 +61,13 @@ void BGE::GL::DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 	case GL_DEBUG_SOURCE_APPLICATION:
 		sourceName = "APP"sv;
 		break;
-	// supply for SOURCE_OTHER and default case:
+	// Supply for SOURCE_OTHER and default case:
 	case GL_DEBUG_SOURCE_OTHER:
 	default:
 		sourceName = "OTHER"sv;
 		break;
 	}
-	// decide type string
+	// Decide type string
 	switch (type)
 	{
 	case GL_DEBUG_TYPE_ERROR:
@@ -94,17 +94,17 @@ void BGE::GL::DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 	case GL_DEBUG_TYPE_POP_GROUP:
 		typeName = "POP GROUP"sv;
 		break;
-	// supply for TYPE_OTHER and default case:
+	// Supply for TYPE_OTHER and default case:
 	case GL_DEBUG_TYPE_OTHER:
 	default:
 		typeName = "OTHER"sv;
 		break;
 	}
-	// log format string
+	// Log format string
 	static constexpr std::string_view c_kGL_DEBUG_FMT = "GL_DEBUG(ID:0x%08X)|%s|%s|%s: %s";
-	// weird use of preprocessor, please forgive me
+	// Weird use of preprocessor, please forgive me
 #define BGE_GL_DEBUG_ARGS id, sourceName.data(), typeName.data(), severityName.data(), pMessage
-	// decide severity string & how message will be output
+	// Decide severity string & how message will be output
 	switch (severity)
 	{
 	case GL_DEBUG_SEVERITY_HIGH:
@@ -129,10 +129,10 @@ void BGE::GL::DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum
 void BGE::GL::DebugContextSetup(void)
 {
 	glDebugMessageCallback(GL::DebugMessageCallback, nullptr);
-	// listen to everything
+	// Listen to everything
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	// however disable notification severity
+	// However disable notification severity
 	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-	// this isn't needed if an "official" context has already been hinted by the windowing system
+	// This isn't needed if an "official" context has already been hinted by the windowing system
 	glEnable(GL_DEBUG_OUTPUT);
 }
