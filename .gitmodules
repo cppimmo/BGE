@@ -25,3 +25,9 @@
 [submodule "Source/Lib/FastDelegate"]
 	path = Source/Lib/FastDelegate
 	url = https://github.com/kaidokert/FastDelegate.git
+[submodule "Source/Lib/stb"]
+	path = Source/Lib/stb
+	url = https://github.com/nothings/stb.git
+[submodule "Source/Lib/assimp"]
+	path = Source/Lib/assimp
+	url = https://github.com/assimp/assimp.git

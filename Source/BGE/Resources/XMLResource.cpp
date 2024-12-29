@@ -1,9 +1,9 @@
 #include "Engine/EngineStd.hpp"
-#include "Resources/XMLResourceLoader.hpp"
+#include "Resources/XMLResource.hpp"
 
 std::string BGE::XMLResourceExtraData::VGetExtraData(void)
 {
-	return "XMLResourceExtraData";
+	return "XML_ResourceExtraData";
 }
 
 void BGE::XMLResourceExtraData::ParseXML(char* pRawBuffer)

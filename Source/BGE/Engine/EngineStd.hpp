@@ -111,6 +111,31 @@
 //! Primary engine namespace.
 namespace BGE
 {
+	/**
+	 * @brief Representation of engine version information.
+	 */
+	class Version : public IStringable
+	{
+	public:
+		int major, minor, patch;
+
+		constexpr Version(int major, int minor, int patch)
+			: major(major), minor(minor), patch(patch) { }
+		// IStringable's interface:
+		virtual std::string VToString(void) const override
+		{
+			std::ostringstream oss;
+			oss << 'v' << major << '.' << minor << '.' << patch;
+			return oss.str();
+		}
+	};
+
+	//! Current engine version.
+	inline constexpr Version kVERSION{ 1, 0, 0 };
+	//! Long form engine name.
+	inline constexpr std::string_view kENGINE_NAME = "Brian's Game Engine";
+	//! Short form engine name.
+	inline constexpr std::string_view kENGINE_ABBREV = "BGE";
 	//! Engine entry point.
 	extern int EngineMain(int numArgs, char *pArgs[]);
 } // End namespace (BGE)

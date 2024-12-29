@@ -129,6 +129,27 @@ set(TINYXML_DIR "Lib/tinyxml2")
 add_library(TinyXml2 STATIC "${TINYXML_DIR}/tinyxml2.cpp")
 target_include_directories(TinyXml2 PUBLIC ${TINYXML_DIR})
 
+# stb library:
+set(STB_DIR "Lib/stb")
+include_directories(${STB_DIR})
+
+# assimp library:
+set(ASSIMP_DIR "Lib/assimp")
+set(ASSIMP_BUILD_ZLIB OFF)
+set(ZLIB_FOUND FALSE)
+add_subdirectory(${ASSIMP_DIR})
+
+include(FetchContent)
+
+# zlib library:
+set(ZLIB_DIR "Lib/zlib")
+#FetchContent_Declare(
+#    zlib-cmake
+#    URL https://github.com/jimmy-park/zlib-cmake/archive/main.tar.gz
+#)
+find_package(ZLIB)
+#FetchContent_MakeAvailable(zlib-cmake)
+
 # See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
 find_package(Lua 5.3 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
@@ -157,30 +178,12 @@ if(WIN32)
 endif()
 
 target_link_libraries(Engine ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
-  FastDelegate ${OPENAL_LIBRARIES} ${LUA_LIBRARY} sol2::sol2) #${Boost_LIBRARIES})
+  FastDelegate ${OPENAL_LIBRARIES} ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB) #${Boost_LIBRARIES})
 
 if(WIN32)
   # Set the CWD for the debugger to start the program
   set_target_properties(Engine PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Engine>)
 endif()
-
-add_custom_command(
-  TARGET Engine
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_if_different
-  "../Game/Engine.xml" $<TARGET_FILE_DIR:Engine>
-  "../Game/Logging.xml" $<TARGET_FILE_DIR:Engine>
-  COMMENT "Copy engine configuration"
-)
-
-add_custom_command(
-  TARGET Engine
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory_if_different "../Assets/" $<TARGET_FILE_DIR:Engine>"/Assets"
-  COMMENT "Copy Assets directory"
-)
 
 if(WIN32)
   add_custom_command(TARGET Engine POST_BUILD
@@ -223,3 +226,22 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${GAME
 target_sources(Game PRIVATE ${GAME_SRC_FILES})
 
 target_link_libraries(Game Engine)
+
+add_custom_command(
+  TARGET Game
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND}
+  ARGS -E copy_if_different
+  "../Game/Engine.xml" $<TARGET_FILE_DIR:Game>
+  "../Game/Logging.xml" $<TARGET_FILE_DIR:Game>
+  "../Game/game_icon.bmp" $<TARGET_FILE_DIR:Game>
+  COMMENT "Copy engine configuration"
+)
+
+add_custom_command(
+  TARGET Game
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND}
+  ARGS -E copy_directory_if_different "../Assets/" $<TARGET_FILE_DIR:Game>"/Assets"
+  COMMENT "Copy Assets directory"
+)

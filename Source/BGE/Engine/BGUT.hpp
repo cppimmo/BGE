@@ -47,6 +47,7 @@ namespace BGE
 	void BGUTShutdown(void);
 	void BGUTSetWindowTitle(std::string_view title);
 	void BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen);
+	void BGUTSetWindowIcon(std::string_view fileName);
 	void BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height);
 	// TODO: This responsibility should be handled by the renderer and the app layer.
 	void BGUTSetViewport(int x, int y, int width, int height);

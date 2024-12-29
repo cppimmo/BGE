@@ -84,11 +84,12 @@ void BGE::TakeScreenshot(std::string_view saveGameDir)
 	
 	std::memcpy(pImage->pixels, pTemp->pixels, width * height * kColorBytes);
 	// Write image to file on disk (do not return on failure, so surfaces can be freed):
-	BGE_INFO("Screenshot filename: %s", GetScreenshotFilename(saveGameDir).c_str());
+	BGE_LOG("Graphics", "Screenshot filename: %s", GetScreenshotFilename(saveGameDir).c_str());
 	BGE_ERROR_IF(SDL_SaveBMP(pTemp, GetScreenshotFilename(saveGameDir).c_str()) < 0,
 				 "TakeScreenshot Failure: Could not save file (%s).", SDL_GetError());
 	// Free surfaces:
-	SDL_free(pTemp); SDL_free(pImage);
+	SDL_free(pTemp);
+	SDL_free(pImage);
 }
 
 std::string GetScreenshotFilename(std::string_view saveGameDir)

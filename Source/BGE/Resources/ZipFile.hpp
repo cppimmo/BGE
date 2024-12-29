@@ -1,10 +1,10 @@
 /*******************************************************************************
- * @file   Console.hpp
+ * @file   ZipFile.hpp
  * @author Brian Hoffpauir
- * @date   07.09.2024
- * @brief  Debug console.
+ * @date   12.28.2024
+ * @brief  API for working with ZIP archive files.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,28 +28,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#ifndef _BGE_CONSOLE_HPP_
-#define _BGE_CONSOLE_HPP_
+#ifndef _BGE_ZIPFILE_HPP_
+#define _BGE_ZIPFILE_HPP_
+
+#include <cstdio>
 
 namespace BGE
 {
-	// TODO: Use struct or std::function
-	// Commands should have a name and function that accepts arguments and returns an execution status result.
-	struct ConsoleCommand
-	{
-	};
+	class ZipFile; // Forward declare
+	BGE_DECLARE_PTR(ZipFile);
+
+	using ZipFileIndex = std::int64_t;
+	using ZipContentsMap = std::map<std::string, ZipFileIndex>; // Maps path to a zip content ID
+	using ZipProgressCallback = std::function<void(int, bool &)>;
+
 	/**
-	 * Engine debug console for running registered commands.
+	 * @brief .
+	 *
+	 * Based on example from GCC4 and original author Javier Arevalo.
 	 */
-	class DebugConsole
+	class ZipFile : public INonCopyable, public INonMovable
 	{
-		bool m_bEnabled; //!< Is the widget currently visible?
-		// TODO: Add container to hold registered commands.
 	public:
-		// TODO: Implement ImGuiable interface to setup immediate mode GUI.
-		// TODO: Add member functions for registering commands.
+		ZipFile(void);
+		~ZipFile(void);
+
+		bool Init(const std::wstring &resFileName);
+		void End(void);
+
+		int GetNumFiles(void) const { return m_nEntries; }
+		std::string GetFileName(ZipFileIndex index) const;
+		int GetFileLen(ZipFileIndex index) const;
+		bool ReadFile(ZipFileIndex index, void *pBuf);
+
+		// Added to show multi-threaded decompression
+		bool ReadLargeFile(ZipFileIndex index, void *pBuf, ZipProgressCallback progressCallback);
+
+		ZipFileIndex Find(const std::string &path) const;
+
+		ZipContentsMap m_ZipContentsMap;
 	private:
+		struct TZipDirHeader;
+		struct TZipDirFileHeader;
+		struct TZipLocalHeader;
+
+		FILE *m_pFile;    // Zip file
+		char *m_pDirData; // Raw data buffer.
+		int  m_nEntries;  // Number of entries.
+
+		// Pointers to the dir entries in pDirData.
+		const TZipDirFileHeader **m_papDir;
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_CONSOLE_HPP_ */
+#endif /* !_BGE_ZIPFILE_HPP_ */

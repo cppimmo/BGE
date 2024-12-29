@@ -2,55 +2,79 @@
 #include "Resources/ResourceLoader.hpp"
 
 // Resource loaders:
-#include "Resources/XMLResourceLoader.hpp"
-#include "Scripting/ScriptResourceLoader.hpp"
+#include "Resources/XMLResource.hpp"
+#include "Scripting/ScriptResource.hpp"
+#include "Graphics/ImageResource.hpp"
 
-BGE::DefaultResourceLoader::DefaultResourceLoader(void)
-	: m_pattern("*")
+namespace BGE
 {
-}
+	DefaultResourceLoader::DefaultResourceLoader(void)
+		: m_pattern("*")
+	{
+	}
 
-const std::string &BGE::DefaultResourceLoader::VGetPattern(void) const
-{
-	return m_pattern;
-}
+	const std::string &DefaultResourceLoader::VGetPattern(void) const
+	{
+		return m_pattern;
+	}
 
-bool BGE::DefaultResourceLoader::VUseRawFile(void) const
-{
-	return true;
-}
+	bool DefaultResourceLoader::VUseRawFile(void) const
+	{
+		return true;
+	}
 
-bool BGE::DefaultResourceLoader::VDiscardRawBufferAfterLoad(void)
-{
-	return true;
-}
+	bool DefaultResourceLoader::VDiscardRawBufferAfterLoad(void)
+	{
+		return true;
+	}
 
-bool BGE::DefaultResourceLoader::VAddNullZero(void)
-{
-	return false;
-}
+	bool DefaultResourceLoader::VAddNullZero(void)
+	{
+		return false;
+	}
 
-std::size_t BGE::DefaultResourceLoader::VGetLoadedResourceSize(char *pRawBuffer, std::size_t rawSize)
-{
-	return rawSize;
-}
+	std::size_t DefaultResourceLoader::VGetLoadedResourceSize(char *pRawBuffer, std::size_t rawSize)
+	{
+		return rawSize;
+	}
 
-bool BGE::DefaultResourceLoader::VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle)
-{
-	return true;
-}
+	bool DefaultResourceLoader::VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle)
+	{
+		return true;
+	}
 
-BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateDefaultResourceLoader(void)
-{
-	return std::make_shared<DefaultResourceLoader>();
-}
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateDefaultResourceLoader(void)
+	{
+		return std::make_shared<DefaultResourceLoader>();
+	}
 
-BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateXMLResourceLoader(void)
-{
-	return std::make_shared<XMLResourceLoader>();
-}
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateXMLResourceLoader(void)
+	{
+		return std::make_shared<XMLResourceLoader>();
+	}
 
-BGE::StrongIResourceLoaderPtr BGE::DefaultResourceLoaderFactory::VCreateScriptResourceLoader(void)
-{
-	return std::make_shared<ScriptResourceLoader>();
-}
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateScriptResourceLoader(void)
+	{
+		return std::make_shared<ScriptResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateBMPResourceLoader(void)
+	{
+		return std::make_shared<BMPResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateJPEGResourceLoader(void)
+	{
+		return std::make_shared<JPEGResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreatePNGResourceLoader(void)
+	{
+		return std::make_shared<PNGResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateTGAResourceLoader(void)
+	{
+		return std::make_shared<TGAResourceLoader>();
+	}
+} // End namespace (BGE)

@@ -35,6 +35,7 @@
 #include "Utilities/Utils.hpp"
 #include "Memory/Memory.hpp"
 #include "Resources/ResourceLoader.hpp"
+#include "Scripting/ScriptExports.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -131,8 +132,16 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Register loaders for the resource cache
 	// NOTE: Loaders should be registered from least to most specific.
 	DefaultResourceLoaderFactory rlFactory;
+	// XML resource loaders:
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateXMLResourceLoader());
+	// Script resource loaders:
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateScriptResourceLoader());
+	// Image resource loaders:
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateBMPResourceLoader());
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateJPEGResourceLoader());
+	m_pResourceCache->RegisterLoader(rlFactory.VCreatePNGResourceLoader());
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateTGAResourceLoader());
+	// Sound resource loaders:
 
 	// Queue resource cache started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_ResourceCacheStarted>());
@@ -143,6 +152,7 @@ bool BGE::EngineApp::VInitInstance(void)
 		BGE_ERROR("Couldn't load localized strings!");
 		return false;
 	}
+	// Queue localization started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_LocalizationStarted>());
 
 	BGE_INFO("(ID_HOWDY): %s",  BGE::WStringToString(GetLocalizer().GetString(L"ID_HOWDY")).c_str());
@@ -155,13 +165,31 @@ bool BGE::EngineApp::VInitInstance(void)
 		BGE_ERROR("Couldn't initialize engine!");
 		return false;
 	}
+	// Queue graphics start event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_GraphicsStarted>());
 
+	// Set window title & icon
 	BGUTSetWindowTitle(VGetGameTitle());
+	BGUTSetWindowIcon(VGetIcon());
 
 	m_pGameLogic = VCreateGameAndView();
 	if (!m_pGameLogic) return false;
+
+	// Register script exports
+    ScriptExports::Register();
+	// Queue game logic started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_GameLogicStarted>());
+
+	// Initialize debug console
+	m_pDebugConsole = std::make_unique<DebugConsole>();
+#ifdef BGE_CONFIG_DEBUG
+	// Enable debug console
+	m_pDebugConsole->SetEnabled(true);
+	// NOTE: The auto-complete isn't working properly at the moment.
+	m_pDebugConsole->SetAutoCompleteEnabled(false);
+#endif
+	// Queue debug console started event
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_DebugConsoleStarted>());
 
 	m_bRunning = true;
 
@@ -185,10 +213,11 @@ void BGE::EngineApp::OnRender(float deltaTime, float elapsedTime)
 	auto &app = GetEngineApp();
 	// TODO: Call rendering routines.
 
+	// TODO: Replace with call to VPreRender().
 	constexpr float kCLEAR_COLOR[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
 	glClearBufferfv(GL_COLOR, 0, kCLEAR_COLOR);
 
-	// Render each view
+	// Render each game view
 	auto &gameViews = app.GetGameLogic().GetGameViews();
 	for (auto &pView : gameViews)
 	{
@@ -197,6 +226,8 @@ void BGE::EngineApp::OnRender(float deltaTime, float elapsedTime)
 
 	ImGui::ShowDemoWindow();
 	ImPlot::ShowDemoWindow();
+	// Call debug console ImGui routine
+	app.GetDebugConsole().VImGuiRoutine();
 }
 
 bool BGE::EngineApp::OnHandleEvent(const SDL_Event &kEvent)
@@ -303,6 +334,8 @@ void BGE::EngineApp::OnShutdown(void)
 {
 	// TODO: Perform destruction tasks.
 	VDestroyNetworkEventForwarder();
+
+	ScriptExports::Deregister();
 }
 
 BGE::MemoryManager &BGE::EngineApp::GetMemoryManager(void) noexcept
@@ -339,6 +372,12 @@ BGE::ResourceCache &BGE::EngineApp::GetResourceCache(void) noexcept
 {
 	BGE_ASSERT(m_pResourceCache);
 	return *m_pResourceCache.get();
+}
+
+BGE::DebugConsole &BGE::EngineApp::GetDebugConsole(void) noexcept
+{
+	BGE_ASSERT(m_pDebugConsole);
+	return *m_pDebugConsole.get();
 }
 
 int BGE::EngineApp::GetExitCode(void) const

@@ -1,5 +1,5 @@
-#ifndef _BGE_XMLRESOURCELOADER_HPP_
-#define _BGE_XMLRESOURCELOADER_HPP_
+#ifndef _BGE_XMLRESOURCE_HPP_
+#define _BGE_XMLRESOURCE_HPP_
 
 #include "Resources/Resource.hpp"
 #include "Resources/ResourceLoader.hpp"
@@ -47,4 +47,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_XMLRESOURCELOADER_HPP_ */
+#endif /* !_BGE_XMLRESOURCE_HPP_ */

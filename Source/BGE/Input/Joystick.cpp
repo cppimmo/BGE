@@ -27,3 +27,45 @@
  *============================================================================*/
 #include "Engine/EngineStd.hpp"
 #include "Joystick.hpp"
+
+namespace BGE
+{
+	bool IGamepadHandler::StartRumble(JoystickID ID, RumbleSpeed sharedSpeed, RumbleDuration durationMS)
+	{
+		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
+		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		{
+			return false;
+		}
+
+		// Assume left motor is twice as powerful
+		const auto kLeftSpeed = sharedSpeed;
+		const auto kRightSpeed = sharedSpeed / 2;
+		const int kResult = SDL_GameControllerRumble(pGameController, kLeftSpeed, kRightSpeed, durationMS);
+		return kResult == 0;
+	}
+
+	bool IGamepadHandler::StartRumble(JoystickID ID, RumbleSpeed leftSpeed, RumbleSpeed rightSpeed, RumbleDuration durationMS)
+	{
+		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
+		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		{
+			return false;
+		}
+
+		const int kResult = SDL_GameControllerRumble(pGameController, leftSpeed, rightSpeed, durationMS);
+		return kResult == 0;
+	}
+
+	bool IGamepadHandler::StopRumble(JoystickID ID)
+	{
+		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
+		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		{
+			return false;
+		}
+
+		const int kResult = SDL_GameControllerRumble(pGameController, 0u, 0u, 0u);
+		return kResult == 0;
+	}
+} // End namespace (BGE)

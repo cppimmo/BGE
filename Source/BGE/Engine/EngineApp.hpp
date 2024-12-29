@@ -36,6 +36,7 @@
 #include "Resources/Localizer.hpp"
 #include "Resources/ResourceCache.hpp"
 #include "Memory/Memory.hpp"
+#include "UI/DebugConsole.hpp"
 
 namespace BGE
 {
@@ -79,6 +80,7 @@ namespace BGE
 		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar
 		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic
 		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache
+		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
@@ -98,11 +100,12 @@ namespace BGE
 		void OnShutdown(void);
 		// Accessors:
 		MemoryManager &GetMemoryManager(void) noexcept;
-		Localizer &GetLocalizer(void) noexcept;
-		EventManager &GetEventManager(void) noexcept;
+		Localizer     &GetLocalizer(void) noexcept;
+		EventManager  &GetEventManager(void) noexcept;
 		EventRegistry &GetEventRegistry(void) noexcept;
 		BaseGameLogic &GetGameLogic(void) noexcept;
 		ResourceCache &GetResourceCache(void) noexcept;
+		DebugConsole  &GetDebugConsole(void) noexcept;
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

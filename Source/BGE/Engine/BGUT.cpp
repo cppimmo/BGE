@@ -278,6 +278,19 @@ void BGE::BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen)
 
 }
 
+void BGE::BGUTSetWindowIcon(std::string_view fileName)
+{
+	SDL_Surface *pIconSurface = SDL_LoadBMP(fileName.data());
+	if (!pIconSurface)
+	{
+		BGE_WARNING("Could't set window icon!");
+		return;
+	}
+
+	SDL_SetWindowIcon(s_BGUT.pWindow, pIconSurface);
+	SDL_FreeSurface(pIconSurface);
+}
+
 void BGE::BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height)
 {
 	SDL_SetWindowSize(pWindow, width, height);

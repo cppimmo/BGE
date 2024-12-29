@@ -97,6 +97,14 @@ namespace BGE
 
 	using GamepadHandlerList = std::list<StrongIGamepadHandlerPtr>;
 
+	//! Rumble speed.
+	using RumbleSpeed = std::uint16_t;
+	inline constexpr RumbleSpeed kMIN_RUMBLE_SPEED = std::numeric_limits<RumbleSpeed>::min();
+	inline constexpr RumbleSpeed kMAX_RUMBLE_SPEED = std::numeric_limits<RumbleSpeed>::max();
+	//! Rumble duration is milliseconds.
+	using RumbleDuration = std::uint32_t;
+	inline constexpr RumbleDuration kDEFAULT_RUMBLE_DURATION = 10;
+
 	class IGamepadHandler
 	{
 	public:
@@ -105,6 +113,9 @@ namespace BGE
 		virtual bool VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value) = 0;
 		virtual bool VOnButtonDown(JoystickID ID, GamepadButton button) = 0;
 		virtual bool VOnButtonUp(JoystickID ID, GamepadButton button) = 0;
+		static bool StartRumble(JoystickID ID, RumbleSpeed sharedSpeed, RumbleDuration durationMS);
+		static bool StartRumble(JoystickID ID, RumbleSpeed leftSpeed, RumbleSpeed rightSpeed, RumbleDuration durationMS);
+		static bool StopRumble(JoystickID ID);
 	};
 
 	using JoystickId = int;

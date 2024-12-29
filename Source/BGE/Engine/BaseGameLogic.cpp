@@ -1,6 +1,8 @@
 #include "Engine/EngineStd.hpp"
 #include "Engine/BaseGameLogic.hpp"
 
+#include "Scripting/ScriptExports.hpp"
+
 BGE::BaseGameLogic::BaseGameLogic(void)
     : m_state(BaseGameState::kInitializing),
       m_bProxy(false)
@@ -24,6 +26,7 @@ bool BGE::BaseGameLogic::VInit(void)
         BGE_ERROR("Could not initialize Lua state");
         return false;
     }
+
     // TODO: Perform other logic here
     VChangeState(BaseGameState::kRunning);
     return true;

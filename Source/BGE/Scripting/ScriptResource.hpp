@@ -1,5 +1,5 @@
-#ifndef _BGE_SCRIPTRESOURCELOADER_HPP_
-#define _BGE_SCRIPTRESOURCELOADER_HPP_
+#ifndef _BGE_SCRIPTRESOURCE_HPP_
+#define _BGE_SCRIPTRESOURCE_HPP_
 
 #include "Resources/ResourceLoader.hpp"
 
@@ -23,4 +23,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_SCRIPTRESOURCELOADER_HPP_ */
+#endif /* !_BGE_SCRIPTRESOURCE_HPP_ */

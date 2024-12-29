@@ -1,5 +1,5 @@
 #include "Engine/EngineStd.hpp"
-#include "Scripting/ScriptResourceLoader.hpp"
+#include "Scripting/ScriptResource.hpp"
 
 #include "Engine/EngineApp.hpp"
 

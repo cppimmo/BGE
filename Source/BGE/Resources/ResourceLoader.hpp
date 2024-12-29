@@ -61,6 +61,10 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreateDefaultResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateXMLResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateScriptResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateBMPResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateJPEGResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreatePNGResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateTGAResourceLoader(void) = 0;
 	};
 
 	class DefaultResourceLoaderFactory : public IResourceLoaderFactory
@@ -71,6 +75,10 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreateDefaultResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateXMLResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateScriptResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateBMPResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateJPEGResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreatePNGResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateTGAResourceLoader(void) override;
 	};
 } // End namespace (BGE)
 

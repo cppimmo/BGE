@@ -61,9 +61,9 @@ namespace BGE
 	{
 	public:
 		virtual ~IImGuiable(void) = default;
-		// implementable ImGui widget routine
+		//! Implementable ImGui widget routine.
 		virtual void VImGuiRoutine(void) = 0;
-		// return the root name of your widget (for use with collapsing header widget)
+		//! Return the root name of your widget (for use with collapsing header widget).
 		virtual constexpr std::string_view VImGuiWidgetName(void) const noexcept = 0;
 	};
 

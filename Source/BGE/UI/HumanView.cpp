@@ -30,18 +30,20 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 		BGUTSendExitCode(BGE_EXIT_SUCCESS);
 		return true;
 	}
-	else if (key.sym == SDLK_s && !bRepeat)
+	else if (key.sym == SDLK_F5 && !bRepeat)
 	{
 		BGE_LOG("Input", "Taking screenshot...");
-		static bool c_initialized = false;
-		if (!c_initialized)
-		{
-			auto &app = GetEngineApp();
-			std::string saveGameDir = app.VGetGameAppDirectory();
-			TakeScreenshot(saveGameDir);
-			BGE_INFO("Tried to take screenshot!");
-			c_initialized = true;
-		}
+		auto &app = GetEngineApp();
+		std::string saveGameDir = app.VGetGameAppDirectory();
+		TakeScreenshot(saveGameDir);
+		return true;
+	}
+	else if (key.sym == SDLK_BACKQUOTE && !bRepeat)
+	{
+		auto &app = GetEngineApp();
+		auto &dbgConsole = app.GetDebugConsole();
+		// Toggle the debug console visibility
+		dbgConsole.SetEnabled(!dbgConsole.IsEnabled());
 		return true;
 	}
 	return false;
