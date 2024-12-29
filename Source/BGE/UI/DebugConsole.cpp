@@ -39,10 +39,11 @@ namespace BGE
 	{
 		std::ostringstream startupMessage;
 		startupMessage << kENGINE_NAME << ' ' << kVERSION.VToString() << " Console\n";
+		startupMessage << "Type \"help\" for more information.\n";
 		AddToOutputLog(startupMessage.str());
 
 		// Register default commands
-		RegisterCommand("help", [](const std::vector<std::string>& args)
+		RegisterCommand("help", [](const std::vector<std::string> &args)
 		{
 			std::ostringstream oss;
 			oss << "Available builtin commands:\n";
@@ -52,7 +53,7 @@ namespace BGE
 			return oss.str();
 		});
 
-		RegisterCommand("clear", [&](const std::vector<std::string>&)
+		RegisterCommand("clear", [&](const std::vector<std::string> &)
 		{
 			FlushOutputLog();
 			return "Console cleared.";
@@ -67,7 +68,7 @@ namespace BGE
 	void DebugConsole::ExecuteCommand(std::string_view input)
 	{
 		std::string inputStr(input);
-		AddToOutputLog(">> " + inputStr);
+		AddToOutputLog(std::string(kPROMPT) + inputStr);
 
 		// Parse command and arguments
 		std::istringstream iss(inputStr);
@@ -80,7 +81,8 @@ namespace BGE
 		tokens.erase(tokens.begin());
 
 		// Find & execute the command
-		auto it = std::find_if(m_commands.begin(), m_commands.end(), [&](const Command &cmd) { return cmd.name == command; });
+		auto it = std::find_if(m_commands.begin(), m_commands.end(),
+							   [&](const Command &cmd) { return cmd.name == command; });
 
 		if (it != m_commands.end())
 		{

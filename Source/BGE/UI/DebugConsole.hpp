@@ -51,6 +51,8 @@ namespace BGE
 			CommandCallback callback; //!< Command callback
 		};
 	private:
+		static constexpr std::string_view kPROMPT = ">> ";
+
 		bool m_bEnabled = false; //!< Is the widget currently visible (off by default)?
 		bool m_bAutoCompleteEnabled = true; //!< Auto completion for registered commands
 		std::vector<Command> m_commands; //!< Registered commands

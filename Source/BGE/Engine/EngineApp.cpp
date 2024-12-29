@@ -121,13 +121,14 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Initialize the resource cache
 	// TODO: Setup resource file
 
+	auto pZipResourceFile = std::make_shared<ZipResourceFile>(L"Assets.zip");
 	// TODO: Replace temporary nullptr argument.
-	m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, nullptr);
-	//if (!m_pResourceCache->Init())
-	//{
-	//	BGE_ERROR("Failed to initialize the resource cache!");
-	//	return false;
-	//}
+	m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, pZipResourceFile);
+	if (!m_pResourceCache->Init())
+	{
+		BGE_ERROR("Failed to initialize the resource cache!");
+		return false;
+	}
 
 	// Register loaders for the resource cache
 	// NOTE: Loaders should be registered from least to most specific.

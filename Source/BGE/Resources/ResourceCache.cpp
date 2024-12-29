@@ -21,6 +21,7 @@ bool BGE::ResourceCache::Init(void)
 	bool bResult = false;
 	if (m_pResourceFile->VOpen())
 	{
+		BGE_LOG("Resources", "Resource cache opened successfully");
 		// All caches need a default resource loader
 		RegisterLoader(std::make_shared<DefaultResourceLoader>());
 		bResult = true;

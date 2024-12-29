@@ -74,62 +74,70 @@ namespace
 
 namespace BGE
 {
+	/*
+	 * For information regarding the ZIP archive file format visit:
+	 * https://en.wikipedia.org/wiki/ZIP_(file_format)
+	 */
 	// Basic types.
-	using dword = unsigned long;
-	using word = unsigned short;
-	using byte = unsigned char;
+	using dword = std::uint32_t; // unsigned int;
+	using word = std::uint16_t; // unsigned short;
+	using byte = std::uint8_t; // unsigned char;
 	// ZIP file structures. NOTE: These have to be packed.
 #pragma pack(1)
 	struct ZipFile::TZipLocalHeader
 	{
-		static constexpr int kSIGNATURE = 0x04034b50;
-		dword sig;
-		word  version;
-		word  flag;
-		word  compression; // Z_NO_COMPRESSION or Z_DEFLATED
-		word  modTime;
-		word  modDate;
-		dword crc32;
-		dword cSize;
-		dword ucSize;
-		word  fnameLen; // Filename string follows header.
-		word  xtraLen;  // Extra field follows filename.
+		static constexpr dword kSIGNATURE = 0x04034b50;
+		dword sig; //!< Local file header signature = 0x04034b50
+		word  version; //!< Version needed to extract (minimum)
+		word  flag; //!< General purpose bit flag
+		word  compression; //!< Z_NO_COMPRESSION or Z_DEFLATED
+		word  modTime; //!< File last modification time
+		word  modDate; //!< File last modification date
+		dword crc32; //!< CRC-32 of uncompressed data
+		dword cSize; //!< Compressed size (or 0xffffffff for ZIP64)
+		dword ucSize; //!< Uncompressed size (or 0xffffffff for ZIP64)
+		word  fnameLen; //!< File name length (n)
+		word  xtraLen;  //!< Extra field length (m)
+		// File name follows the end of the header
+		// Extra field length follows file name
 	};
 
 	struct ZipFile::TZipDirHeader
 	{
-		static constexpr int kSIGNATURE = 0x06054b50;
-		dword sig;
-		word  nDisk;
-		word  nStartDisk;
-		word  nDirEntries;
-		word  totalDirEntries;
-		dword dirSize;
-		dword dirOffset;
-		word  cmntLen;
+		static constexpr dword kSIGNATURE = 0x06054b50;
+		dword sig; //!< End of central directory signature = 0x06054b50
+		word  nDisk; //!< Number of this disk (or 0xffff for ZIP64)
+		word  nStartDisk; //!< Disk where central directory starts (or 0xffff for ZIP64)
+		word  nDirEntries; //!< Number of central directory records on this disk (or 0xffff for ZIP64)
+		word  totalDirEntries; //!< Total number of central directory records (or 0xffff for ZIP64)
+		dword dirSize; //!< Size of central directory (bytes) (or 0xffffffff for ZIP64)
+		dword dirOffset; //!< Offset of start of central directory, relative to start of archive (or 0xffffffff for ZIP64)
+		word  cmntLen; //!< Comment length (n)
 	};
 
 	struct ZipFile::TZipDirFileHeader
 	{
-		static constexpr int kSIGNATURE = 0x02014b50;
-		dword sig;
-		word  verMade;
-		word  verNeeded;
-		word  flag;
-		word  compression; // COMP_xxxx
-		word  modTime;
-		word  modDate;
-		dword crc32;
-		dword cSize;     // Compressed size
-		dword ucSize;    // Uncompressed size
-		word  fnameLen;  // Filename string follows header.
-		word  xtraLen;   // Extra field follows filename.
-		word  cmntLen;   // Comment field follows extra field.
-		word  diskStart;
-		word  intAttr;
-		dword extAttr;
-		dword hdrOffset;
-
+		static constexpr dword kSIGNATURE = 0x02014b50;
+		dword sig; //!< Central directory file header signature = 0x02014b50
+		word  verMade; //!< Version made by
+		word  verNeeded; //!< Version needed to extract (minimum)
+		word  flag; //!< General purpose bit flag
+		word  compression; //!< Compression method COMP_xxxx
+		word  modTime; //!< File last modification time
+		word  modDate; //!< File last modification date
+		dword crc32; //!< CRC-32 of uncompressed data
+		dword cSize; //!< Compressed size (or 0xffffffff for ZIP64)
+		dword ucSize; //!< Uncompressed size (or 0xffffffff for ZIP64)
+		word  fnameLen; //!< File name length (n)
+		word  xtraLen; //!< Extra field length (m)
+		word  cmntLen; //!< File comment length (k)
+		word  diskStart; //!< Disk number where file starts (or 0xffff for ZIP64)
+		word  intAttr; //!< Internal file attributes
+		dword extAttr; //!< External file attributes
+		dword hdrOffset; //!< Relative offset of local file header (or 0xffffffff for ZIP64)
+		// File name follows header.
+		// Extra field follows file name.
+		// File comment follows extra field.
 		char *GetName   (void) const { return (char *)(this + 1);   }
 		char *GetExtra  (void) const { return GetName() + fnameLen; }
 		char *GetComment(void) const { return GetExtra() + xtraLen; }
@@ -166,10 +174,14 @@ namespace BGE
 		TZipDirHeader dh;
 
 		std::fseek(m_pFile, -(int)sizeof(dh), SEEK_END);
-		long dhOffset = ftell(m_pFile);
+		long dhOffset = std::ftell(m_pFile);
 		std::memset(&dh, 0, sizeof(dh));
 		std::fread(&dh, sizeof(dh), 1, m_pFile);
 
+		BGE_LOG("Resources", "sizeof(TZipDirHeader) = %d bytes", sizeof(TZipDirHeader));
+		BGE_LOG("Resources", "sizeof(TZipDirFileHeader) = %d bytes", sizeof(TZipDirFileHeader));
+		BGE_LOG("Resources", "sizeof(TZipLocalHeader) = %d bytes", sizeof(TZipLocalHeader));
+		BGE_LOG("Resources", "dg.sig = 0x%X | TZipDirHeader::kSIGNATURE = 0x%X", dh.sig, TZipDirHeader::kSIGNATURE);
 		// Check
 		if (dh.sig != TZipDirHeader::kSIGNATURE)
 		{

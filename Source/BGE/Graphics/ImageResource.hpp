@@ -48,6 +48,40 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
+	inline constexpr std::size_t kMAX_TEXTURE_MIPS = 14u;
+
+	/**
+	 * @brief .
+	 */
+	struct ImageMipData
+	{
+		GLsizei width;  //!< Width of this mipmap level
+		GLsizei height; //!< Height of this mipmap level
+		GLsizei depth;  //!< Depth of the mipmap level
+		GLsizeiptr mipStride; //!< Distance between mip levels in memory
+		GLvoid *pData; //!< Pointer to the image data
+	};
+
+	/**
+	 * @brief .
+	 */
+	struct ImageData
+	{
+		GLenum target; //!< Texture target (2D, cube map, etc.)
+		GLenum internalFormat; //!< Recommended internal format
+		GLenum format; //!< Format in memory
+		GLenum type; //!< Type in memory (GL_RGB, etc.)
+		std::array<GLenum, 4> swizzle; //!< Swizzle for RGBA
+		GLsizei mipLevels; //!< Number of present mipmap levels
+		GLsizei slices; //!< Number of slices (for arrays)
+		GLsizeiptr sliceStride; //!< Distance between slices of an array texture
+		GLsizeiptr totalDataSize; //!< Total data allocated for texture
+		std::array<ImageMipData, kMAX_TEXTURE_MIPS> mip; //!< Actual mipmap data
+	};
+
+	/**
+	 * @brief .
+	 */
 	class BMPResourceLoader : public IResourceLoader
 	{
 		std::string m_pattern = "*.bmp";
