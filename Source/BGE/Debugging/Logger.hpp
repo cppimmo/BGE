@@ -69,11 +69,15 @@ namespace BGE::Logger
 	/**
 	 * Initialize the logger using the given configuration file.
 	 */
-	void Init(std::string_view configFilename);
+	void Init(std::string_view configFileName);
 	/**
 	 * Free resources used by the logger.
 	 */
 	void Destroy(void);
+	/**
+	 * True if the logging system is initialized and ready to use, false otherwise.
+	 */
+	bool IsActive(void) noexcept;
 	/**
 	 * Convert a log level to a string representation.
 	 *

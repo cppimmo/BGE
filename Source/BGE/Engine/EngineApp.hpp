@@ -37,6 +37,7 @@
 #include "Resources/ResourceCache.hpp"
 #include "Memory/Memory.hpp"
 #include "UI/DebugConsole.hpp"
+#include "Audio/Audio.hpp"
 
 namespace BGE
 {
@@ -81,6 +82,7 @@ namespace BGE
 		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic
 		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache
 		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console
+		UniqueIAudioSystemPtr m_pAudioSystem; //!< Audio system
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
@@ -108,6 +110,7 @@ namespace BGE
 		BaseGameLogic &GetGameLogic(void) noexcept;
 		ResourceCache &GetResourceCache(void) noexcept;
 		DebugConsole  &GetDebugConsole(void) noexcept;
+		IAudioSystem  &GetAudioSystem(void) noexcept;
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

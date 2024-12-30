@@ -50,7 +50,8 @@ namespace BGE
 	BGE_DECLARE_PTR(LogManager);
 	
 	static LogManager *s_pLogManager = nullptr;
-	
+	inline constexpr int kNONE_WRITTEN = 0;
+
 	struct LogMessage
 	{
 		std::string message;
@@ -79,11 +80,11 @@ namespace BGE
 		LogManager(void);
 		~LogManager(void);
 		
-		bool Init(std::string_view configFilename);
+		bool Init(std::string_view configFileName);
 		int Write(std::string_view tagName, std::string_view msgFormat, va_list args);
 		void SetDisplayFlags(std::string_view tagName, std::uint8_t flags);
 		void AddErrorMessenger(Logger::ErrorMessenger *pMessenger);
-	ErrorDialogResult Error(Logger::ErrorMessenger &pMessenger, std::string_view tagName, std::string_view msgFormat...);
+		ErrorDialogResult Error(Logger::ErrorMessenger &pMessenger, std::string_view tagName, std::string_view msgFormat...);
 	private:
 	};
 } // End namespace (BGE)
@@ -117,12 +118,12 @@ bool Logger::ErrorMessenger::Fatal(void) const noexcept
 	return m_bFatal;
 }
 
-void Logger::Init(std::string_view configFilename)
+void Logger::Init(std::string_view configFileName)
 {
 	if (!::s_pLogManager)
 	{
 		::s_pLogManager = BGE_NEW LogManager;
-		(void)::s_pLogManager->Init(configFilename);
+		(void)::s_pLogManager->Init(configFileName);
 	}
 }
 
@@ -131,8 +132,18 @@ void Logger::Destroy(void)
 	BGE_SAFE_DELETE(::s_pLogManager);
 }
 
+bool Logger::IsActive(void) noexcept
+{
+	return ::s_pLogManager != nullptr;
+}
+
 int Logger::Write(std::string_view tagName, std::string_view msgFormat, ...)
 {
+	if (!Logger::IsActive())
+	{
+		return kNONE_WRITTEN;
+	}
+
 	va_list argList;
 	va_start(argList, msgFormat);
 	const int kWritten = s_pLogManager->Write(tagName, msgFormat, argList);
@@ -224,13 +235,13 @@ LogManager::~LogManager(void)
 	m_errorMessengers.clear();
 }
 
-bool LogManager::Init(std::string_view configFilename)
+bool LogManager::Init(std::string_view configFileName)
 {
 	using namespace tinyxml2;
 	XMLDocument xmlDocument; // Document object
 	XMLError xmlResult; // Result object
 
-	xmlResult = xmlDocument.LoadFile(configFilename.data());
+	xmlResult = xmlDocument.LoadFile(configFileName.data());
 	if (xmlResult != XML_SUCCESS) return false;
 
 	// Fetch the root element: Logging
@@ -265,7 +276,7 @@ int LogManager::Write(std::string_view tagName, std::string_view msgFormat, va_l
 	// Check for null optional
 	if (!kTimeString)
 	{
-		return -1;
+		return kNONE_WRITTEN;
 	}
 	// Calculate the required length of the formatted message
     va_list copyOfArgs;
@@ -275,7 +286,7 @@ int LogManager::Write(std::string_view tagName, std::string_view msgFormat, va_l
 
     if (kMsgLength < 0)
     {
-        return -1;  // Error in formatting
+        return kNONE_WRITTEN;  // Error in formatting
     }
 
     // Create a buffer for the formatted message

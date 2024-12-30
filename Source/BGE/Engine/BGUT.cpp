@@ -321,6 +321,11 @@ SDL_Window *BGE::BGUTGetWindowPtr(void)
 	return s_BGUT.pWindow;
 }
 
+void BGE::BGUTGetWindowSize(BGUTWindowPtr pWindow, int &width, int &height)
+{
+	SDL_GetWindowSize(pWindow, &width, &height);
+}
+
 SDL_GLContext BGE::BGUTGetContextPtr(void)
 {
 	return s_BGUT.pContext;

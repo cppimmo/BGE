@@ -58,6 +58,7 @@ namespace BGE
 	void BGUTSetCallbackRender(BGUTRenderCallback pRenderCallback);
 	void BGUTSetCallbackEventHandler(BGUTEventHandlerCallback pEventHandlerCallback);
 	SDL_Window *BGUTGetWindowPtr(void); // BGUTWindowID windowID
+	void BGUTGetWindowSize(BGUTWindowPtr pWindow, int &width, int &height);
 	SDL_GLContext BGUTGetContextPtr(void);
 	const Timer &BGUTGetMainLoopTimer(void);
 	int BGUTGetExitCode(void); // App exit code

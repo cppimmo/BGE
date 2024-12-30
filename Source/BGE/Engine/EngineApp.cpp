@@ -36,6 +36,7 @@
 #include "Memory/Memory.hpp"
 #include "Resources/ResourceLoader.hpp"
 #include "Scripting/ScriptExports.hpp"
+#include "Audio/OpenALAudio.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -173,6 +174,16 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Set window title & icon
 	BGUTSetWindowTitle(VGetGameTitle());
 	BGUTSetWindowIcon(VGetIcon());
+
+	// Initialize the audio system
+	m_pAudioSystem = std::make_unique<OpenALAudioSystem>();
+	if (!m_pAudioSystem->VInitialize())
+	{
+		BGE_ERROR("Failure to initialize the audio system!");
+		return false;
+	}
+	// Queue sound system started event
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_SoundSystemStarted>());
 
 	m_pGameLogic = VCreateGameAndView();
 	if (!m_pGameLogic)
@@ -411,8 +422,10 @@ void BGE::EngineApp::OnShutdown(void)
 {
 	if (m_bHasQuit)
 	{
+		BGE_WARNING("Attempting to call EngineApp::OnShutdown multiple times");
 		return;
 	}
+	//BGE_LOG("App", "Performing shutdown...");
 	// TODO: Perform destruction tasks.
 	VDestroyNetworkEventForwarder();
 
@@ -462,6 +475,12 @@ BGE::DebugConsole &BGE::EngineApp::GetDebugConsole(void) noexcept
 {
 	BGE_ASSERT(m_pDebugConsole);
 	return *m_pDebugConsole.get();
+}
+
+BGE::IAudioSystem &BGE::EngineApp::GetAudioSystem(void) noexcept
+{
+	BGE_ASSERT(m_pAudioSystem);
+	return *m_pAudioSystem.get();
 }
 
 int BGE::EngineApp::GetExitCode(void) const

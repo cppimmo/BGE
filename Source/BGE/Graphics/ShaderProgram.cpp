@@ -107,50 +107,118 @@ bool BGE::ShaderProgram::VIsValid(void) const
 
 void BGE::ShaderProgram::SetBool(std::string_view uniformName, bool value)
 {
-    auto result = GetUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result)
-	{
-		glProgramUniform1i(m_programID, *result, static_cast<bool>(value));
-	}
+	UpdateUniformLocation(uniformName);
+	glProgramUniform1i(m_programID, UniformLocation(uniformName), static_cast<bool>(value));
 }
 
 void BGE::ShaderProgram::SetInt(std::string_view uniformName, GLint value)
 {
-    auto result = GetUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result)
-	{
-		glProgramUniform1i(m_programID, *result, value);
-	}
+    UpdateUniformLocation(uniformName);
+	glProgramUniform1i(m_programID, UniformLocation(uniformName), value);
 }
 
 void BGE::ShaderProgram::SetUnsignedInt(std::string_view uniformName, GLuint value)
 {
-    auto result = GetUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result)
-	{
-		glProgramUniform1ui(m_programID, *result, value);
-	}
+	UpdateUniformLocation(uniformName);
+	glProgramUniform1ui(m_programID, UniformLocation(uniformName), value);
 }
 
 void BGE::ShaderProgram::SetFloat(std::string_view uniformName, GLfloat value)
 {
-    auto result = GetUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result)
-	{
-		glProgramUniform1f(m_programID, *result, value);
-	}
+    UpdateUniformLocation(uniformName);
+	glProgramUniform1f(m_programID, UniformLocation(uniformName), value);
 }
 
 void BGE::ShaderProgram::SetDouble(std::string_view uniformName, GLdouble value)
 {
-    auto result = GetUniformLocation(m_programID, uniformName);
-    BGE_ASSERT(!result.has_value());
-    if (result)
+	UpdateUniformLocation(uniformName);
+	glProgramUniform1d(m_programID, UniformLocation(uniformName), value);
+}
+
+void BGE::ShaderProgram::SetVec2(std::string_view uniformName, const glm::vec2   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniform2fv(m_programID, UniformLocation(uniformName), 1, &kValue[0]);
+}
+
+void BGE::ShaderProgram::SetVec3(std::string_view uniformName, const glm::vec3   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniform3fv(m_programID, UniformLocation(uniformName), 1, &kValue[0]);
+}
+
+void BGE::ShaderProgram::SetVec4(std::string_view uniformName, const glm::vec4   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniform4fv(m_programID, UniformLocation(uniformName), 1, &kValue[0]);
+}
+
+void BGE::ShaderProgram::SetMat2(std::string_view uniformName, const glm::mat2   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix2fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat2(std::string_view uniformName, const glm::mat2x3 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix2x3fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat2(std::string_view uniformName, const glm::mat2x4 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix2x4fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat3(std::string_view uniformName, const glm::mat3   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix3fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat3(std::string_view uniformName, const glm::mat3x2 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix3x2fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat3(std::string_view uniformName, const glm::mat3x4 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix3x4fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat4(std::string_view uniformName, const glm::mat4   &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix4fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat4(std::string_view uniformName, const glm::mat4x2 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix4x2fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::SetMat4(std::string_view uniformName, const glm::mat4x3 &kValue)
+{
+	UpdateUniformLocation(uniformName);
+	glProgramUniformMatrix4x3fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
+}
+
+void BGE::ShaderProgram::UpdateUniformLocation(std::string_view uniformName)
+{
+	std::string name(uniformName);
+	if (m_uniformLocations.find(name) == m_uniformLocations.end())
 	{
-		glProgramUniform1d(m_programID, *result, value);
+		auto result = GetUniformLocation(m_programID, uniformName);
+		BGE_ASSERT(!result.has_value());
+		m_uniformLocations[name] = *result;
 	}
+}
+
+int BGE::ShaderProgram::UniformLocation(std::string_view uniformName)
+{
+	return m_uniformLocations[std::string(uniformName)];
 }

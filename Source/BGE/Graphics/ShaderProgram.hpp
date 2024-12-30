@@ -38,7 +38,10 @@ namespace BGE
 	 */
 	class ShaderProgram final : public IShaderProgram
 	{
+		using UniformLocationMap = std::unordered_map<std::string, GLint>;
+
 		GLuint m_programID;
+		UniformLocationMap m_uniformLocations;
 		ShaderList m_shaders;
 		// TODO: A container of shaders should be used to keep track of linked shaders
 	public:
@@ -57,13 +60,28 @@ namespace BGE
 		virtual void VBind(void) override;
 		virtual void VDestroy(void) override;
 		virtual bool VIsValid(void) const override;
-
+		// Uniform accessors:
 		void SetBool(std::string_view uniformName, bool value);
 		void SetInt(std::string_view uniformName, GLint value);
 		void SetUnsignedInt(std::string_view uniformName, GLuint value);
 		void SetFloat(std::string_view uniformName, GLfloat value);
 		void SetDouble(std::string_view uniformName, GLdouble value);
-
+		void SetVec2(std::string_view uniformName, const glm::vec2   &kValue);
+		void SetVec3(std::string_view uniformName, const glm::vec3   &kValue);
+		void SetVec4(std::string_view uniformName, const glm::vec4   &kValue);
+		void SetMat2(std::string_view uniformName, const glm::mat2   &kValue);
+		void SetMat2(std::string_view uniformName, const glm::mat2x3 &kValue);
+		void SetMat2(std::string_view uniformName, const glm::mat2x4 &kValue);
+		void SetMat3(std::string_view uniformName, const glm::mat3   &kValue);
+		void SetMat3(std::string_view uniformName, const glm::mat3x2 &kValue);
+		void SetMat3(std::string_view uniformName, const glm::mat3x4 &kValue);
+		void SetMat4(std::string_view uniformName, const glm::mat4   &kValue);
+		void SetMat4(std::string_view uniformName, const glm::mat4x2 &kValue);
+		void SetMat4(std::string_view uniformName, const glm::mat4x3 &kValue);
+	private:
+		void UpdateUniformLocation(std::string_view uniformName);
+		int UniformLocation(std::string_view uniformName);
+#if 0
 		template <Math::Numeric Type>
 		void SetVec2(std::string_view uniformName, const Math::Vec2<Type> &vec2)
 		{
@@ -104,6 +122,7 @@ namespace BGE
 			auto result = GetUniformLocation(m_programID, uniformName);
 			BGE_ASSERT(!result.has_value());
 		}
+#endif
 	};
 #if 0
 	// Template specializations for Math:: types:

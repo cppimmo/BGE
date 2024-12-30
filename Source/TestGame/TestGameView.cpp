@@ -5,6 +5,8 @@
 
 #include <al.h>
 #include <alc.h>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 namespace TestGame
 {
@@ -63,7 +65,7 @@ namespace TestGame
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		ALCdevice *pDevice = alcOpenDevice(nullptr);
+		/*ALCdevice *pDevice = alcOpenDevice(nullptr);
 		if (!pDevice)
 		{
 			BGE_ERROR("Error creating ALCdevice!");
@@ -143,7 +145,22 @@ namespace TestGame
 		alcDestroyContext(pContext);
 
 		ALCboolean bClosed;
-		bClosed = alcCloseDevice(pDevice);
+		bClosed = alcCloseDevice(pDevice);*/
+		auto &audio = app.GetAudioSystem();
+		auto pBuffer = audio.VCreateBuffer();
+		auto pSoundHandle = resCache.GetHandle(BGE::Resource("Assets\\Sounds\\coin1.wav"));
+		if (!pBuffer->VLoadFromResource(pSoundHandle))
+		{
+			return false;
+		}
+
+		m_pSource = audio.VCreateSource();
+		m_pSource->VAttachBuffer(pBuffer);
+
+		auto pListener = audio.VCreateListener();
+		pListener->VSetPosition(glm::vec3(0, 0, 0));
+		pListener->VSetVelocity(glm::vec3(0, 0, 0));
+		audio.VSetListener(pListener);
 		return true;
 	}
 
@@ -151,7 +168,22 @@ namespace TestGame
 	{
 		HumanView::VOnRender(deltaTime, elapsedTime);
 
+		int width, height;
+		BGE::BGUTGetWindowSize(BGE::BGUTGetWindowPtr(), width, height);
+		glm::mat4 projection = glm::perspective(1.0f, static_cast<float>(width) / static_cast<float>(height), 0.005f, 50.0f);
+		//glm::mat4 view =
+
 		m_pShaderProgram->VBind();
+
+		//static bool c_bInitialized = false;
+		//if (!c_bInitialized)
+		//{
+		//	m_pSource->VSetVolume(1.0f);
+		//	m_pSource->VPlay();
+		//	c_bInitialized = true;
+		//}
+		m_pSource->VSetLooping(true);
+		m_pSource->VPlay();
 
 		glBindVertexArray(m_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);

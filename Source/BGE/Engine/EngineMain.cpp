@@ -110,8 +110,6 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	
 	BGE_INFO("Shutting down engine...");
 	BGUTShutdown(); // Shutdown upon exit of main loop
-	// Destroy the logging system
-	Logger::Destroy();
 #if BGE_PLATFORM_WINDBG
 	_CrtDumpMemoryLeaks(); // Report leaks to log
 	std::cout << "Press enter to exit.\n";
@@ -212,5 +210,8 @@ For detailed information about each option, refer to the documentation.
 	{
 		auto &app = GetEngineApp();
 		app.OnShutdown();
+
+		// Destroy the logging system
+		Logger::Destroy();
 	}
 } // End namespace
