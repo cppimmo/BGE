@@ -18,7 +18,9 @@ int main(int numArgs, char *pArgs[])
 {
 	// Create the application layer:
 	if (!BGE::CreateEngineApp<TestGame::TestGameApp>())
-		return BGE_EXIT_FAILURE;
+	{
+		return BGE::kBGE_EXIT_FAILURE;
+	}
 
 	return BGE::EngineMain(numArgs, pArgs);
 }
@@ -94,9 +96,17 @@ namespace TestGame
 
 	bool TestGameLogic::VInit(void)
 	{
-		bool bResult = BaseGameLogic::VInit();
+		return BaseGameLogic::VInit();
+	}
 
-		m_pLuaScriptManager->VExecuteFile("Assets/Scripts/Test.lua");
+	bool TestGameLogic::VPostInit(void)
+	{
+		bool bResult = BaseGameLogic::VPostInit();
+		auto &app = BGE::GetEngineApp();
+		auto &resCache = app.GetResourceCache();
+
+		auto pScriptHandle = resCache.GetHandle(BGE::Resource("Assets\\Scripts\\Test.lua"));
+		//m_pLuaScriptManager->VExecuteFile("Assets/Scripts/Test.lua");
 		return bResult;
 	}
 

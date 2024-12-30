@@ -28,6 +28,7 @@ namespace BGE
 		virtual ~IGameLogic(void) = default;
 
 		virtual bool VInit(void) = 0;
+		virtual bool VPostInit(void) = 0;
 		virtual WeakActorPtr VGetActor(ActorID ID) = 0;
 		//virtual StrongActorPtr VCreateActor(const std::string &actorResource, TiXmlElement *overrides, const Mat4x4 *initialTransform=NULL, const ActorId serversActorId=INVALID_ACTOR_ID)=0;
 		virtual void VDestroyActor(ActorID ID) = 0;
@@ -59,6 +60,7 @@ namespace BGE
 		virtual void VRemoveView(StrongIGameViewPtr pView);
 		// IGameLogic interface:
 		virtual bool VInit(void) override;
+		virtual bool VPostInit(void) override;
 		virtual WeakActorPtr VGetActor(ActorID ID) override;
 		virtual void VDestroyActor(ActorID ID) override;
 		virtual bool VLoadGame(std::string_view levelResource) override;

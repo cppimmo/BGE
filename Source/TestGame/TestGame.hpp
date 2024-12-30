@@ -27,6 +27,7 @@ namespace TestGame
 		virtual ~TestGameLogic(void);
 		// IGameLogic's interface:
 		virtual bool VInit(void) override;
+		virtual bool VPostInit(void) override;
 		// BaseGameLogic's interface:
 		virtual void VChangeState(BGE::BaseGameState state) override;
 	protected:

@@ -3,7 +3,7 @@
 
 namespace BGE
 {
-	class Audio : public IAudio
+	class OpenALAudioSystem : public IAudioSystem
 	{
 		ALCdevice *m_pDevice;
 		ALCcontext *m_pContext;

@@ -58,6 +58,21 @@ namespace BGE
 
 		virtual std::string VGetExtraData(void) = 0;
 	};
+
+	/**
+	 * @brief Extra resource data for plaintext file contents.
+	 */
+	class PlaintextExtraData : public IResourceExtraData
+	{
+	protected:
+		std::string m_plaintext;
+	public:
+		explicit PlaintextExtraData(std::string_view plaintext);
+		virtual ~PlaintextExtraData(void) = default;
+		// IResourceExtraData's interface:
+		virtual std::string VGetExtraData(void) override;
+	};
+	BGE_DECLARE_PTR(PlaintextExtraData);
 } // End namespace (BGE)
 
 #endif /* !_BGE_RESOURCE_HPP_ */

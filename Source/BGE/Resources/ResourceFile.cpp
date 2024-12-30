@@ -18,19 +18,19 @@ namespace BGE
 		return false;
 	}
 
-	std::int64_t ZipResourceFile::VGetRawResourceSize(const Resource &kResource)
+	std::size_t ZipResourceFile::VGetRawResourceSize(const Resource &kResource)
 	{
 		auto resourceNum = m_pZipFile->Find(kResource.GetName());
-		if (resourceNum == -1)
+		if (resourceNum < 0)
 		{
-			return -1;
+			return 0;
 		}
 		return m_pZipFile->GetFileLen(resourceNum);
 	}
 
-	std::int64_t ZipResourceFile::VGetRawResource(const Resource &kResource, char *pBuffer)
+	std::size_t ZipResourceFile::VGetRawResource(const Resource &kResource, char *pBuffer)
 	{
-		std::int64_t size = 0;
+		std::size_t size = 0;
 		std::optional<int> resourceNum = m_pZipFile->Find(kResource.GetName());
 		if (resourceNum)
 		{
@@ -40,9 +40,9 @@ namespace BGE
 		return size;
 	}
 
-	std::int64_t ZipResourceFile::VGetNumResources(void) const
+	std::size_t ZipResourceFile::VGetNumResources(void) const
 	{
-		return (!m_pZipFile) ? 0 : m_pZipFile->GetNumFiles();
+		return (m_pZipFile ? m_pZipFile->GetNumFiles() : 0);
 	}
 
 	std::string ZipResourceFile::VGetResourceName(std::size_t num) const

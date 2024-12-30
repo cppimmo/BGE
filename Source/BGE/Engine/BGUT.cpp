@@ -66,7 +66,7 @@ namespace BGE
 		BGUTUpdateCallback pUpdateCallback = nullptr;
 		BGUTRenderCallback pRenderCallback = nullptr;
 		BGUTEventHandlerCallback pEventHandlerCallback = nullptr;
-		int exitCode = BGE_EXIT_SUCCESS;
+		int exitCode = kBGE_EXIT_SUCCESS;
 	};
 	
 	static bool BGUTParseConfig(std::string_view configFilename, BGUTData &data);

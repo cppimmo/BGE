@@ -28,6 +28,8 @@
 #ifndef _BGE_SHADERS_HPP_
 #define _BGE_SHADERS_HPP_
 
+#include "Resources/ResourceHandle.hpp"
+
 namespace BGE
 {
 	class IShader; // Forward declare
@@ -56,6 +58,8 @@ namespace BGE
 		//! .
 		virtual bool VCompile(std::string_view source) = 0;
 		//! .
+		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) = 0;
+		//! .
 		virtual GLuint VGetID(void) const = 0;
 		//! .
 		virtual void VDestroy(void) = 0;
@@ -79,6 +83,7 @@ namespace BGE
 		virtual ~Shader(void);
 		// IShader's interface:
 		virtual bool VCompile(std::string_view source) override;
+		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) override;
 		virtual GLuint VGetID(void) const override;
 		virtual void VDestroy(void) override;
 		virtual bool VIsValid(void) const override;

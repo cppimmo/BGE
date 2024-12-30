@@ -39,6 +39,9 @@ namespace BGE
 	using BGUTWindowPtr = SDL_Window *;
 	using BGUTWindowID = std::size_t;
 
+	inline constexpr int kBGE_EXIT_SUCCESS = 0; // Pass to BGUTSendExitCode()
+	inline constexpr int kBGE_EXIT_FAILURE = 1;
+
 	bool BGUTInit(std::string_view configFilename);
 	bool BGUTCreateWindow(std::string_view windowTitle, std::string_view iconFilename);
 	void BGUTSetWindow(BGUTWindowPtr pWindow);
@@ -59,8 +62,5 @@ namespace BGE
 	const Timer &BGUTGetMainLoopTimer(void);
 	int BGUTGetExitCode(void); // App exit code
 } // End namespace (BGE)
-
-#define BGE_EXIT_SUCCESS 0 // Pass to BGUTSendExitCode()
-#define BGE_EXIT_FAILURE 1
 
 #endif /* !_BGE_BGUT_HPP_ */

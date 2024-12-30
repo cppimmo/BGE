@@ -48,6 +48,16 @@ namespace BGE::ScriptExports
 
 		// Assign the table to a global variable/module in Lua
 		luaState["Logger"] = loggerModule;
+
+		// TODO: This is for testing; replace it later.
+		/*luaState.set_function("LoadResource", [](sol::string_view resource)
+		{
+			auto &app = GetEngineApp();
+			auto &resCache = app.GetResourceCache();
+
+			const Resource kResource(std::string(resource.begin(), resource.end()));
+			auto pResourceHandle = resCache.GetHandle(kResource);
+		});*/
 	}
 
 	void Deregister(void)

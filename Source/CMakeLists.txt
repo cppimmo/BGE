@@ -178,7 +178,7 @@ if(WIN32)
 endif()
 
 target_link_libraries(Engine ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
-  FastDelegate ${OPENAL_LIBRARIES} ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB) #${Boost_LIBRARIES})
+  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB) #${Boost_LIBRARIES})
 
 if(WIN32)
   # Set the CWD for the debugger to start the program

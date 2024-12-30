@@ -97,6 +97,8 @@ namespace BGE
 		static void OnRender(float deltaTime, float elsapsedTime);
 		static bool OnHandleEvent(const SDL_Event &kEvent);
 		static void OnDisplayChange(int colorDepth, int width, int height);
+		// Application signal handlers:
+		static void OnHandleSignal(int signal);
 		void OnShutdown(void);
 		// Accessors:
 		MemoryManager &GetMemoryManager(void) noexcept;

@@ -39,7 +39,8 @@
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
-#include "Graphics/Screenshot.hpp"
+
+#include <csignal>
 
 // Initialize global application instance pointer
 BGE::UniqueEngineAppPtr BGE::g_pApp = nullptr;
@@ -65,9 +66,8 @@ BGE::EngineApp::EngineApp(void)
 
 BGE::EngineApp::~EngineApp(void)
 {
-	// Call the OnClose routine if the game wasn't exited properly.
-	if (!m_bHasQuit)
-		OnShutdown();
+	// Call the OnShutdown routine if the game wasn't exited properly.
+	OnShutdown();
 }
 
 // Method named InitInstance since only one instance of the game is allowed in most cases.
@@ -119,11 +119,8 @@ bool BGE::EngineApp::VInitInstance(void)
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
 
 	// Initialize the resource cache
-	// TODO: Setup resource file
-
-	auto pZipResourceFile = std::make_shared<ZipResourceFile>(L"Assets.zip");
-	// TODO: Replace temporary nullptr argument.
-	m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, pZipResourceFile);
+	auto pResourceFile = std::make_shared<ZipResourceFile>(L"Assets.zip");
+	m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, pResourceFile);
 	if (!m_pResourceCache->Init())
 	{
 		BGE_ERROR("Failed to initialize the resource cache!");
@@ -142,7 +139,11 @@ bool BGE::EngineApp::VInitInstance(void)
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateJPEGResourceLoader());
 	m_pResourceCache->RegisterLoader(rlFactory.VCreatePNGResourceLoader());
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateTGAResourceLoader());
+	// Shader resource loaders:
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateGLSLResourceLoader());
 	// Sound resource loaders:
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateWAVResourceLoader());
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateOGGResourceLoader());
 
 	// Queue resource cache started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_ResourceCacheStarted>());
@@ -174,10 +175,24 @@ bool BGE::EngineApp::VInitInstance(void)
 	BGUTSetWindowIcon(VGetIcon());
 
 	m_pGameLogic = VCreateGameAndView();
-	if (!m_pGameLogic) return false;
+	if (!m_pGameLogic)
+	{
+		BGE_ERROR("BaseGameLogic Failure creating game & view");
+		return false;
+	}
 
 	// Register script exports
     ScriptExports::Register();
+	// Call IGameLogic::VPostInit after the scripting system is setup
+	if (!m_pGameLogic->VPostInit())
+	{
+		BGE_ERROR("BaseGameLogic::VPostInit failure");
+		return false;
+	}
+
+	// Queue scripting system started event
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_ScriptingSystemStarted>());
+
 	// Queue game logic started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_GameLogicStarted>());
 
@@ -192,6 +207,21 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Queue debug console started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_DebugConsoleStarted>());
 
+	//BGE_LOG("Resources", "Num resources: %u", pResourceFile->VGetNumResources());
+	//for (std::size_t i = 0; i < pResourceFile->VGetNumResources(); ++i)
+	//{
+	//	std::string name = pResourceFile->VGetResourceName(i);
+	//	std::size_t s = pResourceFile->VGetRawResourceSize(Resource(name));
+	//	BGE_LOG("Resources", "Resource(%u = %s, size=%u)", i, name.c_str(), s);
+	//	if (name == "Assets\\Shaders\\test_vert.glsl")
+	//	{
+	//		char *pBuffer;
+	//		std::size_t size = pResourceFile->VGetRawResource(Resource(name), pBuffer);
+	//		BGE_LOG("Resources", "Resource(%u = %s, size=%u)", i, name.c_str(), size);
+	//		BGE_LOG("Resources", "Resource(%s)", pBuffer);
+	//	}
+	//}
+	//BGE_LOG("Resources", "test");
 	m_bRunning = true;
 
 	return true;
@@ -331,12 +361,65 @@ void BGE::EngineApp::OnDisplayChange(int colorDepth, int width, int height)
 	// TODO: Implement code which operates on renderer for display change.
 }
 
+void BGE::EngineApp::OnHandleSignal(int signal)
+{
+	switch (signal)
+	{
+	case SIGABRT:
+		BGE_LOG("App", "Caught SIGABRT signal.");
+		break;
+	case SIGFPE:
+		BGE_LOG("App", "Caught SIGFPE signal.");
+		break;
+	case SIGILL:
+		BGE_LOG("App", "Caught SIGILL signal.");
+		break;
+	case SIGINT:
+		BGE_LOG("App", "Caught SIGINT signal.");
+		break;
+	case SIGSEGV:
+		BGE_LOG("App", "Caught SIGSEGV signal.");
+		break;
+	case SIGTERM:
+		BGE_LOG("App", "Caught SIGTERM signal.");
+		break;
+	default:
+		break;
+	}
+
+	// Handle specific cases
+	switch (signal)
+	{
+	case SIGABRT:
+	case SIGFPE:
+	case SIGILL:
+	case SIGSEGV:
+		// These signals indicate a critical error and should terminate the app.
+		std::exit(kBGE_EXIT_FAILURE);
+		break;
+	case SIGINT:
+	case SIGTERM:
+		// Attempt graceful shutdown (cleanup resources here if necessary)
+		std::exit(kBGE_EXIT_SUCCESS);
+		break;
+	default:
+		break;
+	}
+}
+
 void BGE::EngineApp::OnShutdown(void)
 {
+	if (m_bHasQuit)
+	{
+		return;
+	}
 	// TODO: Perform destruction tasks.
 	VDestroyNetworkEventForwarder();
 
 	ScriptExports::Deregister();
+
+	m_bRunning = false;
+	m_bHasQuit = true;
 }
 
 BGE::MemoryManager &BGE::EngineApp::GetMemoryManager(void) noexcept
@@ -405,6 +488,7 @@ void BGE::EngineApp::VDestroyNetworkEventForwarder(void)
 
 void BGE::EngineApp::RegisterEngineEvents(void)
 {
+	BGE_REGISTER_EVENT(EventData_DebugConsoleStarted);
 	BGE_REGISTER_EVENT(EventData_EventSystemStarted);
 	BGE_REGISTER_EVENT(EventData_GameLogicStarted);
 	BGE_REGISTER_EVENT(EventData_GamePaused);
@@ -414,5 +498,6 @@ void BGE::EngineApp::RegisterEngineEvents(void)
 	BGE_REGISTER_EVENT(EventData_NetworkStarted);
 	BGE_REGISTER_EVENT(EventData_PhysicsStarted);
 	BGE_REGISTER_EVENT(EventData_ResourceCacheStarted);
+	BGE_REGISTER_EVENT(EventData_ScriptingSystemStarted);
 	BGE_REGISTER_EVENT(EventData_SoundSystemStarted);
 }

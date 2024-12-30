@@ -73,8 +73,8 @@ namespace BGE
 		void RegisterLoader(StrongIResourceLoaderPtr pLoader);
 		StrongResourceHandlePtr GetHandle(const Resource &kResource);
 
-		std::size_t Preload(const std::string &kPattern, ProgressCallback progressCallback);
-		std::vector<std::string> Match(const std::string &kPattern);
+		std::size_t Preload(std::string_view pattern, ProgressCallback progressCallback);
+		std::vector<std::string> Match(std::string_view pattern);
 
 		void Flush(void);
 		bool IsUsingDevelopmentDirectories(void) const;
@@ -84,7 +84,7 @@ namespace BGE
 		void Free(StrongResourceHandlePtr pResourceHandle);
 
 		StrongResourceHandlePtr Load(const Resource &kResource);
-		std::optional<StrongResourceHandlePtr> Find(const Resource &kResource) const;
+		StrongResourceHandlePtr Find(const Resource &kResource) const;
 		void Update(StrongResourceHandlePtr pResourceHandle);
 
 		void FreeResources(std::size_t count = 1);

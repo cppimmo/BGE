@@ -149,6 +149,24 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
+	class EventData_ScriptingSystemStarted : public BaseEventData
+	{
+	public:
+		BGE_DEFINE_EVENTDATA(0x4998957A, kInternal, "EventData_ScriptingSystemStarted");
+	public:
+		EventData_ScriptingSystemStarted(void) = default;
+		// IEventData's interface:
+		virtual EventType VGetEventType(void) const override { return kEVENT_TYPE; }
+		virtual EventSpecification VGetEventSpec(void) const override { return kEVENT_SPEC; }
+		virtual StrongIEventDataPtr VCopy(void) const override { return nullptr; }
+		virtual void VSerialize(std::ostringstream &oss) const override { }
+		virtual void VDeserialize(std::istringstream &iss) override { }
+		virtual constexpr std::string_view VGetName(void) const override { return kEVENT_NAME; }
+	};
+
+	/**
+	 * @brief .
+	 */
 	class EventData_NetworkStarted : public BaseEventData
 	{
 	public:

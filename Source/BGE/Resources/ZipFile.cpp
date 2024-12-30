@@ -212,6 +212,7 @@ namespace BGE
 			// Store the address of nth file for quicker access.
 			m_papDir[i] = &fh;
 
+			BGE_LOG("Resources", "fh.sig = 0x%X | TZipDirFileHeader::kSIGNATURE = 0x%X", fh.sig, TZipDirFileHeader::kSIGNATURE);
 			// Check the directory entry integrity.
 			if (fh.sig != TZipDirFileHeader::kSIGNATURE)
 				bSuccess = false;
@@ -295,11 +296,11 @@ namespace BGE
 	* Purpose:    Return the length of a file so a buffer can be allocated
 	* Parameters: The file index.
 	*/
-	int ZipFile::GetFileLen(ZipFileIndex index) const
+	std::size_t ZipFile::GetFileLen(ZipFileIndex index) const
 	{
 		if (index < 0 || index >= m_nEntries)
 		{
-			return -1;
+			return 0;
 		}
 		else
 		{
@@ -327,6 +328,7 @@ namespace BGE
 
 		std::memset(&h, 0, sizeof(h));
 		std::fread(&h, sizeof(h), 1, m_pFile);
+		BGE_LOG("Resources", "h.sig = 0x%X | TZipLocalHeader::kSIGNATURE = 0x%X", h.sig, TZipLocalHeader::kSIGNATURE);
 		if (h.sig != TZipLocalHeader::kSIGNATURE)
 		{
 			return false;

@@ -66,7 +66,7 @@ function Inventory:Display()
 end
 
 -- Initialize and interact with the inventory
-local function Main()
+function Main()
     local playerInventory = Inventory:New(5)
 
     -- Adding items

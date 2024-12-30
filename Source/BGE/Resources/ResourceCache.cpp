@@ -36,20 +36,22 @@ void BGE::ResourceCache::RegisterLoader(StrongIResourceLoaderPtr pLoader)
 
 BGE::StrongResourceHandlePtr BGE::ResourceCache::GetHandle(const Resource& kResource)
 {
-	auto handle = Find(kResource);
-	if (handle)
+	auto pResourceHandle = Find(kResource);
+	if (!pResourceHandle)
 	{
-		auto pResourceHandle = Load(kResource);
+		BGE_LOG("Resources", "Calling ResourceCache::Load(\"%s\")", kResource.GetName().c_str());
+		pResourceHandle = Load(kResource);
 		BGE_ASSERT(pResourceHandle);
 	}
 	else
 	{
-		Update(*handle);
+		BGE_LOG("Resources", "Calling ResourceCache::Update(\"%s\")", kResource.GetName().c_str());
+		Update(pResourceHandle);
 	}
-	return *handle;
+	return pResourceHandle;
 }
 
-std::size_t BGE::ResourceCache::Preload(const std::string& kPattern, ProgressCallback progressCallback)
+std::size_t BGE::ResourceCache::Preload(std::string_view pattern, ProgressCallback progressCallback)
 {
 	if (!m_pResourceFile)
 	{
@@ -63,7 +65,7 @@ std::size_t BGE::ResourceCache::Preload(const std::string& kPattern, ProgressCal
 	{
 		Resource resource(m_pResourceFile->VGetResourceName(i));
 
-		if (WildcardMatch(kPattern, resource.GetName()))
+		if (WildcardMatch(pattern, resource.GetName()))
 		{
 			auto pHandle = GetHandle(resource);
 			++loaded;
@@ -77,7 +79,7 @@ std::size_t BGE::ResourceCache::Preload(const std::string& kPattern, ProgressCal
 	return loaded;
 }
 
-std::vector<std::string> BGE::ResourceCache::Match(const std::string& kPattern)
+std::vector<std::string> BGE::ResourceCache::Match(std::string_view pattern)
 {
 	std::vector<std::string> matchingNames;
 	if (!m_pResourceFile)
@@ -85,11 +87,11 @@ std::vector<std::string> BGE::ResourceCache::Match(const std::string& kPattern)
 		return matchingNames;
 	}
 
-	std::size_t numFiles = m_pResourceFile->VGetNumResources();
-	for (std::size_t i = 0; i < numFiles; ++i)
+	const std::size_t kNumFiles = m_pResourceFile->VGetNumResources();
+	for (std::size_t i = 0; i < kNumFiles; ++i)
 	{
 		std::string name = StringToLower(m_pResourceFile->VGetResourceName(i));
-		if (WildcardMatch(kPattern, name))
+		if (WildcardMatch(pattern, name))
 		{
 			matchingNames.emplace_back(name);
 		}
@@ -197,7 +199,7 @@ BGE::StrongResourceHandlePtr BGE::ResourceCache::Load(const Resource& kResource)
 	// TODO: Change return type to indicate errors.
 	if (kRawSize <= 0)
 	{
-		BGE_ERROR("Resource size returned ___ - Resource not found");
+		BGE_ERROR("Resource size returned 0 - Resource not found");
 		return nullptr;
 	}
 
@@ -230,7 +232,6 @@ BGE::StrongResourceHandlePtr BGE::ResourceCache::Load(const Resource& kResource)
 		}
 		pResourceHandle = std::make_shared<ResourceHandle>(kResource, pBuffer, size, this);
 		bool bSuccess = pResourceLoader->VLoadResource(pRawBuffer, kRawSize, pResourceHandle);
-
 		/*
 		 * NOTE: Used for resources that are converted to a usable format upon loading (i.e.
 		 * compressed files). Release the raw buffer for the resource file if it isn't needed.
@@ -257,13 +258,13 @@ BGE::StrongResourceHandlePtr BGE::ResourceCache::Load(const Resource& kResource)
 	return pResourceHandle; // Resource cache is out of memory!
 }
 
-std::optional<BGE::StrongResourceHandlePtr> BGE::ResourceCache::Find(const Resource& kResource) const
+BGE::StrongResourceHandlePtr BGE::ResourceCache::Find(const Resource& kResource) const
 {
 	auto findIt = m_resources.find(kResource.GetName());
 	// Return nullopt for missing resource
 	if (findIt == m_resources.end())
 	{
-		return std::nullopt;
+		return nullptr;
 	}
 	return findIt->second; // Resource was found in the caches
 }

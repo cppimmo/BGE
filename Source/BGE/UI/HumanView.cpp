@@ -27,7 +27,7 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 {
 	if (key.sym == SDLK_ESCAPE)
 	{
-		BGUTSendExitCode(BGE_EXIT_SUCCESS);
+		BGUTSendExitCode(kBGE_EXIT_SUCCESS);
 		return true;
 	}
 	else if (key.sym == SDLK_F5 && !bRepeat)

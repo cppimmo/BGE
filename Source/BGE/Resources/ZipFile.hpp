@@ -56,9 +56,9 @@ namespace BGE
 		bool Init(const std::wstring &resFileName);
 		void End(void);
 
-		int GetNumFiles(void) const { return m_nEntries; }
+		std::size_t GetNumFiles(void) const { return m_nEntries; }
 		std::string GetFileName(ZipFileIndex index) const;
-		int GetFileLen(ZipFileIndex index) const;
+		std::size_t GetFileLen(ZipFileIndex index) const;
 		bool ReadFile(ZipFileIndex index, void *pBuf);
 
 		// Added to show multi-threaded decompression
@@ -74,7 +74,7 @@ namespace BGE
 
 		FILE *m_pFile;    // Zip file
 		char *m_pDirData; // Raw data buffer.
-		int  m_nEntries;  // Number of entries.
+		std::size_t m_nEntries;  // Number of entries.
 
 		// Pointers to the dir entries in pDirData.
 		const TZipDirFileHeader **m_papDir;

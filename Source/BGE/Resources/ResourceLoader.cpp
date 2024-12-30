@@ -5,6 +5,8 @@
 #include "Resources/XMLResource.hpp"
 #include "Scripting/ScriptResource.hpp"
 #include "Graphics/ImageResource.hpp"
+#include "Graphics/ShaderResource.hpp"
+#include "Audio/SoundResource.hpp"
 
 namespace BGE
 {
@@ -76,5 +78,20 @@ namespace BGE
 	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateTGAResourceLoader(void)
 	{
 		return std::make_shared<TGAResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateGLSLResourceLoader(void)
+	{
+		return std::make_shared<GLSLResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateWAVResourceLoader(void)
+	{
+		return std::make_shared<WAVResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateOGGResourceLoader(void)
+	{
+		return std::make_shared<OGGResourceLoader>();
 	}
 } // End namespace (BGE)

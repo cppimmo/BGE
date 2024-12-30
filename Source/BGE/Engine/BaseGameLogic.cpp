@@ -32,6 +32,11 @@ bool BGE::BaseGameLogic::VInit(void)
     return true;
 }
 
+bool BGE::BaseGameLogic::VPostInit(void)
+{
+    return true;
+}
+
 void BGE::BaseGameLogic::VAddView(StrongIGameViewPtr pView, ActorID aID)
 {
     // This makes sure that all views have a non-zero view id

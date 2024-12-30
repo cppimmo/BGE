@@ -73,6 +73,13 @@ bool BGE::Shader::VCompile(std::string_view source)
     return IShader::Compile(m_shaderID, source);
 }
 
+bool BGE::Shader::VCompile(StrongResourceHandlePtr pResourceHandle)
+{
+    // TODO: Add some error checking here to ensure the handle is GLSL.
+    std::string source = pResourceHandle->GetExtraData()->VGetExtraData();
+    return VCompile(source);
+}
+
 GLuint BGE::Shader::VGetID(void) const
 {
     return m_shaderID;

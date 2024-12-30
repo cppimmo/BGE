@@ -22,12 +22,14 @@
 #include "Engine/EngineStd.hpp"
 #include "String.hpp"
 
+#include <string>
+#include <string_view>
+#include <regex>
+
 static bool IsNotBlank(int ch); // Helper function for std::isblank
 
-#include <string_view>
-
 bool BGE::WildcardMatch(std::string_view pattern, std::string_view str) {
-	std::string_view::size_type i = 0;
+	/*std::string_view::size_type i = 0;
 	bool bStar = false;
 new_segment:
 	bStar = false;
@@ -78,7 +80,27 @@ test_match:
 	}
 	// Retry with the next character of the string
 	str.remove_prefix(1);
-	goto test_match;
+	goto test_match;*/
+	// Convert wildcard pattern to a regex pattern
+	std::string regexPattern;
+	for (char ch : pattern)
+	{
+		if (ch == '*')
+			regexPattern += ".*"; // Match zero or more of any character
+		else if (ch == '?')
+			regexPattern += '.';  // Match exactly one of any character
+		else
+		{
+			// Escape special regex characters if needed
+			if (std::string("^$.|()[]{}\\").find(ch) != std::string::npos)
+				regexPattern += '\\';
+
+			regexPattern += ch;
+		}
+	}
+
+	// Perform regex matching
+	return std::regex_match(std::string(str), std::regex(regexPattern));
 }
 
 std::string BGE::SnakeCaseString(std::string_view str)
