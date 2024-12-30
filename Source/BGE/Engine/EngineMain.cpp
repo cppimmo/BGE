@@ -1,7 +1,10 @@
-/*=============================================================================*
- * EngineMain.cpp - Defines the engine entry point.
+/*******************************************************************************
+ * @file   EngineMain.cpp
+ * @author Brian Hoffpauir
+ * @date   12.29.2023
+ * @brief  Defines the engine entry point.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,11 +27,16 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 
+#include "MainLoop/CommandParser.hpp"
+
+#include <cstddef>
+#include <cstdio>
 #include <csignal>
 #include <iostream>
+#include <sstream>
 
 #if BGE_PLATFORM_WINDBG
 #include <crtdbg.h>
@@ -36,20 +44,13 @@
 
 using namespace BGE;
 
-namespace
+namespace // Declare static functions
 {
-	void DebugDumpClient(void *pUserPortion, std::size_t blockSize)
-	{
-		std::uintptr_t address = reinterpret_cast<std::uintptr_t>(pUserPortion);
-		// Use cstdio since Logger will be destroyed.
-		std::fprintf(stderr, "Memory leak at: %llu, bytes allocated: %llu", address, blockSize);
-	}
-
-	void AtExit(void)
-	{
-		auto &app = GetEngineApp();
-		app.OnShutdown();
-	}
+	void DebugDumpClient(void *pUserPortion, std::size_t blockSize);
+	void PrintVersion(void);
+	void PrintUsage(void);
+	void ParseArguments(std::span<std::string_view> arguments);
+	void AtExit(void);
 } // End namespace
 
 /**
@@ -64,7 +65,8 @@ namespace
  */
 int BGE::EngineMain(int numArgs, char *pArgs[])
 {
-	const auto kArgsSpan = GetArguments(numArgs, pArgs); // Collect command line args
+	// Parse CLI arguments
+	ParseArguments(GetArguments(numArgs, pArgs));
 #if BGE_PLATFORM_WINDBG
 	int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Retrieve the current flags
 	// Don't actually free the blocks
@@ -117,3 +119,98 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 #endif /* BGE_PLATFORM_WINDBG */
 	return app.GetExitCode(); // Return app exit code
 }
+
+namespace // Define static functions
+{
+	void DebugDumpClient(void *pUserPortion, std::size_t blockSize)
+	{
+		std::uintptr_t address = reinterpret_cast<std::uintptr_t>(pUserPortion);
+		// Use cstdio since Logger will be destroyed.
+		std::fprintf(stderr, "Memory leak at: %llu, bytes allocated: %llu", address, blockSize);
+	}
+
+	void PrintVersion(void)
+	{
+		std::cout << kENGINE_ABBREV << " (" << kENGINE_NAME << ") " << kVERSION.VToString() << '\n';
+	}
+
+	void PrintUsage(void)
+	{
+		PrintVersion();
+		// NOTE: Most of the options are just made up for now.
+		std::cout << R"usage(
+Usage: game [OPTION...]
+
+General:
+  --help                  Display this help message.
+  --version               Show engine version and build information.
+
+Configuration:
+  --config=FILE           Use a custom configuration file.
+  --reset-settings        Reset to default engine settings.
+
+Graphics:
+  --renderer=ENGINE       Select rendering engine (OpenGL, Vulkan).
+  --resolution=WxH        Set screen resolution (e.g., 1920x1080).
+  --fullscreen=ON|OFF     Toggle fullscreen mode.
+  --vsync=ON|OFF          Enable or disable VSync.
+  --fps-limit=FPS         Limit frame rate (e.g., 60).
+
+Audio:
+  --volume=LEVEL          Set audio volume (0-100).
+  --mute                  Mute all audio.
+
+Debugging:
+  --log-level=LEVEL       Set logging level (debug, info, error).
+  --debug-mode            Enable additional debug information.
+  --profiling             Enable performance profiling.
+
+Gameplay:
+  --skip-intro            Skip introductory scenes.
+  --level=NAME            Load a specific level.
+  --savegame=FILE         Load save file.
+
+Networking:
+  --host=IP               Host the game server at the specified IP.
+  --join=ADDRESS          Join a game at the specified address.
+
+For detailed information about each option, refer to the documentation.
+)usage";
+	}
+
+	void ParseArguments(std::span<std::string_view> arguments)
+	{
+		// Collect command line args
+		CommandParser parser(arguments);
+
+		if (parser.Boolean("help"))
+		{
+			PrintUsage();
+			std::exit(kBGE_EXIT_SUCCESS);
+		}
+
+		if (parser.Boolean("version"))
+		{
+			PrintVersion();
+			std::exit(kBGE_EXIT_SUCCESS);
+		}
+		// TODO: Remove this test code.
+		int value = 0;
+		if (parser.Integer("number", value))
+		{
+			std::cout << "Number: " << value << '\n';
+		}
+
+		std::string str;
+		if (parser.String("test", str))
+		{
+			std::cout << "Test: " << str << '\n';
+		}
+	}
+
+	void AtExit(void)
+	{
+		auto &app = GetEngineApp();
+		app.OnShutdown();
+	}
+} // End namespace
