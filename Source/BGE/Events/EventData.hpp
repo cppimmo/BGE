@@ -2,7 +2,7 @@
  * @file   EventData.hpp
  * @author Brian Hoffpauir
  * @date   12.08.2024
- * @brief  .
+ * @brief  Declaration of even data interface & subclass.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *

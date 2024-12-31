@@ -25,7 +25,8 @@ namespace BGE
 	public:
 		virtual ~IResourceLoader(void) = default;
 
-		virtual const std::string &VGetPattern(void) const = 0;
+		virtual std::string VGetPattern(void) const = 0;
+		virtual ResourceType VGetType(void) const = 0;
 		virtual bool VUseRawFile(void) const = 0;
 		virtual bool VDiscardRawBufferAfterLoad(void) = 0;
 		virtual bool VAddNullZero(void) = 0;
@@ -38,11 +39,11 @@ namespace BGE
 	 */
 	class DefaultResourceLoader final : public IResourceLoader
 	{
-		std::string m_pattern;
 	public:
-		DefaultResourceLoader(void);
+		DefaultResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

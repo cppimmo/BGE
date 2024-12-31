@@ -10,9 +10,6 @@
 [submodule "Source/Lib/implot"]
 	path = Source/Lib/implot
 	url = https://github.com/epezent/implot.git
-[submodule "Source/Lib/bgfx"]
-	path = Source/Lib/bgfx
-	url = https://github.com/bkaradzic/bgfx.git
 [submodule "Source/Lib/openal-soft"]
 	path = Source/Lib/openal-soft
 	url = https://github.com/kcat/openal-soft.git
@@ -37,3 +34,6 @@
 [submodule "Source/Lib/json"]
 	path = Source/Lib/json
 	url = https://github.com/nlohmann/json.git
+[submodule "Source/Lib/glslang"]
+	path = Source/Lib/glslang
+	url = https://github.com/KhronosGroup/glslang.git

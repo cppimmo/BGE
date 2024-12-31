@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Utils.cpp - Various utilities.
+/*******************************************************************************
+ * @file   Utils.cpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Various utilities.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,7 +27,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 #include "Utilities/Utils.hpp"
 
@@ -35,60 +38,80 @@
 #include <sstream>
 #include <iomanip>
 
-// Optional in case
-std::optional<std::string> BGE::Utils::GetSystemTimeString(bool useUnderscores)
+namespace BGE
 {
-	namespace ch = std::chrono;
-	const auto kTime = ch::system_clock::to_time_t(ch::system_clock::now());
-	std::tm *pNow = nullptr;
-	pNow = std::localtime(&kTime); // localtime_s not available on Linux & GCC?
-	if (!pNow)
-		return std::nullopt;
-	
-	std::ostringstream stringStream;
-	stringStream.fill('0');
-	static constexpr int c_kSTARTING_YEAR = 1900;
-	// Why must I set the width each time??
-	stringStream << std::setw(2) << (pNow->tm_mon + 1) << '-'
-				 << std::setw(2) << pNow->tm_mday << '-'
-				 << (pNow->tm_year + c_kSTARTING_YEAR) << ((useUnderscores) ? "_" : ", ")
-				 << std::setw(2) << (pNow->tm_hour + 1) << ((useUnderscores) ? '-' : ':')
-				 << std::setw(2) <<  pNow->tm_min << ((useUnderscores) ? '-' : ':')
-				 << std::setw(2) << ((pNow->tm_sec == 60) ? 0 : pNow->tm_sec);
-	return stringStream.str();
-}
+	// Optional in case
+	std::optional<std::string> GetSystemTimeString(bool useUnderscores)
+	{
+		namespace ch = std::chrono;
+		const auto kTime = ch::system_clock::to_time_t(ch::system_clock::now());
+		std::tm *pNow = nullptr;
+		pNow = std::localtime(&kTime); // localtime_s not available on Linux & GCC?
+		if (!pNow)
+		{
+			return std::nullopt;
+		}
 
-std::string BGE::Utils::GenerateUUID(void)
-{
-	/*constexpr Math::RandomRange<int> kRANGE{ 0, 15 };
-	Math::Random random;
+		std::ostringstream stringStream;
+		stringStream.fill('0');
+		static constexpr int c_kSTARTING_YEAR = 1900;
+		// Why must I set the width each time??
+		stringStream << std::setw(2) << (pNow->tm_mon + 1) << '-'
+			<< std::setw(2) << pNow->tm_mday << '-'
+			<< (pNow->tm_year + c_kSTARTING_YEAR) << ((useUnderscores) ? "_" : ", ")
+			<< std::setw(2) << (pNow->tm_hour + 1) << ((useUnderscores) ? '-' : ':')
+			<< std::setw(2) <<  pNow->tm_min << ((useUnderscores) ? '-' : ':')
+			<< std::setw(2) << ((pNow->tm_sec == 60) ? 0 : pNow->tm_sec);
+		return stringStream.str();
+	}
 
-	std::ostringstream oss;
-	for (int i = 0; i < 8; ++i) // 8 characters
+	std::string GenerateUUID(void)
 	{
-		oss << std::hex << random.GenerateInt(kRANGE);
+		/*constexpr Math::RandomRange<int> kRANGE{ 0, 15 };
+		Math::Random random;
+
+		std::ostringstream oss;
+		for (int i = 0; i < 8; ++i) // 8 characters
+		{
+			oss << std::hex << random.GenerateInt(kRANGE);
+		}
+		oss << "-";
+		for (int i = 0; i < 4; ++i) // 4 characters
+		{
+			oss << std::hex << random.GenerateInt(kRANGE);
+		}
+		oss << "-4"; // 4 characters, version 4 UUID
+		for (int i = 0; i < 3; ++i) // 3 characters
+		{
+			oss << std::hex << random.GenerateInt(kRANGE);
+		}
+		oss << "-";
+		oss << std::hex << (random.GenerateInt(kRANGE) & (0x3 | 0x8)); // Variant bits
+		for (int i = 0; i < 3; ++i) // 3 characters
+		{
+			oss << std::hex << random.GenerateInt(kRANGE);
+		}
+		oss << "-";
+		for (int i = 0; i < 12; ++i) // 12 characters
+		{
+			oss << std::hex << random.GenerateInt(kRANGE);
+		}
+		return oss.str();*/
+		return "";
 	}
-	oss << "-";
-	for (int i = 0; i < 4; ++i) // 4 characters
+
+	std::int32_t ConvertBufToInt(char *pBuffer, std::size_t length)
 	{
-		oss << std::hex << random.GenerateInt(kRANGE);
+		std::int32_t result = 0;
+		if (std::endian::native == std::endian::little)
+		{
+			std::memcpy(&result, pBuffer, length);
+		}
+		else
+		{
+			for (std::size_t i = 0; i < length; ++i)
+				reinterpret_cast<char *>(&result)[3 - i] = pBuffer[i];
+		}
+		return result;
 	}
-	oss << "-4"; // 4 characters, version 4 UUID
-	for (int i = 0; i < 3; ++i) // 3 characters
-	{
-		oss << std::hex << random.GenerateInt(kRANGE);
-	}
-	oss << "-";
-	oss << std::hex << (random.GenerateInt(kRANGE) & (0x3 | 0x8)); // Variant bits
-	for (int i = 0; i < 3; ++i) // 3 characters
-	{
-		oss << std::hex << random.GenerateInt(kRANGE);
-	}
-	oss << "-";
-	for (int i = 0; i < 12; ++i) // 12 characters
-	{
-		oss << std::hex << random.GenerateInt(kRANGE);
-	}
-	return oss.str();*/
-	return "";
-}
+} // End namespace (BGE)

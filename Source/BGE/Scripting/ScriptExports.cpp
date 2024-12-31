@@ -4,6 +4,7 @@
 #include "Engine/EngineApp.hpp"
 #include "UI/DebugConsole.hpp"
 #include "Debugging/Logger.hpp"
+#include "Resources/Localizer.hpp"
 
 namespace BGE::ScriptExports
 {
@@ -48,6 +49,32 @@ namespace BGE::ScriptExports
 
 		// Assign the table to a global variable/module in Lua
 		luaState["Logger"] = loggerModule;
+
+		luaState.new_usertype<Localizer>(
+			"Localizer",
+			// Constructors
+			sol::constructors<Localizer()>(),
+			// Member functions
+			"LoadStrings", &Localizer::LoadStrings,
+			"UnloadStrings", &Localizer::UnloadString,
+			"GetString", &Localizer::GetString,
+			"SetLanguage", &Localizer::SetLanguage,
+			"GetCurrentLanguage", &Localizer::GetCurrentLanguage,
+			// Static member functions
+			"LanguageToString", &Localizer::LanguageToString);
+
+		// Bind the language enum
+		luaState.new_enum<Localizer::Language>(
+			"Language",
+			{
+				{ "English", Localizer::Language::kEnglish },
+				{ "Spanish", Localizer::Language::kSpanish },
+				{ "French", Localizer::Language::kFrench },
+				{ "German", Localizer::Language::kGerman }
+			});
+
+		// Bind the global Localizer instance to Lua
+		luaState["localizer"] = &app.GetLocalizer();
 
 		// TODO: This is for testing; replace it later.
 		/*luaState.set_function("LoadResource", [](sol::string_view resource)

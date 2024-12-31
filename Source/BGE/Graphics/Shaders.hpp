@@ -60,6 +60,8 @@ namespace BGE
 		//! .
 		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) = 0;
 		//! .
+		virtual bool VCompileBinary(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint) = 0;
+		//! .
 		virtual GLuint VGetID(void) const = 0;
 		//! .
 		virtual void VDestroy(void) = 0;
@@ -80,10 +82,11 @@ namespace BGE
 		GLuint m_shaderID;
 	public:
 		Shader(void);
-		virtual ~Shader(void);
+		virtual ~Shader(void) override;
 		// IShader's interface:
 		virtual bool VCompile(std::string_view source) override;
 		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) override;
+		virtual bool VCompileBinary(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint) override;
 		virtual GLuint VGetID(void) const override;
 		virtual void VDestroy(void) override;
 		virtual bool VIsValid(void) const override;

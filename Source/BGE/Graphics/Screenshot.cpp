@@ -94,7 +94,7 @@ void BGE::TakeScreenshot(std::string_view saveGameDir)
 
 std::string GetScreenshotFilename(std::string_view saveGameDir)
 {
-	using BGE::Utils::GetSystemTimeString;
+	using BGE::GetSystemTimeString;
 
 	constexpr bool kUSE_UNDERSCORES = true;
 	const auto kTimeString = GetSystemTimeString(kUSE_UNDERSCORES);

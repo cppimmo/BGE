@@ -65,9 +65,9 @@ bool BGE::Localizer::LoadStrings(Language language)
 
         if (pKey && pValue)
         {
-            auto wideKey = StringToWString(pKey);
-            auto wideValue = StringToWString(pValue);
-            localizedStrings[wideKey] = wideValue;
+            //auto wideKey = StringToWString(pKey);
+            //auto wideValue = StringToWString(pValue);
+            localizedStrings[pKey] = pValue;
         }
     }
 
@@ -86,7 +86,7 @@ bool BGE::Localizer::UnloadString(Language language)
     return false;
 }
 
-const std::wstring &BGE::Localizer::GetString(std::wstring_view sID) const
+const std::string &BGE::Localizer::GetString(std::string_view sID) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -112,7 +112,7 @@ const std::wstring &BGE::Localizer::GetString(std::wstring_view sID) const
 
     // Log missing string and return an empty string
     BGE_ERROR("Missing string ID: " + std::string(sID.begin(), sID.end()));
-    static const std::wstring c_emptyString;
+    static const std::string c_emptyString;
     return c_emptyString;
 }
 

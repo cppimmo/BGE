@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Utils.hpp - Various utilities.
+/*******************************************************************************
+ * @file   Utils.hpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Various utilities.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,41 +27,42 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #ifndef _BGE_UTILS_HPP_
 #define _BGE_UTILS_HPP_
 
-namespace BGE::Utils
+namespace BGE
 {
 	// C++20 concept representing an enum type.
 	template <typename Type>
 	concept Enum = std::is_enum<Type>::value;
 
 	/**
-	 * Return the current system time in a string representation
-	 * useUnderscores argument makes the string suitable for filenames.
+	 * @brief Use to get the current system time in a string representation.
+	 * @param useUnderscores Makes the string suitable for filenames.
+	 * @return The current system time in a string representation.
 	 */
 	std::optional<std::string> GetSystemTimeString(bool useUnderscores = false);
 
 	/**
-	 *
+	 * @brief Generate a UUID.
 	 */
 	std::string GenerateUUID(void);
 
-	// Cast an enum to its underyling type.
+	//! Cast an enum to its underyling type.
 	template <Enum Type>
 	inline constexpr auto ToUnderlying(Type tEnum)
 	{
 		return static_cast<std::underlying_type_t<Type>>(tEnum);
 	}
 
-	// Fetch a string representation of a boolean value.
+	//! Fetch a string representation of a boolean value.
 	inline constexpr std::string_view BoolToString(bool value)
 	{
 		return (value) ? "true" : "false";
 	}
 
-	// Grab the strong shared pointer of a weak pointer.
+	//! Grab the strong shared pointer of a weak pointer.
 	template <typename Type>
 	inline std::shared_ptr<Type> MakeStrongPtr(std::weak_ptr<Type> pWeak)
 	{
@@ -67,6 +71,9 @@ namespace BGE::Utils
 		else
 			return std::shared_ptr<Type>();
 	}
+
+	//! Convert the contents of a character buffer to a 32-bit integer.
+	std::int32_t ConvertBufToInt(char *pBuffer, std::size_t length);
 } // End namespace (BGE::Utils)
 
 #endif /* !_BGE_UTILS_HPP_ */

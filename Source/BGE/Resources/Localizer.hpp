@@ -35,7 +35,7 @@ namespace BGE
 {
 	class Localizer; // Forward declare
     BGE_DECLARE_PTR(Localizer);
-
+	// TODO: Does this need to use std::wstring?
 	/**
 	 * @brief .
 	 */
@@ -54,7 +54,7 @@ namespace BGE
 		//! Language two letter ISO-639 code and name.
 		using LanguagePair = std::pair<std::string_view, std::string_view>;
 	private:
-		using TextStringMap = std::map<std::wstring, std::wstring>;
+		using TextStringMap = std::map<std::string, std::string>;
 		//! Fallback to this language if a string is missing
 		static constexpr Language kFALLBACK_LANGUAGE = Language::kEnglish;
 
@@ -70,12 +70,12 @@ namespace BGE
 		//! Unload strings for a specific language.
 		bool UnloadString(Language language);
 		//! Get a localized string by ID.
-		const std::wstring &GetString(std::wstring_view sID) const;
+		const std::string &GetString(std::string_view sID) const;
 		//! Change the current language.
 		void SetLanguage(Language language);
 		//! Get the current language.
 		Language GetCurrentLanguage(void) const;
-	private:
+	public:
 		// Convert enum to language string (e.g., "English")
 		static constexpr LanguagePair LanguageToString(Language language);
 	};

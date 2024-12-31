@@ -36,9 +36,14 @@
 
 namespace BGE
 {
-	const std::string &BMPResourceLoader::VGetPattern(void) const
+	std::string BMPResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.bmp";
+	}
+
+	ResourceType BMPResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kBMP;
 	}
 
 	bool BMPResourceLoader::VUseRawFile(void) const
@@ -97,9 +102,15 @@ namespace BGE
 		return true;
 	}
 
-	const std::string &JPEGResourceLoader::VGetPattern(void) const
+	std::string JPEGResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		// TODO: Support other JPEG file extensions.
+		return "*.jpeg";
+	}
+
+	ResourceType JPEGResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kJPEG;
 	}
 
 	bool JPEGResourceLoader::VUseRawFile(void) const
@@ -132,9 +143,14 @@ namespace BGE
 		return true;
 	}
 
-	const std::string &PNGResourceLoader::VGetPattern(void) const
+	std::string PNGResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.png";
+	}
+
+	ResourceType PNGResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kPNG;
 	}
 
 	bool PNGResourceLoader::VUseRawFile(void) const
@@ -167,9 +183,14 @@ namespace BGE
 		return true;
 	}
 
-	const std::string &TGAResourceLoader::VGetPattern(void) const
+	std::string TGAResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.tga";
+	}
+
+	ResourceType TGAResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kTGA;
 	}
 
 	bool TGAResourceLoader::VUseRawFile(void) const

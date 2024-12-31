@@ -13,12 +13,28 @@ namespace BGE
 	 */
 	class GLSLResourceLoader final : public IResourceLoader
 	{
-	private:
-		std::string m_pattern = "*.glsl";
 	public:
 		GLSLResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
+		virtual bool VUseRawFile(void) const override;
+		virtual bool VDiscardRawBufferAfterLoad(void) override;
+		virtual bool VAddNullZero(void) override;
+		virtual std::size_t VGetLoadedResourceSize(char *pRawBuffer, std::size_t rawSize) override;
+		virtual bool VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle) override;
+	};
+
+	/**
+	 * @brief Resource loader for .spv shader source code files.
+	 */
+	class SPIRVResourceLoader final : public IResourceLoader
+	{
+	public:
+		SPIRVResourceLoader(void) = default;
+		// IResourceLoader's interface:
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

@@ -10,11 +10,11 @@ namespace BGE
 
 	class ScriptResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.lua";
 	public:
 		ScriptResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

@@ -4,7 +4,7 @@
 #include "Resources/Resource.hpp"
 #include "Resources/ResourceLoader.hpp"
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json.hpp> // Use nlohmann/json library
 
 namespace BGE
 {
@@ -19,9 +19,10 @@ namespace BGE
 	class JSONResourceExtraData final : public IResourceExtraData
 	{
 	public:
+		//! Alias for nlohmann::json.
 		using json = nlohmann::json;
 	private:
-		json m_json;
+		json m_json; //!< Instance of nlohmann::json class type.
 	public:
 		explicit JSONResourceExtraData(const json &data);
 
@@ -39,10 +40,10 @@ namespace BGE
 	 */
 	class JSONResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.json";
 	public:
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

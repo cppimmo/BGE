@@ -11,14 +11,14 @@
 
 namespace BGE
 {
-	DefaultResourceLoader::DefaultResourceLoader(void)
-		: m_pattern("*")
+	std::string DefaultResourceLoader::VGetPattern(void) const
 	{
+		return "";
 	}
 
-	const std::string &DefaultResourceLoader::VGetPattern(void) const
+	ResourceType DefaultResourceLoader::VGetType(void) const
 	{
-		return m_pattern;
+		return ResourceType::kUnknown;
 	}
 
 	bool DefaultResourceLoader::VUseRawFile(void) const

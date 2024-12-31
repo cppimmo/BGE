@@ -2,7 +2,7 @@
  * @file   Bindable.cpp
  * @author Brian Hoffpauir
  * @date   12.14.2024
- * @brief  .
+ * @brief  Definition of IBindable interface.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *

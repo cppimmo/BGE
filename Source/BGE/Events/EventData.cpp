@@ -2,7 +2,7 @@
  * @file   EventData.cpp
  * @author Brian Hoffpauir
  * @date   12.08.2024
- * @brief  .
+ * @brief  Definition of even data interface & subclass.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -31,20 +31,23 @@
 #include "Engine/EngineStd.hpp"
 #include "Events/EventData.hpp"
 
-BGE::BaseEventData::BaseEventData(Timestamp timestamp)
-	: m_timestamp(timestamp)
+namespace BGE
 {
-}
+	BaseEventData::BaseEventData(Timestamp timestamp)
+		: m_timestamp(timestamp)
+	{
+	}
 
-const BGE::Timestamp &BGE::BaseEventData::VGetTimestamp(void) const
-{
-	return m_timestamp;
-}
+	const Timestamp &BaseEventData::VGetTimestamp(void) const
+	{
+		return m_timestamp;
+	}
 
-void BGE::BaseEventData::VSerialize(std::ostringstream &oss) const
-{
-}
+	void BaseEventData::VSerialize(std::ostringstream &oss) const
+	{
+	}
 
-void BGE::BaseEventData::VDeserialize(std::istringstream &iss)
-{
-}
+	void BaseEventData::VDeserialize(std::istringstream &iss)
+	{
+	}
+} // End namespace (BGE)

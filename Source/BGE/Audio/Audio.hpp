@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Audio.hpp - Audio utility system.
+/*******************************************************************************
+ * @file   Audio.hpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Audio subsystem.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,7 +27,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #ifndef _BGE_AUDIO_HPP_
 #define _BGE_AUDIO_HPP_
 
@@ -113,7 +116,7 @@ namespace BGE
 	public:
 		virtual ~IAudioSystem(void) = default;
 		// Interface:
-		virtual bool VInitialize(void) = 0;
+		virtual bool VInit(void) = 0;
 		virtual void VShutdown(void) = 0;
 
 		virtual StrongIAudioListenerPtr VCreateListener(void) = 0;

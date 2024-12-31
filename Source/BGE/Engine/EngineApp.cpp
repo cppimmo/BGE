@@ -1,7 +1,10 @@
-/*=============================================================================*
- * EngineApp.cpp - Implementation of the application layer.
+/*******************************************************************************
+ * @file   EngineApp.cpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Implementation of the application layer.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,7 +27,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 #include "Engine/EngineApp.hpp"
 
@@ -160,7 +163,7 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Queue localization started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_LocalizationStarted>());
 
-	BGE_INFO("(ID_HOWDY): %s",  BGE::WStringToString(GetLocalizer().GetString(L"ID_HOWDY")).c_str());
+	BGE_INFO("(ID_HOWDY): %s", GetLocalizer().GetString("ID_HOWDY").c_str());
 
 	// TODO: Setup event manager.
 
@@ -179,7 +182,7 @@ bool BGE::EngineApp::VInitInstance(void)
 
 	// Initialize the audio system
 	m_pAudioSystem = std::make_unique<OpenALAudioSystem>();
-	if (!m_pAudioSystem->VInitialize())
+	if (!m_pAudioSystem->VInit())
 	{
 		BGE_ERROR("Failure to initialize the audio system!");
 		return false;

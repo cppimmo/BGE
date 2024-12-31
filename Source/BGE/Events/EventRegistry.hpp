@@ -2,7 +2,7 @@
  * @file   EventRegistry.hpp
  * @author Brian Hoffpauir
  * @date   12.10.2024
- * @brief  Declarations of engine events.
+ * @brief  Declarations of EventRegistry class.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *

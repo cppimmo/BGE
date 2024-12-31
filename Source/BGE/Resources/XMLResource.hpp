@@ -4,7 +4,7 @@
 #include "Resources/Resource.hpp"
 #include "Resources/ResourceLoader.hpp"
 
-#include <tinyxml2.h>
+#include <tinyxml2.h> // Use tinyxml2 library
 
 namespace BGE
 {
@@ -33,10 +33,10 @@ namespace BGE
 	 */
 	class XMLResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.xml";
 	public:
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

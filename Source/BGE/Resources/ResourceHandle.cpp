@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   ResourceHandle.hpp
+ * @file   ResourceHandle.cpp
  * @author Brian Hoffpauir
  * @date   11.29.2024
- * @brief  .
+ * @brief  Handle to resources in the cache.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -33,45 +33,58 @@
 
 #include "Resources/ResourceCache.hpp"
 
-BGE::ResourceHandle::ResourceHandle(const Resource &kResource, char *pBuffer, std::size_t size,
-									ResourceCache *pResourceCache)
-	: m_resource(kResource), m_pBuffer(pBuffer), m_size(size), m_pExtraData{}, m_pResourceCache(pResourceCache)
+namespace BGE
 {
-}
+	ResourceHandle::ResourceHandle(const Resource &resource, char *pBuffer, std::size_t size,
+								   ResourceCache *pResourceCache)
+		: m_resource(resource), m_pBuffer(pBuffer), m_size(size), m_pExtraData{}, m_pResourceCache(pResourceCache)
+	{
+	}
 
-BGE::ResourceHandle::~ResourceHandle(void)
-{
-	BGE_SAFE_DELETE_ARRAY(m_pBuffer);
-	// Signal to resource cache that memory has been freed
-	m_pResourceCache->MemoryHasBeenFreed(m_size);
-}
+	ResourceHandle::~ResourceHandle(void)
+	{
+		BGE_SAFE_DELETE_ARRAY(m_pBuffer);
+		// Signal to resource cache that memory has been freed
+		m_pResourceCache->MemoryHasBeenFreed(m_size);
+	}
 
-const std::string &BGE::ResourceHandle::GetName(void) const
-{
-	return m_resource.GetName();
-}
+	const std::string &ResourceHandle::GetName(void) const noexcept
+	{
+		return m_resource.GetName();
+	}
 
-std::size_t BGE::ResourceHandle::GetSize(void) const
-{
-	return m_size;
-}
+	ResourceType ResourceHandle::GetType(void) const noexcept
+	{
+		return m_type;
+	}
 
-char *BGE::ResourceHandle::Buffer(void) const
-{
-	return m_pBuffer;
-}
+	std::size_t ResourceHandle::GetSize(void) const noexcept
+	{
+		return m_size;
+	}
 
-char *BGE::ResourceHandle::WritableBuffer(void)
-{
-	return m_pBuffer;
-}
+	char *ResourceHandle::Buffer(void) const
+	{
+		return m_pBuffer;
+	}
 
-BGE::StrongIResourceExtraDataPtr BGE::ResourceHandle::GetExtraData(void)
-{
-	return m_pExtraData;
-}
+	char *ResourceHandle::WritableBuffer(void)
+	{
+		return m_pBuffer;
+	}
 
-void BGE::ResourceHandle::SetExtraData(StrongIResourceExtraDataPtr pExtraData)
-{
-	m_pExtraData = pExtraData;
-}
+	StrongIResourceExtraDataPtr ResourceHandle::GetExtraData(void)
+	{
+		return m_pExtraData;
+	}
+
+	void ResourceHandle::SetType(ResourceType type) noexcept
+	{
+		m_type = type;
+	}
+
+	void ResourceHandle::SetExtraData(StrongIResourceExtraDataPtr pExtraData)
+	{
+		m_pExtraData = pExtraData;
+	}
+} // End namespace (BGE)

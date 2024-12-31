@@ -32,6 +32,7 @@
 #define _BGE_IMAGERESOURCE_HPP_
 
 #include "Resources/Resource.hpp"
+#include "Resources/ResourceHandle.hpp"
 #include "Resources/ResourceLoader.hpp"
 
 namespace BGE
@@ -84,11 +85,11 @@ namespace BGE
 	 */
 	class BMPResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.bmp";
 	public:
 		BMPResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;
@@ -101,11 +102,11 @@ namespace BGE
 	 */
 	class JPEGResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.jpeg";
 	public:
 		JPEGResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;
@@ -118,11 +119,11 @@ namespace BGE
 	 */
 	class PNGResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.png";
 	public:
 		PNGResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;
@@ -135,11 +136,11 @@ namespace BGE
 	 */
 	class TGAResourceLoader : public IResourceLoader
 	{
-		std::string m_pattern = "*.tga";
 	public:
 		TGAResourceLoader(void) = default;
 		// IResourceLoader's interface:
-		virtual const std::string &VGetPattern(void) const override;
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
 		virtual bool VUseRawFile(void) const override;
 		virtual bool VDiscardRawBufferAfterLoad(void) override;
 		virtual bool VAddNullZero(void) override;

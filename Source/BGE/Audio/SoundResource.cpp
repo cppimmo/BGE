@@ -1,26 +1,41 @@
+/*******************************************************************************
+ * @file   SoundResource.cpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Definition of sound resource types & classes.
+ *
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 #include "Audio/SoundResource.hpp"
 
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
+#include <vorbis/codec.h> // Use vorbis library
+#include <vorbis/vorbisfile.h> // Use vorbisfile library
 
 namespace
 {
-	std::int32_t ConvertToInt(char *pBuffer, std::size_t length)
-	{
-		std::int32_t result = 0;
-		if (std::endian::native == std::endian::little)
-		{
-			std::memcpy(&result, pBuffer, length);
-		}
-		else
-		{
-			for (std::size_t i = 0; i < length; ++i)
-				reinterpret_cast<char *>(&result)[3 - i] = pBuffer[i];
-		}
-		return result;
-	}
-
 	struct OggVorbis_MemoryFile
 	{
 		unsigned char *pDataPtr = nullptr; //!< Pointer to the data in memory.
@@ -130,9 +145,14 @@ namespace BGE
 		return m_soundData;
 	}
 
-	const std::string &WAVResourceLoader::VGetPattern(void) const
+	std::string WAVResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.wav";
+	}
+
+	ResourceType WAVResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kWAV;
 	}
 
 	bool WAVResourceLoader::VUseRawFile(void) const
@@ -194,7 +214,7 @@ namespace BGE
 		pCursor += 4;
 
 		// Ensure fmt chunk size is 16 (PCM format)
-		std::int32_t fmtChunkSize = ConvertToInt(pCursor, 4);
+		std::int32_t fmtChunkSize = ConvertBufToInt(pCursor, 4);
 		pCursor += 4;
 		if (fmtChunkSize != 16)
 		{
@@ -203,7 +223,7 @@ namespace BGE
 		}
 
 		// Read audio format (2 bytes, should be 1 for PCM)
-		std::int16_t audioFormat = ConvertToInt(pCursor, 2);
+		std::int16_t audioFormat = ConvertBufToInt(pCursor, 2);
 		pCursor += 2;
 		if (audioFormat != 1)
 		{
@@ -212,25 +232,25 @@ namespace BGE
 		}
 
 		// Read the number of channels (2 bytes)
-		soundData.channels = static_cast<std::uint8_t>(ConvertToInt(pCursor, 2));
+		soundData.channels = static_cast<std::uint8_t>(ConvertBufToInt(pCursor, 2));
 		pCursor += 2;
 
 		// Read sample rate (4 bytes)
-		soundData.sampleRate = ConvertToInt(pCursor, 4);
+		soundData.sampleRate = ConvertBufToInt(pCursor, 4);
 		pCursor += 4;
 
 		// Skip byte rate & block align (6 bytes total)
 		pCursor += 6;
 
 		// Read bits per sample (2 bytes)
-		soundData.bitsPerSample = static_cast<std::uint8_t>(ConvertToInt(pCursor, 2));
+		soundData.bitsPerSample = static_cast<std::uint8_t>(ConvertBufToInt(pCursor, 2));
 		pCursor += 2;
 
 		// Locate the "data" chunk
 		while (std::strncmp(pCursor, "data", 4) != 0)
 		{
 			pCursor += 4;
-			std::int32_t chunkSize = ConvertToInt(pCursor, 4);
+			std::int32_t chunkSize = ConvertBufToInt(pCursor, 4);
 			pCursor += 4 + chunkSize; // Skip over this chunk's data
 			if (pCursor >= pRawBuffer + size)
 			{
@@ -241,7 +261,7 @@ namespace BGE
 		pCursor += 4;
 
 		// Read data size (4 bytes)
-		std::int32_t dataSize = ConvertToInt(pCursor, 4);
+		std::int32_t dataSize = ConvertBufToInt(pCursor, 4);
 		pCursor += 4;
 
 		// Ensure we have enough buffer left for the data
@@ -260,9 +280,14 @@ namespace BGE
 		return true;
 	}
 
-	const std::string &OGGResourceLoader::VGetPattern(void) const
+	std::string OGGResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.ogg";
+	}
+
+	ResourceType OGGResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kOGG;
 	}
 
 	bool OGGResourceLoader::VUseRawFile(void) const

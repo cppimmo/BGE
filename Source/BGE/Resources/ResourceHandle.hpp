@@ -2,7 +2,7 @@
  * @file   ResourceHandle.hpp
  * @author Brian Hoffpauir
  * @date   11.29.2024
- * @brief  .
+ * @brief  Handle to resources in the cache.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -41,6 +41,23 @@ namespace BGE
 	class ResourceHandle; // Forward declare
 	BGE_DECLARE_PTR(ResourceHandle);
 
+	//! Scoped enum with all possible resource types.
+	enum struct ResourceType
+	{
+		kXML,      /**< .xml files. */
+		kJSON,     /**< .json files. */
+		kScript,   /**< .lua files. */
+		kOGG,      /**< .ogg files. */
+		kWAV,      /**< .wav files. */
+		kGLSL,     /**< .glsl files. */
+		kSPIRV,    /**< .spv files. */
+		kJPEG,     /**< .jpeg files. */
+		kPNG,      /**< .png files. */
+		kBMP,      /**< .bmp files. */
+		kTGA,      /**< .tga files. */
+		kUnknown   /**< Files of unknown type. */
+	};
+
 	//! Least recently used cache list.
 	using ResourceHandleList = std::list<StrongResourceHandlePtr>;
 	//! Maps identifiers to resource data (handles).
@@ -51,21 +68,24 @@ namespace BGE
 		friend class ResourceCache;
 	protected:
 		Resource m_resource;
+		ResourceType m_type = ResourceType::kUnknown;
 		char *m_pBuffer;
 		std::size_t m_size;
 		StrongIResourceExtraDataPtr m_pExtraData;
 		ResourceCache *m_pResourceCache;
 	public:
-		ResourceHandle(const Resource &kResource, char *pBuffer, std::size_t size, ResourceCache *pResourceCache);
+		ResourceHandle(const Resource &resource, char *pBuffer, std::size_t size, ResourceCache *pResourceCache);
 		virtual ~ResourceHandle(void);
 
 		// Accessors:
-		const std::string &GetName(void) const;
-		std::size_t GetSize(void) const;
+		const std::string &GetName(void) const noexcept;
+		ResourceType GetType(void) const noexcept;
+		std::size_t GetSize(void) const noexcept;
 		char *Buffer(void) const;
 		char *WritableBuffer(void);
-
 		StrongIResourceExtraDataPtr GetExtraData(void);
+		// Modifiers:
+		void SetType(ResourceType type) noexcept;
 		void SetExtraData(StrongIResourceExtraDataPtr pExtraData);
 	};
 } // End namespace (BGE)

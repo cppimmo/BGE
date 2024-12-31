@@ -63,9 +63,9 @@ namespace BGE
 	public:
 		enum struct ErrorDialogResult
 		{
-			Abort,
-			Retry,
-			Ignore
+			kAbort,
+			kRetry,
+			kIgnore
 		};
 		using TagMap = std::map<std::string, std::uint8_t>;
 		using ErrorMessengerList = std::list<Logger::ErrorMessenger *>;
@@ -211,6 +211,8 @@ void Logger::LogOutputFunc_SDL(void *const pUserData, int category, SDL_LogPrior
 	case SDL_LOG_PRIORITY_CRITICAL:
 		BGE_ERROR("SDL(%s|%s)", categoryName.data(), pMessage);
 		break;
+	default:
+		break;
 	}
 }
 
@@ -270,7 +272,7 @@ bool LogManager::Init(std::string_view configFileName)
 
 int LogManager::Write(std::string_view tagName, std::string_view msgFormat, va_list args)
 {
-	using BGE::Utils::GetSystemTimeString;
+	using BGE::GetSystemTimeString;
 	// Just print for now
 	const auto kTimeString = GetSystemTimeString();
 	// Check for null optional
@@ -359,10 +361,10 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		mbData.title = "Error";
 
 		// Just print for now
-		const auto kTimeString = BGE::Utils::GetSystemTimeString();
+		const auto kTimeString = BGE::GetSystemTimeString();
 		// Check for null optional
 		if (!kTimeString)
-			return ErrorDialogResult::Ignore;
+			return ErrorDialogResult::kIgnore;
 
 		std::ostringstream fmtStream; // Prepend items to arguments format
 		fmtStream << *kTimeString << " [" << tagName << "] " << msgFormat << '\n';
@@ -399,15 +401,15 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 	switch (buttonID)
 	{
 	case 1:
-		return ErrorDialogResult::Ignore;
+		return ErrorDialogResult::kIgnore;
 		break;
 	case 2:
 		SDL_TriggerBreakpoint(); // Trigger a breakpoint when a debugger is attached
-		return ErrorDialogResult::Abort;
+		return ErrorDialogResult::kAbort;
 		break;
 	case 3:
 	default: // Cover default case as well with Retry result
-		return ErrorDialogResult::Retry;
+		return ErrorDialogResult::kRetry;
 		break;
 	}
 }

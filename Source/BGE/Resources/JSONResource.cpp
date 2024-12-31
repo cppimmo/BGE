@@ -18,9 +18,14 @@ namespace BGE
 		return m_json;
 	}
 
-	const std::string &JSONResourceLoader::VGetPattern(void) const
+	std::string JSONResourceLoader::VGetPattern(void) const
 	{
-		return m_pattern;
+		return "*.json";
+	}
+
+	ResourceType JSONResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kJSON;
 	}
 
 	bool JSONResourceLoader::VUseRawFile(void) const

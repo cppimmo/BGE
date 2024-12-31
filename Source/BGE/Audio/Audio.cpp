@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Audio.cpp - Audio utility system.
+/*******************************************************************************
+ * @file   Audio.cpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Audio subsystem.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,6 +27,6 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 #include "Audio/Audio.hpp"

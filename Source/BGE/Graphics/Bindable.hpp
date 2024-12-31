@@ -2,7 +2,7 @@
  * @file   Bindable.hpp
  * @author Brian Hoffpauir
  * @date   12.14.2024
- * @brief  .
+ * @brief  Declaration of IBindable interface.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *

@@ -231,6 +231,8 @@ BGE::StrongResourceHandlePtr BGE::ResourceCache::Load(const Resource& kResource)
 			return nullptr;
 		}
 		pResourceHandle = std::make_shared<ResourceHandle>(kResource, pBuffer, size, this);
+		// Set the type based on the selected resource loader
+		pResourceHandle->SetType(pResourceLoader->VGetType());
 		bool bSuccess = pResourceLoader->VLoadResource(pRawBuffer, kRawSize, pResourceHandle);
 		/*
 		 * NOTE: Used for resources that are converted to a usable format upon loading (i.e.
