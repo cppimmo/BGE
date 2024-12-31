@@ -2,6 +2,7 @@
 #include "TestGameView.hpp"
 
 #include "Audio/SoundResource.hpp"
+#include "Resources/JSONResource.hpp"
 
 #include <al.h>
 #include <alc.h>
@@ -161,6 +162,19 @@ namespace TestGame
 		pListener->VSetPosition(glm::vec3(0, 0, 0));
 		pListener->VSetVelocity(glm::vec3(0, 0, 0));
 		audio.VSetListener(pListener);
+
+		auto pJSON = resCache.GetHandle(BGE::Resource("Assets\\test.json"));
+		if (pJSON)
+		{
+			auto pExtraData = std::dynamic_pointer_cast<BGE::JSONResourceExtraData>(pJSON->GetExtraData());
+
+			const auto &json = pExtraData->GetJSON();
+			for (const auto &element : json)
+			{
+				std::cout << element << '\n';
+			}
+		}
+
 		return true;
 	}
 
@@ -184,6 +198,10 @@ namespace TestGame
 		//}
 		m_pSource->VSetLooping(true);
 		m_pSource->VPlay();
+
+		ImGui::Begin("Test");
+		ImGui::Text("Audio source progress: %1.2f", m_pSource->VGetProgress());
+		ImGui::End();
 
 		glBindVertexArray(m_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);

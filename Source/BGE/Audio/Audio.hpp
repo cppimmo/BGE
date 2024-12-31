@@ -84,6 +84,7 @@ namespace BGE
 		virtual void VPause(void) = 0;
 		virtual void VStop(void) = 0;
 		virtual bool VIsPlaying(void) const = 0;
+		virtual float VGetProgress(void) const = 0;
 
 		virtual void VAttachBuffer(StrongIAudioBufferPtr pBuffer) = 0;
 		virtual StrongIAudioBufferPtr VGetBuffer(void) const = 0;

@@ -64,6 +64,7 @@ namespace BGE
 		virtual void VPause(void) override;
 		virtual void VStop(void) override;
 		virtual bool VIsPlaying(void) const override;
+		virtual float VGetProgress(void) const override;
 
 		virtual void VAttachBuffer(StrongIAudioBufferPtr pBuffer) override;
 		virtual StrongIAudioBufferPtr VGetBuffer(void) const override;

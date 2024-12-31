@@ -117,6 +117,49 @@ namespace BGE
 		return (state == AL_PLAYING);
 	}
 
+	float OpenALAudioSource::VGetProgress(void) const
+	{
+		ALint byteOffset = 0;
+		ALint bufferID = 0;
+
+		// TODO: Use IAudioBuffer::VGet() instead.
+		// Get the currently bound buffer
+		alGetSourcei(m_sourceID, AL_BUFFER, &bufferID);
+		if (bufferID == 0)
+		{
+			return 0.0f; // No buffer is attached
+		}
+
+		// Query the byte offset of the source
+		alGetSourcei(m_sourceID, AL_BYTE_OFFSET, &byteOffset);
+
+		// Query buffer properties
+		ALint size = 0, freq = 0, bits = 0, channels = 0;
+		alGetBufferi(bufferID, AL_SIZE, &size);
+		alGetBufferi(bufferID, AL_FREQUENCY, &freq);
+		alGetBufferi(bufferID, AL_BITS, &bits);
+		alGetBufferi(bufferID, AL_CHANNELS, &channels);
+
+		if (freq == 0 || bits == 0 || channels == 0)
+		{
+			return 0.0f; // Invalid buffer properties
+		}
+
+		// Calculate the total duration of the buffer in seconds
+		float totalDuration = static_cast<float>(size) / (freq * channels * (bits / 8.0f));
+
+		// Calculate the current playback position in seconds
+		float currentPosition = static_cast<float>(byteOffset) / (freq * channels * (bits / 8.0f));
+
+		// Calculate normalized progress in range [0.0, 1.0]
+		if (totalDuration > 0.0f)
+		{
+			return currentPosition / totalDuration;
+		}
+
+		return 0.0f; // Avoid division by zero
+	}
+
 	void OpenALAudioSource::VAttachBuffer(StrongIAudioBufferPtr pBuffer)
 	{
 		if (!pBuffer)

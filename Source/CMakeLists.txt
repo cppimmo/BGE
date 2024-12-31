@@ -168,6 +168,12 @@ add_subdirectory(${VORBIS_DIR})
 #find_package(Vorbis REQUIRED) # This will look for libvorbis
 #find_package(VorbisFile REQUIRED) # This will look for libvorbisfile
 
+# nlohmann/json:
+set(JSON_DIR "Lib/json")
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_MultipleHeaders ON CACHE INTERNAL "")
+add_subdirectory(${JSON_DIR})
+
 # Engine Project:
 set(ENGINE_SRC_DIR "BGE")
 
@@ -189,7 +195,7 @@ endif()
 target_link_libraries(Engine
   ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
   FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB
-  vorbis vorbisfile
+  vorbis vorbisfile nlohmann_json::nlohmann_json
 ) #${Boost_LIBRARIES})
 
 if(WIN32)

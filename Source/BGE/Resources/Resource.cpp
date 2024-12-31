@@ -3,12 +3,12 @@
 
 namespace BGE
 {
-	PlaintextExtraData::PlaintextExtraData(std::string_view plaintext)
+	PlaintextResourceExtraData::PlaintextResourceExtraData(std::string_view plaintext)
 		: m_plaintext(plaintext)
 	{
 	}
 
-	std::string PlaintextExtraData::VGetExtraData(void)
+	std::string PlaintextResourceExtraData::VGetExtraData(void)
 	{
 		return m_plaintext;
 	}

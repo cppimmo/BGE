@@ -13,6 +13,7 @@ namespace BGE
 	 */
 	class GLSLResourceLoader final : public IResourceLoader
 	{
+	private:
 		std::string m_pattern = "*.glsl";
 	public:
 		GLSLResourceLoader(void) = default;

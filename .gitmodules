@@ -34,3 +34,6 @@
 [submodule "Source/Lib/vorbis"]
 	path = Source/Lib/vorbis
 	url = https://gitlab.xiph.org/xiph/vorbis.git
+[submodule "Source/Lib/json"]
+	path = Source/Lib/json
+	url = https://github.com/nlohmann/json.git

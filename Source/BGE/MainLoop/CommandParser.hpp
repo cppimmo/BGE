@@ -1,7 +1,7 @@
 /*******************************************************************************
  * @file   CommandParser.hpp
  * @author Brian Hoffpauir
- * @date   12.29.2023
+ * @date   12.29.2024
  * @brief  A class to parse and handle command-line arguments.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.

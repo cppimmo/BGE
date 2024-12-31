@@ -118,6 +118,16 @@ namespace BGE
 
 		ImGui::Begin(VImGuiWidgetName().data(), &m_bEnabled);
 
+		if (ImGui::Button("Clear"))
+		{
+			FlushOutputLog();
+		}
+		ImGui::SameLine();
+		bool bAutoScroll;
+		ImGui::Checkbox("Auto-scroll", &m_bAutoScroll);
+
+		ImGui::Separator();
+
 		RenderOutputLog();
 		RenderInputBox();
 
@@ -153,21 +163,19 @@ namespace BGE
 		// Copy existing m_inputBuffer contents to the temporary buffer
 		std::strncpy(tempBuffer, m_inputBuffer.c_str(), kBUFFER_SIZE - 1);
 
-		if (ImGui::InputText("Input", tempBuffer, kBUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
+		ImGui::Text("Input:");
+		ImGui::SameLine();
+		if (ImGui::InputText("##InputBox", tempBuffer, kBUFFER_SIZE, ImGuiInputTextFlags_EnterReturnsTrue))
 		{
-			// Update m_inputBuffer with the contents of tempBuffer
-			m_inputBuffer = tempBuffer;
-
-			// Execute the entered command
-			ExecuteCommand(m_inputBuffer);
-
-			// Clear the intermediate buffer and m_inputBuffer for the next input
-			tempBuffer[0] = '\0';
-			m_inputBuffer.clear();
-
-			// Clear auto-complete suggestions
-			m_autoCompleteSuggestions.clear();
+			SubmitCommand(tempBuffer);
 		}
+
+		/*ImGui::SameLine();
+
+		if (ImGui::Button("Submit"))
+		{
+			SubmitCommand(tempBuffer);
+		}*/
 
 		// Navigation through history
 		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)) && !m_commandHistory.empty())
@@ -208,7 +216,7 @@ namespace BGE
 			for (const auto &line : m_outputLog)
 				ImGui::TextWrapped("%s", line.c_str());
 
-			if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+			if (m_bAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 				ImGui::SetScrollHereY(1.0f);
 
 			ImGui::EndChild();
@@ -255,6 +263,21 @@ namespace BGE
 			}
 		}
 		ImGui::End();
+	}
+
+	void DebugConsole::SubmitCommand(std::string_view input)
+	{
+		// Update m_inputBuffer with the contents of tempBuffer
+		m_inputBuffer = std::string(input);
+
+		// Execute the entered command
+		ExecuteCommand(m_inputBuffer);
+
+		// Clear the intermediate buffer and m_inputBuffer for the next input
+		m_inputBuffer.clear();
+
+		// Clear auto-complete suggestions
+		m_autoCompleteSuggestions.clear();
 	}
 
 	void DebugConsole::ExecuteLua(std::string_view code)

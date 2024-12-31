@@ -1,7 +1,7 @@
 /*******************************************************************************
  * @file   CommandParser.cpp
  * @author Brian Hoffpauir
- * @date   12.29.2023
+ * @date   12.29.2024
  * @brief  A class to parse and handle command-line arguments.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
@@ -152,10 +152,14 @@ namespace BGE
 
 	CommandParser &CommandParser::Inf(double value)
 	{
+		// TODO: This needs a proper implementation.
+		return *this;
 	}
 
 	CommandParser &CommandParser::Sup(double value)
 	{
+		// TODO: This needs a proper implementation.
+		return *this;
 	}
 
 	int CommandParser::ExcessArguments(void) const

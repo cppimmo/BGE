@@ -133,6 +133,8 @@ bool BGE::EngineApp::VInitInstance(void)
 	DefaultResourceLoaderFactory rlFactory;
 	// XML resource loaders:
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateXMLResourceLoader());
+	// JSON resource loaders:
+	m_pResourceCache->RegisterLoader(rlFactory.VCreateJSONResourceLoader());
 	// Script resource loaders:
 	m_pResourceCache->RegisterLoader(rlFactory.VCreateScriptResourceLoader());
 	// Image resource loaders:

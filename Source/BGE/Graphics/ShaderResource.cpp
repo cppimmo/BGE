@@ -34,8 +34,8 @@ namespace BGE
 			return false;
 
 		// Set the shader plaintext source code extra data
-		auto pPlaintextExtraData = std::make_shared<PlaintextExtraData>(pRawBuffer);
-		pResourceHandle->SetExtraData(pPlaintextExtraData);
+		auto pExtraData = std::make_shared<PlaintextResourceExtraData>(pRawBuffer);
+		pResourceHandle->SetExtraData(pExtraData);
 		return true;
 	}
 } // End namespace (BGE)
