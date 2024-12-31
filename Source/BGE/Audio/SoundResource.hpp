@@ -18,34 +18,50 @@ namespace BGE
 	BGE_DECLARE_PTR(OGGResourceLoader);
 
 	/**
-	 * @brief Extra resource data for plaintext file contents.
+	 * @brief Enumeration for identifiying the sound format.
 	 */
-	class SoundExtraData : public IResourceExtraData
+	enum struct SoundType
 	{
-	public:
-		struct SoundData
-		{
-			std::uint8_t channels;
-			std::int32_t sampleRate;
-			std::uint8_t bitsPerSample;
-			std::vector<char> soundData;
-		};
+		kWAV,
+		kOGG
+	};
+
+	/**
+	 * @brief Data used for setting up sounds.
+	 */
+	struct SoundData
+	{
+		std::uint8_t channels;
+		std::int32_t sampleRate;
+		std::uint8_t bitsPerSample;
+		std::vector<char> soundData;
+	};
+
+	/**
+	 * @brief Extra resource data for sound file contents.
+	 */
+	class SoundResourceExtraData : public IResourceExtraData
+	{
 	protected:
-		SoundData m_soundData;
+		SoundType m_soundType; //!< The type of the sound.
+		SoundData m_soundData; //!< The sound data.
 	public:
-		explicit SoundExtraData(const SoundData &kSoundData);
-		SoundExtraData(const SoundExtraData &) = default;
-		SoundExtraData(SoundExtraData &&) noexcept = default;
-		SoundExtraData &operator=(const SoundExtraData &) = default;
-		SoundExtraData &operator=(SoundExtraData &&) noexcept = default;
-		virtual ~SoundExtraData(void) = default;
+		SoundResourceExtraData(SoundType type, const SoundData &kSoundData);
+		SoundResourceExtraData(const SoundResourceExtraData &) = default;
+		SoundResourceExtraData(SoundResourceExtraData &&) noexcept = default;
+		SoundResourceExtraData &operator=(const SoundResourceExtraData &) = default;
+		SoundResourceExtraData &operator=(SoundResourceExtraData &&) noexcept = default;
+		virtual ~SoundResourceExtraData(void) override = default;
 		// IResourceExtraData's interface:
 		virtual std::string VGetExtraData(void) override;
+		SoundType GetSoundType(void) const;
 		const SoundData &GetSoundData(void) const;
 	};
 
 	/**
-	 * @brief Resource loader for .glsl shader source code files.
+	 * @brief Resource loader for .wav sound files.
+	 *
+	 * @see https://en.wikipedia.org/wiki/WAV
 	 */
 	class WAVResourceLoader final : public IResourceLoader
 	{
@@ -62,7 +78,9 @@ namespace BGE
 	};
 
 	/**
-	 * @brief Resource loader for .glsl shader source code files.
+	 * @brief Resource loader for .ogg sound files.
+	 *
+	 * @see https://en.wikipedia.org/wiki/Vorbis
 	 */
 	class OGGResourceLoader final : public IResourceLoader
 	{

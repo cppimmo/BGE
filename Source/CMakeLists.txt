@@ -162,12 +162,21 @@ set(SOL2_LUA_VERSION "5.3.4" CACHE STRING "The version of Lua used")
 set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
 add_subdirectory(${SOL2_DIR})
 
+# Vorbis:
+set(VORBIS_DIR "Lib/vorbis")
+add_subdirectory(${VORBIS_DIR})
+#find_package(Vorbis REQUIRED) # This will look for libvorbis
+#find_package(VorbisFile REQUIRED) # This will look for libvorbisfile
+
 # Engine Project:
 set(ENGINE_SRC_DIR "BGE")
 
 add_library(Engine SHARED)
 
-target_include_directories(Engine PUBLIC "${ENGINE_SRC_DIR}" ${OPENAL_INCLUDE_DIR}) #"${Boost_INCLUDE_DIRS}")
+target_include_directories(Engine PUBLIC
+  "${ENGINE_SRC_DIR}" ${OPENAL_INCLUDE_DIR}
+  "${VORBIS_DIR}/include"
+) #"${Boost_INCLUDE_DIRS}")
 
 get_sources_match_list(ENGINE_SRC_FILES "${ENGINE_SRC_DIR}")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${ENGINE_SRC_FILES})
@@ -177,8 +186,11 @@ if(WIN32)
   target_compile_options(Engine PUBLIC "/MP")
 endif()
 
-target_link_libraries(Engine ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
-  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB) #${Boost_LIBRARIES})
+target_link_libraries(Engine
+  ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
+  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB
+  vorbis vorbisfile
+) #${Boost_LIBRARIES})
 
 if(WIN32)
   # Set the CWD for the debugger to start the program

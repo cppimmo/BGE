@@ -31,3 +31,6 @@
 [submodule "Source/Lib/assimp"]
 	path = Source/Lib/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "Source/Lib/vorbis"]
+	path = Source/Lib/vorbis
+	url = https://gitlab.xiph.org/xiph/vorbis.git

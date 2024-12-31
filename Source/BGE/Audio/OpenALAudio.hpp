@@ -23,8 +23,18 @@ namespace BGE
 	 */
 	class OpenALAudioListener final : public IAudioListener
 	{
+	private:
+		static constexpr float kDEFAULT_VOLUME = 1.0f; //!< Default listener volume.
+
+		float m_volume; //!< Master volume of the listener.
+		glm::vec3 m_position; //!< 3D position of the listener.
+		glm::vec3 m_velocity; //!< Velocity of the listener.
 	public:
+		OpenALAudioListener(void);
+		~OpenALAudioListener(void) override = default;
 		// IAudioListener's interface:
+		virtual void VSetVolume(float volume) override;
+		virtual float VGetVolume(void) const override;
 		virtual void VSetPosition(const glm::vec3 &position) override;
 		virtual void VSetVelocity(const glm::vec3 &velocity) override;
 		virtual void VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up) override;
@@ -35,8 +45,9 @@ namespace BGE
 	 */
 	class OpenALAudioSource final : public IAudioSource
 	{
-		ALuint m_sourceID;
-		StrongIAudioBufferPtr m_pBuffer;
+	private:
+		ALuint m_sourceID; //!< OpenAL source identifier.
+		StrongIAudioBufferPtr m_pBuffer; //!< Audio buffer managed by this source.
 	public:
 		OpenALAudioSource(void);
 		~OpenALAudioSource(void) override;
@@ -61,8 +72,9 @@ namespace BGE
 
 	class OpenALAudioBuffer final : public IAudioBuffer
 	{
-		ALuint m_bufferID;
-		bool m_bInitialized = false;
+	private:
+		ALuint m_bufferID; //!< OpenAL buffer identifier.
+		bool m_bInitialized = false; //!< Has the buffer been initialized?
 	public:
 		OpenALAudioBuffer(void);
 		~OpenALAudioBuffer(void) override;
@@ -78,11 +90,13 @@ namespace BGE
 	 */
 	class OpenALAudioSystem final : public IAudioSystem
 	{
-		ALCdevice *m_pDevice;
-		ALCcontext *m_pContext;
-		bool m_bAllPaused;
-		bool m_bInitialized;
-		StrongIAudioListenerPtr m_pActiveListener;
+	private:
+		ALCdevice *m_pDevice; //!< OpenAL device.
+		ALCcontext *m_pContext; //!< OpenAL context.
+		bool m_bAllPaused; //!< Are all sources paused?
+		bool m_bInitialized; //!< Is the audio system initialized?
+		StrongIAudioListenerPtr m_pActiveListener; //!< The active audio listener (of which there can only be one).
+		AudioSourceList m_sources; //!< List of managed audio sources.
 	public:
 		OpenALAudioSystem(void);
 		~OpenALAudioSystem(void) override;
@@ -105,39 +119,9 @@ namespace BGE
 		virtual void VResumeAll(void) override;
 		virtual void VStopAll(void) override;
 		virtual bool VIsInitialized(void) const override;
+	private:
+		static void ListAudioDevices(const ALchar *pDevices);
 	};
-
-	/*class OpenALAudioSystem : public IAudioSystem
-	{
-		ALCdevice *m_pDevice;
-		ALCcontext *m_pContext;
-		bool m_allPaused;
-	public:
-		Audio(void);
-		~Audio(void);
-	
-		virtual bool VActive(void) { return false; }
-	
-		virtual IAudioListener *VInitAudioListener(void) { return nullptr; }
-		virtual void VReleaseAudioListener(void) { }
-	
-		virtual IAudioSource *VInitAudioSource(void) { return nullptr; }
-		virtual void VReleaseAudioSource(void) { }
-	
-		virtual IAudioBuffer *VInitAudioBuffer(void) { return nullptr; }
-		virtual void VReleaseAudioBuffer(IAudioBuffer *pAudioBuffer) { }
-	
-		virtual void VStopAllSounds(void) { }
-		virtual void VPauseAllSounds(void) { }
-		virtual void VResumeAllSounds(void) { }
-	
-		virtual bool VInitialize(void) { return false; }
-		virtual void VShutdown(void) { }
-	
-		ALCdevice *GetDevice(void) { return nullptr; }
-		ALCcontext *GetContext(void) { return nullptr; }
-		bool IsPaused(void) const { return false; }
-	};*/
 } // End namespace (BGE)
 
 #endif /* !_BGE_OPENALAUDIO_HPP_ */

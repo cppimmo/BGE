@@ -57,6 +57,8 @@ namespace BGE
 	public:
 		virtual ~IAudioListener(void) = default;
 		// Interface:
+		virtual void VSetVolume(float volume) = 0;
+		virtual float VGetVolume(void) const = 0;
 		virtual void VSetPosition(const glm::vec3 &position) = 0;
 		virtual void VSetVelocity(const glm::vec3 &velocity) = 0;
 		virtual void VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up) = 0;
@@ -101,7 +103,7 @@ namespace BGE
 		virtual void *VGet(void) = 0;
 		virtual bool VIsLoaded(void) const = 0;
 	};
-	
+	// TODO: Add audio capture API.
 	/**
 	 * @brief .
 	 */
@@ -128,36 +130,6 @@ namespace BGE
 		virtual void VResumeAll(void) = 0;
 		virtual void VStopAll(void) = 0;
 		virtual bool VIsInitialized(void) const = 0;
-	};
-
-	class AudioSystem : public IAudioSystem, public INonCopyable, public INonMovable
-	{
-	protected:
-		AudioBufferList m_buffers;
-		bool m_bAllPaused;
-		bool m_bInitialized;
-	public:
-		AudioSystem(void);
-		virtual ~AudioSystem(void);
-		// IAudioSystem's interface:
-		virtual bool VInitialize(void) override;
-		virtual void VShutdown(void) override;
-
-		virtual StrongIAudioListenerPtr VCreateListener(void) override;
-		virtual StrongIAudioSourcePtr VCreateSource(void) override;
-		virtual StrongIAudioBufferPtr VCreateBuffer(void) override;
-
-		virtual void VReleaseListener(StrongIAudioListenerPtr pListener) override;
-		virtual void VReleaseSource(StrongIAudioSourcePtr pSource) override;
-		virtual void VReleaseBuffer(StrongIAudioBufferPtr pBuffer) override;
-
-		virtual void VPauseAll(void) override;
-		virtual void VResumeAll(void) override;
-		virtual void VStopAll(void) override;
-		virtual bool VIsInitialized(void) const override;
-		// Accessors:
-		bool IsPaused(void);
-		static bool HasSoundCard(void);
 	};
 } // End namespace (BGE)
 

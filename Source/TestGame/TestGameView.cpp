@@ -148,7 +148,7 @@ namespace TestGame
 		bClosed = alcCloseDevice(pDevice);*/
 		auto &audio = app.GetAudioSystem();
 		auto pBuffer = audio.VCreateBuffer();
-		auto pSoundHandle = resCache.GetHandle(BGE::Resource("Assets\\Sounds\\coin1.wav"));
+		auto pSoundHandle = resCache.GetHandle(BGE::Resource("Assets\\Music\\calmbgm.ogg"));
 		if (!pBuffer->VLoadFromResource(pSoundHandle))
 		{
 			return false;
