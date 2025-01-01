@@ -246,18 +246,22 @@ bool BGE::EngineApp::VInitInstance(void)
 
 	const Timer::Seconds seconds = m_timer.GetElapsedSecs();
 	BGE_LOG("App", "Initialization duration: %.2f seconds", seconds);
-	m_timer.Reset();
+	m_timer.Reset(); // Reset the application timer for the main loop
 	return true;
 }
 
 void BGE::EngineApp::OnUpdate(float deltaTime, float elapsedTime)
 {
-	// TODO: Call update routines.
 	auto &app = GetEngineApp();
-	// TODO: Update event queue.
+
+	app.UpdateFPS(); // Calculate the FPS
 	// TODO: Update network stuff.
+
+	// Update the game logic
 	app.m_pGameLogic->VOnUpdate(deltaTime, elapsedTime);
+
 	// TODO: Set a reasonable event queue processing timeout.
+	// Update the event queue
 	// Allow event queue to process for up to ___ milliseconds
 	app.m_pEventManager->VUpdate(EventManager::kINFINITY);
 }
@@ -281,6 +285,10 @@ void BGE::EngineApp::OnRender(float deltaTime, float elapsedTime)
 	{
 		pView->VOnRender(deltaTime, elapsedTime);
 	}
+
+	ImGui::Begin("FPS");
+	ImGui::Text("%03.4f", app.GetFPSData().smoothedFPS);
+	ImGui::End();
 
 	ImGui::ShowDemoWindow();
 	ImPlot::ShowDemoWindow();
@@ -421,11 +429,13 @@ void BGE::EngineApp::OnHandleSignal(int signal)
 	case SIGFPE:
 	case SIGILL:
 	case SIGSEGV:
+		BGE_LOG("App", "Shutting down due to caught signal (critical)");
 		// These signals indicate a critical error and should terminate the app.
 		std::exit(kBGE_EXIT_FAILURE);
 		break;
 	case SIGINT:
 	case SIGTERM:
+		BGE_LOG("App", "Shutting down due to caught signal (non-critical)");
 		// Attempt graceful shutdown (cleanup resources here if necessary)
 		std::exit(kBGE_EXIT_SUCCESS);
 		break;
@@ -443,7 +453,7 @@ void BGE::EngineApp::OnShutdown(void)
 	}
 	BGE_LOG("App", "Performing shutdown...");
 
-	m_timer.Stop();
+	m_timer.Stop(); // Stop the application timer
 	const Timer::Seconds seconds = m_timer.GetElapsedSecs();
 	BGE_LOG("App", "Main loop duration: %.2f seconds", seconds);
 	// TODO: Perform destruction tasks.
@@ -458,6 +468,11 @@ void BGE::EngineApp::OnShutdown(void)
 const BGE::Timer &BGE::EngineApp::GetTimer(void) const noexcept
 {
 	return m_timer;
+}
+
+const BGE::EngineApp::FPSData &BGE::EngineApp::GetFPSData(void) const noexcept
+{
+	return m_fpsData;
 }
 
 BGE::MemoryManager &BGE::EngineApp::GetMemoryManager(void) noexcept
@@ -544,4 +559,32 @@ void BGE::EngineApp::RegisterEngineEvents(void)
 	BGE_REGISTER_EVENT(EventData_ResourceCacheStarted);
 	BGE_REGISTER_EVENT(EventData_ScriptingSystemStarted);
 	BGE_REGISTER_EVENT(EventData_SoundSystemStarted);
+}
+
+void BGE::EngineApp::UpdateFPS(void)
+{
+	// Get the current elapsed time in milliseconds
+	const Timer::Milliseconds kCurrElapsedMS = m_timer.GetElapsedMillis();
+
+	// Calculate time for this frame
+	const Timer::Milliseconds kFrameTime = kCurrElapsedMS - m_fpsData.lastElapsedMS;
+	m_fpsData.lastElapsedMS = kCurrElapsedMS;
+
+	// Update the circular buffer and rolling sum
+	m_fpsData.sumFrameTimes -= m_fpsData.frameTimes[m_fpsData.currentFrameIndex]; // Remove old frame time
+	m_fpsData.frameTimes[m_fpsData.currentFrameIndex] = kFrameTime; // Add new frame time
+	m_fpsData.sumFrameTimes += kFrameTime; // Update sum
+
+	// Update circular buffer index
+	m_fpsData.currentFrameIndex = (m_fpsData.currentFrameIndex + 1) % FPSData::kFRAME_SAMPLE_COUNT;
+
+	// Calculate smoothed FPS (avoid division by zero)
+	if (m_fpsData.sumFrameTimes > 0)
+	{
+		m_fpsData.smoothedFPS = 1'000.0f * FPSData::kFRAME_SAMPLE_COUNT / m_fpsData.sumFrameTimes;
+	}
+	else
+	{
+		m_fpsData.smoothedFPS = 0.0f; // Fallback to 0 FPS if no valid frame times
+	}
 }

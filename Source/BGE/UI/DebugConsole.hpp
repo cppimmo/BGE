@@ -56,6 +56,7 @@ namespace BGE
 		bool m_bEnabled = false; //!< Is the widget currently visible (off by default)?
 		bool m_bAutoCompleteEnabled = true; //!< Auto completion for registered commands
 		bool m_bAutoScroll = true; //!< Auto scroll the output log
+		bool m_bAutoReturn = true; //!< Auto prepend "return " to entered commands.
 		std::vector<Command> m_commands; //!< Registered commands
 		std::vector<std::string> m_outputLog; //!< Console output log
 		std::vector<std::string> m_commandHistory; //!< History of commands

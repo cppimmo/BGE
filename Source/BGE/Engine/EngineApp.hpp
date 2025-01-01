@@ -69,6 +69,17 @@ namespace BGE
 	 */
 	class EngineApp : public INonCopyable, public INonMovable
 	{
+	public:
+		//! Struct for holding data used to calculate the FPS.
+		struct FPSData
+		{
+			static constexpr int kFRAME_SAMPLE_COUNT = 60; //!< Number of samples for averaging.
+			std::array<Timer::Milliseconds, kFRAME_SAMPLE_COUNT> frameTimes = { 0 }; //!< Store frame durations.
+			int currentFrameIndex = 0; //!< Current index in the circular buffer.
+			Timer::Milliseconds lastElapsedMS = 0; //!< Time at the last frame.
+			Timer::Milliseconds sumFrameTimes = 0; //!< Rolling sum of frame times.
+			float smoothedFPS = 0.0f; //!< Calculated FPS.
+		};
 	protected:
 		bool m_bRunning; // True if game is in the main loop.
 		bool m_bQuitRequested; // True if the exit sequence is nigh.
@@ -78,6 +89,7 @@ namespace BGE
 		bool m_bResourceCheck; //!< Check system resources for availability.
 		TextStringMap m_textStrings; // Localized string container.
 		Timer m_timer; //!< Application timer.
+		FPSData m_fpsData; //!< Data used to calculate the FPS.
 		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager.
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler.
 		UniqueEventManagerPtr m_pEventManager; //!< Main event manager.
@@ -108,6 +120,7 @@ namespace BGE
 		void OnShutdown(void);
 		// Accessors:
 		const Timer &GetTimer(void) const noexcept;
+		const FPSData &GetFPSData(void) const noexcept;
 		MemoryManager &GetMemoryManager(void) noexcept;
 		Localizer     &GetLocalizer(void) noexcept;
 		EventManager  &GetEventManager(void) noexcept;
@@ -123,6 +136,7 @@ namespace BGE
 		virtual void VDestroyNetworkEventForwarder(void);
 	private:
 		void RegisterEngineEvents(void);
+		void UpdateFPS(void);
 	};
 } // End namespace (BGE)
 

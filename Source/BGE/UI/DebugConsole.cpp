@@ -123,8 +123,12 @@ namespace BGE
 			FlushOutputLog();
 		}
 		ImGui::SameLine();
-		bool bAutoScroll;
+
 		ImGui::Checkbox("Auto-scroll", &m_bAutoScroll);
+
+		ImGui::SameLine();
+
+		ImGui::Checkbox("Auto-\"return\"", &m_bAutoReturn);
 
 		ImGui::Separator();
 
@@ -268,7 +272,7 @@ namespace BGE
 	void DebugConsole::SubmitCommand(std::string_view input)
 	{
 		// Update m_inputBuffer with the contents of tempBuffer
-		m_inputBuffer = std::string(input);
+		m_inputBuffer = ((m_bAutoReturn ? "return " : "") + std::string(input));
 
 		// Execute the entered command
 		ExecuteCommand(m_inputBuffer);

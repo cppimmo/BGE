@@ -24,7 +24,7 @@ namespace TestGame
 	{
 	public:
 		TestGameLogic(void);
-		virtual ~TestGameLogic(void);
+		virtual ~TestGameLogic(void) override;
 		// IGameLogic's interface:
 		virtual bool VInit(void) override;
 		virtual bool VPostInit(void) override;

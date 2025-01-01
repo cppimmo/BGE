@@ -1,5 +1,7 @@
 # Brian's Game Engine
 
+![Screenshot](Screenshots/screenshot_01_01_25.jpeg)
+
 Game engine project using C++, SDL2, and OpenGL 4.5 
 
 ## Introduction
