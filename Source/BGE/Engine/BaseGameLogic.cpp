@@ -56,9 +56,6 @@ bool BGE::BaseGameLogic::VInit(void)
         BGE_ERROR("Could not initialize Lua state");
         return false;
     }
-
-    // TODO: Perform other logic here
-    VChangeState(BaseGameState::kRunning);
     return true;
 }
 
@@ -108,6 +105,8 @@ void BGE::BaseGameLogic::VOnUpdate(float time, float elapsedTime)
     switch (m_state)
     {
     case kInitializing:
+        // TODO: Fix this.
+        VChangeState(BaseGameState::kRunning);
         break;
     case kMainMenu:
         break;

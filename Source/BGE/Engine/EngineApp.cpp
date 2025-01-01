@@ -77,6 +77,8 @@ BGE::EngineApp::~EngineApp(void)
 // Method named InitInstance since only one instance of the game is allowed in most cases.
 bool BGE::EngineApp::VInitInstance(void)
 {
+	m_timer.Start(); // Start the timer to measure the initialization time
+	BGE_LOG("App", "Beginning initialization...");
 	// TODO: Implement intialization tasks.
 #ifdef BGE_CONFIG_DEBUG
 	HideConsole(); // TODO: This should be called by Logger based on configuration.
@@ -190,16 +192,27 @@ bool BGE::EngineApp::VInitInstance(void)
 	// Queue sound system started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_SoundSystemStarted>());
 
+		// Initialize debug console
+	m_pDebugConsole = std::make_unique<DebugConsole>();
+#ifdef BGE_CONFIG_DEBUG
+	// Enable debug console
+	m_pDebugConsole->SetEnabled(true);
+	// NOTE: The auto-complete isn't working properly at the moment.
+	m_pDebugConsole->SetAutoCompleteEnabled(false);
+#endif
+	// Queue debug console started event
+	BGE_QUEUE_GEVENT(std::make_shared<EventData_DebugConsoleStarted>());
+
 	m_pGameLogic = VCreateGameAndView();
 	if (!m_pGameLogic)
 	{
 		BGE_ERROR("BaseGameLogic Failure creating game & view");
 		return false;
 	}
-
 	// Register script exports
     ScriptExports::Register();
-	// Call IGameLogic::VPostInit after the scripting system is setup
+
+	// Call IGameLogic::VPostInit after the scripting system is setup & scripts have run
 	if (!m_pGameLogic->VPostInit())
 	{
 		BGE_ERROR("BaseGameLogic::VPostInit failure");
@@ -211,17 +224,6 @@ bool BGE::EngineApp::VInitInstance(void)
 
 	// Queue game logic started event
 	BGE_QUEUE_GEVENT(std::make_shared<EventData_GameLogicStarted>());
-
-	// Initialize debug console
-	m_pDebugConsole = std::make_unique<DebugConsole>();
-#ifdef BGE_CONFIG_DEBUG
-	// Enable debug console
-	m_pDebugConsole->SetEnabled(true);
-	// NOTE: The auto-complete isn't working properly at the moment.
-	m_pDebugConsole->SetAutoCompleteEnabled(false);
-#endif
-	// Queue debug console started event
-	BGE_QUEUE_GEVENT(std::make_shared<EventData_DebugConsoleStarted>());
 
 	//BGE_LOG("Resources", "Num resources: %u", pResourceFile->VGetNumResources());
 	//for (std::size_t i = 0; i < pResourceFile->VGetNumResources(); ++i)
@@ -240,6 +242,11 @@ bool BGE::EngineApp::VInitInstance(void)
 	//BGE_LOG("Resources", "test");
 	m_bRunning = true;
 
+	BGE_LOG("App", "Initialized successfully");
+
+	const Timer::Seconds seconds = m_timer.GetElapsedSecs();
+	BGE_LOG("App", "Initialization duration: %.2f seconds", seconds);
+	m_timer.Reset();
 	return true;
 }
 
@@ -261,8 +268,12 @@ void BGE::EngineApp::OnRender(float deltaTime, float elapsedTime)
 	// TODO: Call rendering routines.
 
 	// TODO: Replace with call to VPreRender().
-	constexpr float kCLEAR_COLOR[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
-	glClearBufferfv(GL_COLOR, 0, kCLEAR_COLOR);
+	float clearColor[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
+	auto time = app.GetTimer().GetElapsedSecs();
+	clearColor[0] = (std::sin(time * 0.5f) + 1.0f) / 2.0f;
+	clearColor[1] = (std::sin(time * 0.3f) + 1.0f) / 2.0f;
+	clearColor[2] = (std::sin(time * 0.7f) + 1.0f) / 2.0f;
+	glClearBufferfv(GL_COLOR, 0, clearColor);
 
 	// Render each game view
 	auto &gameViews = app.GetGameLogic().GetGameViews();
@@ -430,7 +441,11 @@ void BGE::EngineApp::OnShutdown(void)
 		BGE_WARNING("Attempting to call EngineApp::OnShutdown multiple times");
 		return;
 	}
-	//BGE_LOG("App", "Performing shutdown...");
+	BGE_LOG("App", "Performing shutdown...");
+
+	m_timer.Stop();
+	const Timer::Seconds seconds = m_timer.GetElapsedSecs();
+	BGE_LOG("App", "Main loop duration: %.2f seconds", seconds);
 	// TODO: Perform destruction tasks.
 	VDestroyNetworkEventForwarder();
 
@@ -438,6 +453,11 @@ void BGE::EngineApp::OnShutdown(void)
 
 	m_bRunning = false;
 	m_bHasQuit = true;
+}
+
+const BGE::Timer &BGE::EngineApp::GetTimer(void) const noexcept
+{
+	return m_timer;
 }
 
 BGE::MemoryManager &BGE::EngineApp::GetMemoryManager(void) noexcept

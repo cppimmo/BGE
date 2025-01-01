@@ -14,10 +14,11 @@ namespace BGE
 
 	class LuaScriptManager : public IScriptManager
 	{
+	private:
 		sol::state m_state;
 	public:
 		LuaScriptManager(void);
-		virtual ~LuaScriptManager(void) = default;
+		virtual ~LuaScriptManager(void) override = default;
 		// IScriptManager's interface:
 		virtual bool VInit(void) override;
 		virtual void VExecuteString(std::string_view str) override;
@@ -31,7 +32,7 @@ namespace BGE
 		//! Return the number of bytes used by the Lua state in memory.
 		std::size_t GetMemoryUsed(void) const;
 	private:
-		void HandleProtectedFunctionResult(const sol::protected_function_result &kResult);
+		void HandleProtectedFunctionResult(const sol::protected_function_result &result);
 		static int OnHandleException(lua_State *pLuaState, sol::optional<const std::exception &>, std::string_view what);
 		static int OnPanic(lua_State *pLuaState);
 	};

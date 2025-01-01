@@ -60,16 +60,17 @@ std::size_t BGE::LuaScriptManager::GetMemoryUsed(void) const
 	return m_state.memory_used();
 }
 
-void BGE::LuaScriptManager::HandleProtectedFunctionResult(const sol::protected_function_result &kResult)
+void BGE::LuaScriptManager::HandleProtectedFunctionResult(const sol::protected_function_result &result)
 {
-	if (!kResult.valid())
+	auto &app = GetEngineApp();
+	auto &dbgConsole = app.GetDebugConsole();
+
+	if (!result.valid())
 	{
-		sol::error err = kResult;
+		sol::error err = result;
 		std::ostringstream oss;
 		oss << "[sol] Error: " << err.what();
 
-		auto &app = GetEngineApp();
-		auto &dbgConsole = app.GetDebugConsole();
 		if (dbgConsole.IsEnabled())
 		{
 			dbgConsole.AddToOutputLog(oss.str());
@@ -78,6 +79,61 @@ void BGE::LuaScriptManager::HandleProtectedFunctionResult(const sol::protected_f
 		{
 			BGE_ERROR("%s", oss.str().c_str());
 		}
+	}
+	else
+	{
+		std::ostringstream oss;
+        // Handle multiple return values
+        bool bIsFirst = true;
+        for (auto &obj : result)
+        {
+            if (!bIsFirst)
+            {
+                oss << ", "; // Add a comma between results for readability
+            }
+            bIsFirst = false;
+
+            switch (obj.get_type())
+            {
+            case sol::type::nil:
+                oss << "nil";
+                break;
+            case sol::type::boolean:
+                oss << (obj.as<bool>() ? "true" : "false");
+                break;
+            case sol::type::number:
+                oss << obj.as<double>();
+                break;
+            case sol::type::string:
+                oss << '"' << obj.as<std::string>() << '"';
+                break;
+            case sol::type::table:
+                oss << "<table>"; // Simplified representation
+                break;
+            case sol::type::function:
+                oss << "<function>"; // Simplified representation
+                break;
+            case sol::type::userdata:
+                oss << "<userdata>"; // Simplified representation
+                break;
+            case sol::type::thread:
+                oss << "<thread>";
+                break;
+            default:
+                oss << "<unknown>";
+                break;
+            }
+        }
+
+        // Output to the debug console or log
+        if (dbgConsole.IsEnabled())
+        {
+            dbgConsole.AddToOutputLog(oss.str());
+        }
+        else
+        {
+            BGE_INFO("%s", oss.str().c_str());
+        }
 	}
 }
 

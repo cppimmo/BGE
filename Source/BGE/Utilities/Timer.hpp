@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Timer.hpp - Timer utilities.
+/*******************************************************************************
+ * @file   Timer.hpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Timer utility.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,14 +27,17 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #ifndef _BGE_TIMER_HPP_
 #define _BGE_TIMER_HPP_
 
 namespace BGE
 {
+	class Timer; // Forward declare
+	BGE_DECLARE_PTR(Timer);
+
 	/**
-	 * Simple timer class.
+	 * @brief Simple timer class.
 	 */
 	class Timer
 	{
@@ -41,15 +47,18 @@ namespace BGE
 		using Seconds = UnderlyingType;
 		using Minutes = UnderlyingType;
 		using Hours = UnderlyingType;
+
+		friend Milliseconds operator+(const Timer &lhs, const Timer &rhs);
+		friend Milliseconds operator-(const Timer &lhs, const Timer &rhs);
 	private:
 		using Duration = std::chrono::duration<UnderlyingType, std::milli>;
 	
-		bool m_isPaused; // Pause state
+		bool m_bPaused; // Pause state
 		std::chrono::high_resolution_clock::time_point m_start;
 		std::chrono::high_resolution_clock::time_point m_end;
 	public:
-		explicit Timer(bool isPaused = true);
-		// TODO: Implement operator - and + to get difference between two timers.
+		explicit Timer(bool bPaused = true);
+
 		Milliseconds GetElapsedMillis(void) const; // Elapsed milliseconds
 		Seconds GetElapsedSecs(void) const; // Seconds
 		Minutes GetElapsedMins(void) const; // Minutes
@@ -68,6 +77,16 @@ namespace BGE
 	private:
 		Duration GetRawDuration(void) const noexcept;
 	};
+
+	inline Timer::Milliseconds operator+(const Timer &lhs, const Timer &rhs)
+	{
+		return lhs.GetElapsedMillis() + rhs.GetElapsedMillis();
+	}
+
+	inline Timer::Milliseconds operator-(const Timer &lhs, const Timer &rhs)
+	{
+		return lhs.GetElapsedMillis() - rhs.GetElapsedMillis();
+	}
 
 	inline constexpr Timer::Seconds Timer::MillisToSecs(Milliseconds millis) noexcept
 	{

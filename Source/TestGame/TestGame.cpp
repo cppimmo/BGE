@@ -102,11 +102,15 @@ namespace TestGame
 	bool TestGameLogic::VPostInit(void)
 	{
 		bool bResult = BaseGameLogic::VPostInit();
+
 		auto &app = BGE::GetEngineApp();
 		auto &resCache = app.GetResourceCache();
 
+		BGE_LOG("TestGame", "What's going on");
 		auto pScriptHandle = resCache.GetHandle(BGE::Resource("Assets\\Scripts\\Test.lua"));
+
 		//m_pLuaScriptManager->VExecuteFile("Assets/Scripts/Test.lua");
+
 		return bResult;
 	}
 

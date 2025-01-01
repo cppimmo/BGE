@@ -1,3 +1,8 @@
+old_print = print
+print = function(...)
+    Logger.Log("Lua", ...)
+end
+
 -- Define an Inventory class
 local Inventory = {}
 Inventory.__index = Inventory

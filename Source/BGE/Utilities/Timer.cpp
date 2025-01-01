@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Timer.cpp - Timer utilities.
+/*******************************************************************************
+ * @file   Timer.cpp
+ * @author Brian Hoffpauir
+ * @date   12.31.2024
+ * @brief  Timer utility.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,67 +27,76 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 #include "Timer.hpp"
 
 namespace ch = std::chrono;
 
-BGE::Timer::Timer(bool isPaused)
-	: m_isPaused(isPaused)
+namespace BGE
 {
-	Reset(); // Reset high res clocks
-}
+	Timer::Timer(bool bPaused)
+		: m_bPaused(bPaused)
+	{
+		Reset(); // Reset high res clocks
+	}
 
-BGE::Timer::Milliseconds BGE::Timer::GetElapsedMillis(void) const
-{
-	return GetRawDuration().count();
-}
+	Timer::Milliseconds Timer::GetElapsedMillis(void) const
+	{
+		return GetRawDuration().count();
+	}
 
-BGE::Timer::Seconds BGE::Timer::GetElapsedSecs(void) const
-{
-	return MillisToSecs(GetElapsedMillis());
-}
+	Timer::Seconds Timer::GetElapsedSecs(void) const
+	{
+		return MillisToSecs(GetElapsedMillis());
+	}
 
-BGE::Timer::Minutes BGE::Timer::GetElapsedMins(void) const
-{
-	return SecsToMins(GetElapsedSecs());
-}
+	Timer::Minutes Timer::GetElapsedMins(void) const
+	{
+		return SecsToMins(GetElapsedSecs());
+	}
 
-BGE::Timer::Hours BGE::Timer::GetElapsedHrs(void) const
-{
-	return MinsToHrs(GetElapsedMins());
-}
+	Timer::Hours Timer::GetElapsedHrs(void) const
+	{
+		return MinsToHrs(GetElapsedMins());
+	}
 
-void BGE::Timer::Reset(void)
-{
-	m_start = ch::high_resolution_clock::now();
-	m_end   = ch::high_resolution_clock::now();
-}
+	void Timer::Reset(void)
+	{
+		m_start = ch::high_resolution_clock::now();
+		m_end   = ch::high_resolution_clock::now();
+	}
 
-void BGE::Timer::Start(void) noexcept
-{
-	if (!m_isPaused) // Do nothing if already unpaused
-		return;
-	m_isPaused = false;
-	m_start = ch::high_resolution_clock::now();
-}
+	void Timer::Start(void) noexcept
+	{
+		if (!m_bPaused) // Do nothing if already unpaused
+		{
+			return;
+		}
 
-void BGE::Timer::Stop(void) noexcept
-{
-	if (m_isPaused) // Do nothing if already paused
-		return;
-	m_isPaused = true;
-	m_end = ch::high_resolution_clock::now();
-}
+		m_bPaused = false;
+		m_start = ch::high_resolution_clock::now();
+	}
 
-bool BGE::Timer::IsPaused(void) const noexcept
-{
-	return m_isPaused;
-}
+	void Timer::Stop(void) noexcept
+	{
+		if (m_bPaused) // Do nothing if already paused
+		{
+			return;
+		}
 
-BGE::Timer::Duration BGE::Timer::GetRawDuration(void) const noexcept
-{
-	return ((!m_isPaused) ? Duration(ch::high_resolution_clock::now() - m_start)
-						  : Duration(m_end - m_start));
-}
+		m_bPaused = true;
+		m_end = ch::high_resolution_clock::now();
+	}
+
+	bool Timer::IsPaused(void) const noexcept
+	{
+		return m_bPaused;
+	}
+
+	Timer::Duration Timer::GetRawDuration(void) const noexcept
+	{
+		return ((!m_bPaused) ? Duration(ch::high_resolution_clock::now() - m_start)
+			: Duration(m_end - m_start));
+	}
+} // End namespace (BGE)

@@ -106,8 +106,7 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 
 	// TODO: Use SDL_Set/GetWindowData to set class object pointer.
 	BGUTMainLoop(); // Enter main loop
-	BGE_INFO("Main loop duration: %.2f seconds", BGUTGetMainLoopTimer().GetElapsedSecs());
-	
+
 	BGE_INFO("Shutting down engine...");
 	BGUTShutdown(); // Shutdown upon exit of main loop
 #if BGE_PLATFORM_WINDBG

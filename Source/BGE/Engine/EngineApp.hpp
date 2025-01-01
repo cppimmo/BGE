@@ -70,25 +70,26 @@ namespace BGE
 	class EngineApp : public INonCopyable, public INonMovable
 	{
 	protected:
-		bool m_bRunning; // True if game is in the main loop
-		bool m_bQuitRequested; // True if the exit sequence is nigh
-		bool m_bQuitting; // True if the exit sequence is being ran
-		bool m_bHasQuit; // true if the exit sequence has been run
-		bool m_bEditorRunning; // True if the game editor is running
-		bool m_bResourceCheck; //!< Check system resources for availability
-		TextStringMap m_textStrings; // Localized string container
-
-		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager
-		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler
-		UniqueEventManagerPtr m_pEventManager; //!< Main event manager
-		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar
-		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic
-		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache
-		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console
-		UniqueIAudioSystemPtr m_pAudioSystem; //!< Audio system
+		bool m_bRunning; // True if game is in the main loop.
+		bool m_bQuitRequested; // True if the exit sequence is nigh.
+		bool m_bQuitting; // True if the exit sequence is being ran.
+		bool m_bHasQuit; // true if the exit sequence has been run.
+		bool m_bEditorRunning; // True if the game editor is running.
+		bool m_bResourceCheck; //!< Check system resources for availability.
+		TextStringMap m_textStrings; // Localized string container.
+		Timer m_timer; //!< Application timer.
+		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager.
+		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler.
+		UniqueEventManagerPtr m_pEventManager; //!< Main event manager.
+		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar.
+		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic.
+		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache.
+		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console.
+		UniqueIAudioSystemPtr m_pAudioSystem; //!< Audio system.
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
+
 		// EngineApp interface:
 		virtual bool VInitInstance(void);
 		virtual UniqueBaseGameLogicPtr VCreateGameAndView(void) = 0;
@@ -106,6 +107,7 @@ namespace BGE
 		static void OnHandleSignal(int signal);
 		void OnShutdown(void);
 		// Accessors:
+		const Timer &GetTimer(void) const noexcept;
 		MemoryManager &GetMemoryManager(void) noexcept;
 		Localizer     &GetLocalizer(void) noexcept;
 		EventManager  &GetEventManager(void) noexcept;

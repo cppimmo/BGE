@@ -53,10 +53,55 @@ namespace TestGame
 		}
 		virtual bool VOnButtonDown(BGE::JoystickID ID, BGE::GamepadButton button) override
 		{
+			using enum BGE::GamepadButton;
 			BGE_LOG("Input", "(%d) Gamepad button down: %d", ID, button);
-			if (button == BGE::kGAMEPAD_BUTTON_X)
+			switch (button)
 			{
+			case kGAMEPAD_BUTTON_X:
 				BGE_LOG("Input", "Gamepad X button down");
+				break;
+			case kGAMEPAD_BUTTON_Y:
+				BGE_LOG("Input", "Gamepad Y button down");
+				break;
+			case kGAMEPAD_BUTTON_A:
+				BGE_LOG("Input", "Gamepad A button down");
+				break;
+			case kGAMEPAD_BUTTON_B:
+				BGE_LOG("Input", "Gamepad B button down");
+				break;
+			case kGAMEPAD_BUTTON_BACK:
+				BGE_LOG("Input", "Gamepad BACK button down");
+				break;
+			case kGAMEPAD_BUTTON_GUIDE:
+				BGE_LOG("Input", "Gamepad GUIDE button down");
+				break;
+			case kGAMEPAD_BUTTON_START:
+				BGE_LOG("Input", "Gamepad START button down");
+				break;
+			case kGAMEPAD_BUTTON_LEFT_STICK:
+				BGE_LOG("Input", "Gamepad LEFT STICK button down");
+				break;
+			case kGAMEPAD_BUTTON_RIGHT_STICK:
+				BGE_LOG("Input", "Gamepad RIGHT STICK button down");
+			case kGAMEPAD_BUTTON_LEFT_SHOULDER:
+				BGE_LOG("Input", "Gamepad LEFT SHOULDER button down");
+				break;
+			case kGAMEPAD_BUTTON_RIGHT_SHOULDER:
+				BGE_LOG("Input", "Gamepad RIGHT_SHOULDER button down");
+				break;
+			case kGAMEPAD_BUTTON_DPAD_UP:
+				BGE_LOG("Input", "Gamepad DPAD UP button down");
+				break;
+			case kGAMEPAD_BUTTON_DPAD_DOWN:
+				BGE_LOG("Input", "Gamepad DPAD DOWN button down");
+				break;
+			case kGAMEPAD_BUTTON_DPAD_LEFT:
+				BGE_LOG("Input", "Gamepad DPAD LEFT button down");
+				break;
+			case kGAMEPAD_BUTTON_DPAD_RIGHT:
+				BGE_LOG("Input", "Gamepad DPAD RIGHT button down");
+			default:
+				break;
 			}
 			return false;
 		}
