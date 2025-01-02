@@ -52,13 +52,16 @@ namespace BGE
 		virtual void VShutdown(void) = 0;
 		virtual RendererImpl VGetImpl(void) const = 0;
 
-		virtual void VCreateShaderFactory(void) = 0;
+		virtual StrongIShaderFactoryPtr VCreateShaderFactory(void) = 0;
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
 
 		virtual void VSetViewport(const IViewport &kViewport) = 0;
+		virtual const IViewport &VGetViewport(void) const = 0;
 		virtual void VSetBackgroundColor(const glm::vec4 &kColor) = 0;
 		virtual glm::vec4 VGetBackgroundColor(void) = 0;
+
+		virtual bool VTakeScreenshot(void) = 0;
 		//virtual void VSetBackgroundColor(float r, float g, float b, float a) = 0;
 		//virtual void VShutdown(void) = 0;
 		//virtual bool VPreRender(void) = 0;

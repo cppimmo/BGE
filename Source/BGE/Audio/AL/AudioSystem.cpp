@@ -43,17 +43,17 @@ namespace
 
 namespace BGE
 {
-	OpenALAudioSystem::OpenALAudioSystem(void)
+	ALAudioSystem::ALAudioSystem(void)
 		: m_pDevice(nullptr), m_pContext(nullptr), m_bAllPaused(false), m_bInitialized(false)
 	{
 	}
 
-	OpenALAudioSystem::~OpenALAudioSystem(void)
+	ALAudioSystem::~ALAudioSystem(void)
 	{
 		VShutdown();
 	}
 
-	bool OpenALAudioSystem::VInit(void)
+	bool ALAudioSystem::VInit(void)
 	{
 		if (m_bInitialized)
 		{
@@ -125,7 +125,7 @@ namespace BGE
 		return true;
 	}
 
-	void OpenALAudioSystem::VShutdown(void)
+	void ALAudioSystem::VShutdown(void)
 	{
 		if (!m_bInitialized)
 		{
@@ -150,12 +150,12 @@ namespace BGE
 		m_bInitialized = false;
 	}
 
-	AudioImpl OpenALAudioSystem::VGetImpl(void) const noexcept
+	AudioImpl ALAudioSystem::VGetImpl(void) const noexcept
 	{
 		return AudioImpl::kOpenAL;
 	}
 
-	std::size_t OpenALAudioSystem::VGetActiveBufferCount(void) const
+	std::size_t ALAudioSystem::VGetActiveBufferCount(void) const
 	{
 		std::size_t count = 0;
 		for (const auto &pkSource : m_sources)
@@ -165,46 +165,46 @@ namespace BGE
 		return count;
 	}
 
-	std::size_t OpenALAudioSystem::VGetActiveSourceCount(void) const
+	std::size_t ALAudioSystem::VGetActiveSourceCount(void) const
 	{
 		return m_sources.size();
 	}
 
-	DistanceModel OpenALAudioSystem::VGetDistanceModel(void) const
+	DistanceModel ALAudioSystem::VGetDistanceModel(void) const
 	{
 		return m_distModel;
 	}
 
-	void OpenALAudioSystem::VSetDistanceModel(DistanceModel model)
+	void ALAudioSystem::VSetDistanceModel(DistanceModel model)
 	{
 		m_distModel = model;
 		alDistanceModel(ConvertDistanceModel(model));
 	}
 
-	StrongIAudioListenerPtr OpenALAudioSystem::VCreateListener(void)
+	StrongIAudioListenerPtr ALAudioSystem::VCreateListener(void)
 	{
-		auto pAudioListener = std::make_shared<OpenALAudioListener>();
+		auto pAudioListener = std::make_shared<ALAudioListener>();
 		return pAudioListener;
 	}
 
-	StrongIAudioSourcePtr OpenALAudioSystem::VCreateSource(void)
+	StrongIAudioSourcePtr ALAudioSystem::VCreateSource(void)
 	{
-		auto pAudioSource = std::make_shared<OpenALAudioSource>();
+		auto pAudioSource = std::make_shared<ALAudioSource>();
 		return pAudioSource;
 	}
 
-	StrongIAudioBufferPtr OpenALAudioSystem::VCreateBuffer(void)
+	StrongIAudioBufferPtr ALAudioSystem::VCreateBuffer(void)
 	{
-		auto pAudioBuffer = std::make_shared<OpenALAudioBuffer>();
+		auto pAudioBuffer = std::make_shared<ALAudioBuffer>();
 		return pAudioBuffer;
 	}
 
-	void OpenALAudioSystem::VReleaseListener(StrongIAudioListenerPtr pListener)
+	void ALAudioSystem::VReleaseListener(StrongIAudioListenerPtr pListener)
 	{
 		// TODO: Implement.
 	}
 
-	void OpenALAudioSystem::VReleaseSource(StrongIAudioSourcePtr pSource)
+	void ALAudioSystem::VReleaseSource(StrongIAudioSourcePtr pSource)
 	{
 		auto it = std::ranges::find(m_sources, pSource);
 		// Ensure pSource exists in the list and then remove it.
@@ -214,22 +214,22 @@ namespace BGE
 		}
 	}
 
-	void OpenALAudioSystem::VReleaseBuffer(StrongIAudioBufferPtr pBuffer)
+	void ALAudioSystem::VReleaseBuffer(StrongIAudioBufferPtr pBuffer)
 	{
 		// TODO: Implement.
 	}
 
-	void OpenALAudioSystem::VSetListener(StrongIAudioListenerPtr pListener)
+	void ALAudioSystem::VSetListener(StrongIAudioListenerPtr pListener)
 	{
 		m_pActiveListener = pListener;
 	}
 
-	StrongIAudioListenerPtr OpenALAudioSystem::VGetListener(void) const
+	StrongIAudioListenerPtr ALAudioSystem::VGetListener(void) const
 	{
 		return m_pActiveListener;
 	}
 
-	void OpenALAudioSystem::VPauseAll(void)
+	void ALAudioSystem::VPauseAll(void)
 	{
 		// Pause all sources
 		for (auto &pSource : m_sources)
@@ -238,7 +238,7 @@ namespace BGE
 		}
 	}
 
-	void OpenALAudioSystem::VResumeAll(void)
+	void ALAudioSystem::VResumeAll(void)
 	{
 		// Resume all sources
 		for (auto &pSource : m_sources)
@@ -247,7 +247,7 @@ namespace BGE
 		}
 	}
 
-	void OpenALAudioSystem::VStopAll(void)
+	void ALAudioSystem::VStopAll(void)
 	{
 		// Stop all sources
 		for (auto &pSource : m_sources)
@@ -256,12 +256,12 @@ namespace BGE
 		}
 	}
 
-	bool OpenALAudioSystem::VIsInitialized(void) const
+	bool ALAudioSystem::VIsInitialized(void) const
 	{
 		return m_bInitialized;
 	}
 
-	void OpenALAudioSystem::ListAudioDevices(const ALchar *pDevices)
+	void ALAudioSystem::ListAudioDevices(const ALchar *pDevices)
 	{
 		const ALCchar *pDevice = pDevices, *pNext = pDevices + 1;
 		size_t length = 0;
@@ -279,7 +279,7 @@ namespace BGE
 		BGE_LOG("Audio", "OpenAL context device specifiers: %s", oss.str().c_str());
 	}
 
-	ALenum OpenALAudioSystem::ConvertDistanceModel(DistanceModel model)
+	ALenum ALAudioSystem::ConvertDistanceModel(DistanceModel model)
 	{
 		switch (model)
 		{

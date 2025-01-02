@@ -40,6 +40,7 @@
 #include "Resources/ResourceLoader.hpp"
 #include "Scripting/ScriptExports.hpp"
 #include "Audio/AL/AudioSystem.hpp"
+#include "Graphics/GL/Renderer.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -179,6 +180,14 @@ namespace BGE
 			BGE_ERROR("Couldn't initialize engine!");
 			return false;
 		}
+
+		// Initialize the renderer
+		m_pRenderer = std::make_unique<GLRenderer>();
+		if (!m_pRenderer->VInit())
+		{
+			BGE_ERROR("Couldn't initialize renderer!");
+			return false;
+		}
 		// Queue graphics start event
 		BGE_QUEUE_GEVENT(std::make_shared<EventData_GraphicsStarted>());
 
@@ -191,7 +200,7 @@ namespace BGE
 		}
 
 		// Initialize the audio system
-		m_pAudioSystem = std::make_unique<OpenALAudioSystem>();
+		m_pAudioSystem = std::make_unique<ALAudioSystem>();
 		if (!m_pAudioSystem->VInit())
 		{
 			BGE_ERROR("Failure to initialize the audio system!");
@@ -532,6 +541,12 @@ namespace BGE
 	{
 		BGE_ASSERT(m_pAudioSystem);
 		return *m_pAudioSystem.get();
+	}
+
+	IRenderer &EngineApp::GetRenderer(void) noexcept
+	{
+		BGE_ASSERT(m_pRenderer);
+		return *m_pRenderer.get();
 	}
 
 	int EngineApp::GetExitCode(void) const

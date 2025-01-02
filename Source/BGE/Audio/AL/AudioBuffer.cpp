@@ -35,17 +35,17 @@
 
 namespace BGE
 {
-	OpenALAudioBuffer::OpenALAudioBuffer(void)
+	ALAudioBuffer::ALAudioBuffer(void)
 	{
 		alGenBuffers(1, &m_bufferID);
 	}
 
-	OpenALAudioBuffer::~OpenALAudioBuffer(void)
+	ALAudioBuffer::~ALAudioBuffer(void)
 	{
 		alDeleteBuffers(1, &m_bufferID);
 	}
 
-	bool OpenALAudioBuffer::VLoadFromResource(StrongResourceHandlePtr pHandle)
+	bool ALAudioBuffer::VLoadFromResource(StrongResourceHandlePtr pHandle)
 	{
 		auto pExtraData = std::dynamic_pointer_cast<SoundResourceExtraData>(pHandle->GetExtraData());
 		const SoundData &soundData = pExtraData->GetSoundData();
@@ -80,17 +80,45 @@ namespace BGE
 		return true;
 	}
 
-	StrongResourceHandlePtr OpenALAudioBuffer::VGetResource(void) const
+	StrongResourceHandlePtr ALAudioBuffer::VGetResource(void) const
 	{
 		return nullptr;
 	}
 
-	void *OpenALAudioBuffer::VGet(void)
+	void *ALAudioBuffer::VGet(void)
 	{
 		return reinterpret_cast<void *>(&m_bufferID);
 	}
 
-	bool OpenALAudioBuffer::VIsLoaded(void) const
+	int ALAudioBuffer::VGetFrequency(void) const
+	{
+		ALint frequency{};
+		alGetBufferi(m_bufferID, AL_FREQUENCY, &frequency);
+		return frequency;
+	}
+
+	int ALAudioBuffer::VGetBitDepth(void) const
+	{
+		ALint bitDepth{};
+		alGetBufferi(m_bufferID, AL_BITS, &bitDepth);
+		return bitDepth;
+	}
+
+	int ALAudioBuffer::VGetChannels(void) const
+	{
+		ALint channels{};
+		alGetBufferi(m_bufferID, AL_CHANNELS, &channels);
+		return channels;
+	}
+
+	int ALAudioBuffer::VGetSize(void) const
+	{
+		ALint size{};
+		alGetBufferi(m_bufferID, AL_SIZE, &size);
+		return size;
+	}
+
+	bool ALAudioBuffer::VIsLoaded(void) const
 	{
 		return m_bInitialized;
 	}

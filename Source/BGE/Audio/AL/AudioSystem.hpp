@@ -39,13 +39,13 @@
 
 namespace BGE
 {
-	class OpenALAudioSystem; // Forward declare
-	BGE_DECLARE_PTR(OpenALAudioSystem);
+	class ALAudioSystem; // Forward declare
+	BGE_DECLARE_PTR(ALAudioSystem);
 
 	/**
 	 * @brief .
 	 */
-	class OpenALAudioSystem final : public IAudioSystem
+	class ALAudioSystem final : public IAudioSystem
 	{
 	private:
 		ALCdevice *m_pDevice; //!< OpenAL device.
@@ -56,8 +56,8 @@ namespace BGE
 		AudioSourceList m_sources; //!< List of managed audio sources.
 		DistanceModel m_distModel = DistanceModel::kInverseClamped; //!< Distance model.
 	public:
-		OpenALAudioSystem(void);
-		~OpenALAudioSystem(void) override;
+		ALAudioSystem(void);
+		~ALAudioSystem(void) override;
 		// IAudioSystem's interface:
 		virtual bool VInit(void) override;
 		virtual void VShutdown(void) override;

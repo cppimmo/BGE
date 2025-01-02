@@ -73,6 +73,10 @@ namespace BGE
 		virtual bool VLoadFromResource(StrongResourceHandlePtr pHandle) = 0;
 		virtual StrongResourceHandlePtr VGetResource(void) const = 0;
 		virtual void *VGet(void) = 0;
+		virtual int VGetFrequency(void) const = 0;
+		virtual int VGetBitDepth(void) const = 0;
+		virtual int VGetChannels(void) const = 0;
+		virtual int VGetSize(void) const = 0;
 		virtual bool VIsLoaded(void) const = 0;
 	};
 	

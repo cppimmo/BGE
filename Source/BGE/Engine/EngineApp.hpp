@@ -41,6 +41,7 @@
 #include "Memory/Memory.hpp"
 #include "UI/DebugConsole.hpp"
 #include "Audio/Audio.hpp"
+#include "Graphics/Renderer.hpp"
 
 namespace BGE
 {
@@ -99,6 +100,7 @@ namespace BGE
 		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache.
 		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console.
 		UniqueIAudioSystemPtr m_pAudioSystem; //!< Audio system.
+		UniqueIRendererPtr m_pRenderer; //!< Renderer.
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
@@ -130,6 +132,7 @@ namespace BGE
 		ResourceCache &GetResourceCache(void) noexcept;
 		DebugConsole  &GetDebugConsole(void) noexcept;
 		IAudioSystem  &GetAudioSystem(void) noexcept;
+		IRenderer     &GetRenderer(void) noexcept;
 		int GetExitCode(void) const;
 	protected:
 		virtual void VRegisterGameEvents(void);

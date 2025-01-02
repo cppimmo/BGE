@@ -33,12 +33,12 @@
 
 namespace BGE
 {
-	OpenALAudioListener::OpenALAudioListener(void)
+	ALAudioListener::ALAudioListener(void)
 		: m_volume(kDEFAULT_VOLUME), m_position(0), m_velocity(0)
 	{
 	}
 
-	void OpenALAudioListener::VSetVolume(float volume)
+	void ALAudioListener::VSetVolume(float volume)
 	{
 		// TODO: Error check on bounds.
 		BGE_ASSERT(volume >= 0.0f);
@@ -46,24 +46,24 @@ namespace BGE
 		alListenerf(AL_GAIN, volume);
 	}
 
-	float OpenALAudioListener::VGetVolume(void) const
+	float ALAudioListener::VGetVolume(void) const
 	{
 		float volume;
 		alGetListenerf(AL_GAIN, &volume);
 		return volume;
 	}
 
-	void OpenALAudioListener::VSetPosition(const glm::vec3 &position)
+	void ALAudioListener::VSetPosition(const glm::vec3 &position)
 	{
 		alListener3f(AL_POSITION, position.x, position.y, position.z);
 	}
 
-	void OpenALAudioListener::VSetVelocity(const glm::vec3 &velocity)
+	void ALAudioListener::VSetVelocity(const glm::vec3 &velocity)
 	{
 		alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 	}
 
-	void OpenALAudioListener::VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up)
+	void ALAudioListener::VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up)
 	{
 		// Orientation is expressed as “at” and “up” vectors
 		const std::array<float, 6> orientation = { forward.x, forward.y, forward.z, up.x, up.y, up.z };

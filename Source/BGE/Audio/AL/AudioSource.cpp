@@ -33,7 +33,7 @@
 
 namespace BGE
 {
-	OpenALAudioSource::OpenALAudioSource(void)
+	ALAudioSource::ALAudioSource(void)
 		: m_sourceID(0), m_pBuffer(nullptr), m_position(0), m_velocity(0)
 	{
 		alGenSources(1, &m_sourceID);
@@ -41,58 +41,58 @@ namespace BGE
 		VSetVelocity(m_velocity);
 	}
 
-	OpenALAudioSource::~OpenALAudioSource(void)
+	ALAudioSource::~ALAudioSource(void)
 	{
 		alDeleteSources(1, &m_sourceID);
 	}
 
-	void OpenALAudioSource::VSetPosition(const glm::vec3 &kPosition)
+	void ALAudioSource::VSetPosition(const glm::vec3 &kPosition)
 	{
 		m_position = kPosition;
 		alSource3f(m_sourceID, AL_POSITION, kPosition.x, kPosition.y, kPosition.z);
 	}
 
-	const glm::vec3 &OpenALAudioSource::VGetPosition(void) const
+	const glm::vec3 &ALAudioSource::VGetPosition(void) const
 	{
 		return m_position;
 	}
 
-	void OpenALAudioSource::VSetVelocity(const glm::vec3 &kVelocity)
+	void ALAudioSource::VSetVelocity(const glm::vec3 &kVelocity)
 	{
 		m_velocity = kVelocity;
 		alSource3f(m_sourceID, AL_VELOCITY, kVelocity.x, kVelocity.y, kVelocity.z);
 	}
 
-	const glm::vec3 &OpenALAudioSource::VGetVelocity(void) const
+	const glm::vec3 &ALAudioSource::VGetVelocity(void) const
 	{
 		return m_velocity;
 	}
 
-	void OpenALAudioSource::VSetVolume(float volume)
+	void ALAudioSource::VSetVolume(float volume)
 	{
 		alSourcef(m_sourceID, AL_GAIN, volume);
 	}
 
-	float OpenALAudioSource::VGetVolume(void) const
+	float ALAudioSource::VGetVolume(void) const
 	{
 		float volume;
 		alGetSourcef(m_sourceID, AL_GAIN, &volume);
 		return volume;
 	}
 
-	void OpenALAudioSource::VSetLooping(bool bLooping)
+	void ALAudioSource::VSetLooping(bool bLooping)
 	{
 		alSourcei(m_sourceID, AL_LOOPING, (bLooping ? AL_TRUE : AL_FALSE));
 	}
 
-	bool OpenALAudioSource::VIsLooping(void) const
+	bool ALAudioSource::VIsLooping(void) const
 	{
 		int looping;
 		alGetSourcei(m_sourceID, AL_LOOPING, &looping);
 		return (looping == AL_TRUE);
 	}
 
-	void OpenALAudioSource::VPlay(void)
+	void ALAudioSource::VPlay(void)
 	{
 		if (!VIsPlaying())
 		{
@@ -100,24 +100,24 @@ namespace BGE
 		}
 	}
 
-	void OpenALAudioSource::VPause(void)
+	void ALAudioSource::VPause(void)
 	{
 		alSourcePause(m_sourceID);
 	}
 
-	void OpenALAudioSource::VStop(void)
+	void ALAudioSource::VStop(void)
 	{
 		alSourceStop(m_sourceID);
 	}
 
-	bool OpenALAudioSource::VIsPlaying(void) const
+	bool ALAudioSource::VIsPlaying(void) const
 	{
 		int state;
 		alGetSourcei(m_sourceID, AL_SOURCE_STATE, &state);
 		return (state == AL_PLAYING);
 	}
 
-	float OpenALAudioSource::VGetProgress(void) const
+	float ALAudioSource::VGetProgress(void) const
 	{
 		ALint byteOffset = 0;
 		ALint bufferID = 0;
@@ -160,7 +160,7 @@ namespace BGE
 		return 0.0f; // Avoid division by zero
 	}
 
-	void OpenALAudioSource::VAttachBuffer(StrongIAudioBufferPtr pBuffer)
+	void ALAudioSource::VAttachBuffer(StrongIAudioBufferPtr pBuffer)
 	{
 		if (!pBuffer)
 		{
@@ -180,12 +180,12 @@ namespace BGE
 		alSourcei(m_sourceID, AL_BUFFER, *static_cast<ALuint *>(pRawBufferID));
 	}
 
-	StrongIAudioBufferPtr OpenALAudioSource::VGetBuffer(void) const
+	StrongIAudioBufferPtr ALAudioSource::VGetBuffer(void) const
 	{
 		return m_pBuffer;
 	}
 
-	void OpenALAudioSource::VDetachBuffer(void)
+	void ALAudioSource::VDetachBuffer(void)
 	{
 		m_pBuffer = nullptr;
 		alSourcei(m_sourceID, AL_BUFFER, 0);

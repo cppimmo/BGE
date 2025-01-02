@@ -39,13 +39,13 @@
 
 namespace BGE
 {
-	class OpenALAudioListener; // Forward declare
-	BGE_DECLARE_PTR(OpenALAudioListener);
+	class ALAudioListener; // Forward declare
+	BGE_DECLARE_PTR(ALAudioListener);
 
 	/**
 	 * @brief .
 	 */
-	class OpenALAudioListener final : public IAudioListener
+	class ALAudioListener final : public IAudioListener
 	{
 	private:
 		static constexpr float kDEFAULT_VOLUME = 1.0f; //!< Default listener volume.
@@ -54,8 +54,8 @@ namespace BGE
 		glm::vec3 m_position; //!< 3D position of the listener.
 		glm::vec3 m_velocity; //!< Velocity of the listener.
 	public:
-		OpenALAudioListener(void);
-		~OpenALAudioListener(void) override = default;
+		ALAudioListener(void);
+		~ALAudioListener(void) override = default;
 		// IAudioListener's interface:
 		virtual void VSetVolume(float volume) override;
 		virtual float VGetVolume(void) const override;

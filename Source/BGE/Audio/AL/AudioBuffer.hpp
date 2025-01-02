@@ -39,21 +39,25 @@
 
 namespace BGE
 {
-	class OpenALAudioBuffer; // Forward declare
-	BGE_DECLARE_PTR(OpenALAudioBuffer);
+	class ALAudioBuffer; // Forward declare
+	BGE_DECLARE_PTR(ALAudioBuffer);
 
-	class OpenALAudioBuffer final : public IAudioBuffer
+	class ALAudioBuffer final : public IAudioBuffer
 	{
 	private:
 		ALuint m_bufferID; //!< OpenAL buffer identifier.
 		bool m_bInitialized = false; //!< Has the buffer been initialized?
 	public:
-		OpenALAudioBuffer(void);
-		~OpenALAudioBuffer(void) override;
+		ALAudioBuffer(void);
+		~ALAudioBuffer(void) override;
 		// IAudioBuffer's interface:
 		virtual bool VLoadFromResource(StrongResourceHandlePtr pHandle) override;
 		virtual StrongResourceHandlePtr VGetResource(void) const override;
 		virtual void *VGet(void) override;
+		virtual int VGetFrequency(void) const override;
+		virtual int VGetBitDepth(void) const override;
+		virtual int VGetChannels(void) const override;
+		virtual int VGetSize(void) const override;
 		virtual bool VIsLoaded(void) const override;
 	};
 } // End namespace (BGE)

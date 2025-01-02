@@ -39,13 +39,13 @@
 
 namespace BGE
 {
-	class OpenALAudioSource; // Forward declare
-	BGE_DECLARE_PTR(OpenALAudioSource);
+	class ALAudioSource; // Forward declare
+	BGE_DECLARE_PTR(ALAudioSource);
 
 	/**
 	 * @brief .
 	 */
-	class OpenALAudioSource final : public IAudioSource
+	class ALAudioSource final : public IAudioSource
 	{
 	private:
 		ALuint m_sourceID; //!< OpenAL source identifier.
@@ -53,8 +53,8 @@ namespace BGE
 		glm::vec3 m_position;
 		glm::vec3 m_velocity;
 	public:
-		OpenALAudioSource(void);
-		~OpenALAudioSource(void) override;
+		ALAudioSource(void);
+		~ALAudioSource(void) override;
 		// IAudioSource's interface:
 		virtual void VSetPosition(const glm::vec3 &kPosition) override;
 		virtual const glm::vec3 &VGetPosition(void) const override;

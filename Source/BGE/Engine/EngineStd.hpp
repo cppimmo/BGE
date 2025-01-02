@@ -91,6 +91,9 @@
 // BGE_CONFIG_PROFILE // For profiling (disables certain parts of DEBUG config)
 // BGE_CONFIG_RELEASE // For final versions
 
+//! Macro for inline keyword
+#define BGE_INLINE inline
+
 // Common project headers:
 #include "Utilities/Types.hpp"
 #include "Utilities/Templates.hpp"
@@ -131,11 +134,11 @@ namespace BGE
 	};
 
 	//! Current engine version.
-	inline constexpr Version kVERSION{ 1, 0, 0 };
+	BGE_INLINE constexpr Version kVERSION{ 1, 0, 0 };
 	//! Long form engine name.
-	inline constexpr std::string_view kENGINE_NAME = "Brian's Game Engine";
+	BGE_INLINE constexpr std::string_view kENGINE_NAME = "Brian's Game Engine";
 	//! Short form engine name.
-	inline constexpr std::string_view kENGINE_ABBREV = "BGE";
+	BGE_INLINE constexpr std::string_view kENGINE_ABBREV = "BGE";
 	//! Engine entry point.
 	extern int EngineMain(int numArgs, char *pArgs[]);
 } // End namespace (BGE)

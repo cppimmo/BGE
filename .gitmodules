@@ -37,3 +37,6 @@
 [submodule "Source/Lib/glslang"]
 	path = Source/Lib/glslang
 	url = https://github.com/KhronosGroup/glslang.git
+[submodule "Source/Lib/bullet3"]
+	path = Source/Lib/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
