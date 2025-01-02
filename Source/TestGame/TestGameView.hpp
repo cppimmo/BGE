@@ -2,8 +2,8 @@
 #define _TG_TESTGAMEVIEW_HPP_
 
 #include <UI/HumanView.hpp>
-#include <Graphics/Shaders.hpp>
-#include <Graphics/ShaderProgram.hpp>
+#include <Graphics/GL/Shaders.hpp>
+#include <Graphics/GL/ShaderProgram.hpp>
 
 #include "TestController.hpp"
 #include <glm/gtc/quaternion.hpp>
@@ -33,7 +33,7 @@ namespace TestGame
 			}
 		};
 
-		BGE::UniqueShaderProgramPtr m_pShaderProgram;
+		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
 		GLuint m_vao, m_vbo;
 		BGE::StrongIAudioSourcePtr m_pSource;
 	public:

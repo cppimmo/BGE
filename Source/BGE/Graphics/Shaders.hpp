@@ -36,10 +36,8 @@ namespace BGE
 	BGE_DECLARE_PTR(IShader);
 	class Shader; // Forward declare
 	BGE_DECLARE_PTR(Shader);
-	class VertexShader; // Forward declare
-	BGE_DECLARE_PTR(VertexShader);
-	class FragmentShader; // Forward declare
-	BGE_DECLARE_PTR(FragmentShader);
+	class IShaderFactory; // Forward declare
+	BGE_DECLARE_PTR(IShaderFactory);
 
 	//! List of shaders.
 	using ShaderList = std::list<StrongIShaderPtr>;
@@ -67,77 +65,19 @@ namespace BGE
 		virtual void VDestroy(void) = 0;
 		//! .
 		virtual bool VIsValid(void) const = 0;
-	protected:
-		static bool Compile(GLuint shaderID, std::string_view source);
-	};
-	
-	// TODO: Shaders should use resource cache handles for shader source code.
-
-	/**
-	 * @brief .
-	 */
-	class Shader : public IShader
-	{
-	protected:
-		GLuint m_shaderID;
-	public:
-		Shader(void);
-		virtual ~Shader(void) override;
-		// IShader's interface:
-		virtual bool VCompile(std::string_view source) override;
-		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) override;
-		virtual bool VCompileBinary(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint) override;
-		virtual GLuint VGetID(void) const override;
-		virtual void VDestroy(void) override;
-		virtual bool VIsValid(void) const override;
 	};
 
-	class VertexShader final : public Shader
+	class IShaderFactory
 	{
 	public:
-		VertexShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
-	};
-
-	class TessControlShader final : public Shader
-	{
-	public:
-		TessControlShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
-	};
-
-	class TessEvalShader final : public Shader
-	{
-	public:
-		TessEvalShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
-	};
-
-	class GeometryShader final : public Shader
-	{
-	public:
-		GeometryShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
-	};
-
-	class FragmentShader final : public Shader
-	{
-	public:
-		FragmentShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
-	};
-
-	class ComputeShader final : public Shader
-	{
-	public:
-		ComputeShader(void) = default;
-		// IShader's interface:
-		virtual bool VCreate(void) override;
+		virtual ~IShaderFactory(void) = default;
+		// Interface:
+		virtual StrongIShaderPtr VCreateVertexShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateTessControlShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateTessEvalShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateGeometryShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateFragmentShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateComputeShader(void) const = 0;
 	};
 } // End namespace (BGE)
 

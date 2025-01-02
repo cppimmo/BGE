@@ -54,6 +54,7 @@ namespace BGE
 		bool m_bInitialized; //!< Is the audio system initialized?
 		StrongIAudioListenerPtr m_pActiveListener; //!< The active audio listener (of which there can only be one).
 		AudioSourceList m_sources; //!< List of managed audio sources.
+		DistanceModel m_distModel = DistanceModel::kInverseClamped; //!< Distance model.
 	public:
 		OpenALAudioSystem(void);
 		~OpenALAudioSystem(void) override;
@@ -61,6 +62,10 @@ namespace BGE
 		virtual bool VInit(void) override;
 		virtual void VShutdown(void) override;
 		virtual AudioImpl VGetImpl(void) const noexcept override;
+		virtual std::size_t VGetActiveBufferCount(void) const override;
+		virtual std::size_t VGetActiveSourceCount(void) const override;
+		virtual DistanceModel VGetDistanceModel(void) const override;
+		virtual void VSetDistanceModel(DistanceModel model) override;
 
 		virtual StrongIAudioListenerPtr VCreateListener(void) override;
 		virtual StrongIAudioSourcePtr VCreateSource(void) override;
@@ -79,6 +84,7 @@ namespace BGE
 		virtual bool VIsInitialized(void) const override;
 	private:
 		static void ListAudioDevices(const ALchar *pDevices);
+		static ALenum ConvertDistanceModel(DistanceModel model);
 	};
 } // End namespace (BGE)
 

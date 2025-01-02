@@ -50,10 +50,7 @@ namespace BGE
 
 	OpenALAudioSystem::~OpenALAudioSystem(void)
 	{
-		if (m_bInitialized)
-		{
-			VShutdown();
-		}
+		VShutdown();
 	}
 
 	bool OpenALAudioSystem::VInit(void)
@@ -130,6 +127,11 @@ namespace BGE
 
 	void OpenALAudioSystem::VShutdown(void)
 	{
+		if (!m_bInitialized)
+		{
+			return;
+		}
+
 		m_sources.clear(); // Clear the audio source list
 
 		// Attempt to destroy the OpenAL context
@@ -151,6 +153,32 @@ namespace BGE
 	AudioImpl OpenALAudioSystem::VGetImpl(void) const noexcept
 	{
 		return AudioImpl::kOpenAL;
+	}
+
+	std::size_t OpenALAudioSystem::VGetActiveBufferCount(void) const
+	{
+		std::size_t count = 0;
+		for (const auto &pkSource : m_sources)
+		{
+			count += ((pkSource->VGetBuffer() != nullptr) ? 1 : 0);
+		}
+		return count;
+	}
+
+	std::size_t OpenALAudioSystem::VGetActiveSourceCount(void) const
+	{
+		return m_sources.size();
+	}
+
+	DistanceModel OpenALAudioSystem::VGetDistanceModel(void) const
+	{
+		return m_distModel;
+	}
+
+	void OpenALAudioSystem::VSetDistanceModel(DistanceModel model)
+	{
+		m_distModel = model;
+		alDistanceModel(ConvertDistanceModel(model));
 	}
 
 	StrongIAudioListenerPtr OpenALAudioSystem::VCreateListener(void)
@@ -249,6 +277,29 @@ namespace BGE
         }
         oss << "----------";
 		BGE_LOG("Audio", "OpenAL context device specifiers: %s", oss.str().c_str());
+	}
+
+	ALenum OpenALAudioSystem::ConvertDistanceModel(DistanceModel model)
+	{
+		switch (model)
+		{
+		case DistanceModel::kNone:
+			return AL_NONE;
+		case DistanceModel::kInverse:
+			return AL_INVERSE_DISTANCE;
+		case DistanceModel::kInverseClamped:
+			return AL_INVERSE_DISTANCE_CLAMPED;
+		case DistanceModel::kLinear:
+			return AL_LINEAR_DISTANCE;
+		case DistanceModel::kLinearClamped:
+			return AL_LINEAR_DISTANCE_CLAMPED;
+		case DistanceModel::kExponential:
+			return AL_EXPONENT_DISTANCE;
+		case DistanceModel::kExponentialClamped:
+			return AL_EXPONENT_DISTANCE_CLAMPED;
+		default:
+			return AL_NONE; // Default fallback
+		}
 	}
 } // End namespace (BGE)
 

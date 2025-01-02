@@ -99,6 +99,9 @@ namespace BGE
  * memory manager has been initialized.  If not, it should use std::malloc & std::free, and
  * store addresses of allocated memory so the memory manager does not attempt to free memory
  * allocated with std::malloc once it has been initialized.
+ *
+ * The memory manager could also use a form of bootstrapping where some memory is allocated
+ * before the manager is initialized.
  */
 
 #if defined(_DEBUG) // Only on Windows IIRC

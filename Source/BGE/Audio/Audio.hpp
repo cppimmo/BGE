@@ -124,6 +124,31 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
+	class IAudioCapture
+	{
+	public:
+		virtual ~IAudioCapture(void) = default;
+		// Interface:
+		virtual bool VStartCapture(void) = 0;
+		virtual void VStopCapture(void) = 0;
+		virtual std::vector<float> VGetCapturedData(void) const = 0;
+	};
+
+	//! .
+	enum struct DistanceModel
+	{
+		kNone,              /**< No attenuation. */
+		kInverse,           /**< OpenAL's AL_INVERSE_DISTANCE. */
+		kInverseClamped,    /**< OpenAL's AL_INVERSE_DISTANCE_CLAMPED. */
+		kLinear,            /**< OpenAL's AL_LINEAR_DISTANCE. */
+		kLinearClamped,     /**< OpenAL's AL_LINEAR_DISTANCE_CLAMPED. */
+		kExponential,       /**< OpenAL's AL_EXPONENT_DISTANCE. */
+		kExponentialClamped /**< OpenAL's AL_EXPONENT_DISTANCE_CLAMPED. */
+	};
+
+	/**
+	 * @brief .
+	 */
 	class IAudioSystem
 	{
 	public:
@@ -132,6 +157,10 @@ namespace BGE
 		virtual bool VInit(void) = 0;
 		virtual void VShutdown(void) = 0;
 		virtual AudioImpl VGetImpl(void) const noexcept = 0;
+		virtual std::size_t VGetActiveBufferCount(void) const = 0;
+		virtual std::size_t VGetActiveSourceCount(void) const = 0;
+		virtual DistanceModel VGetDistanceModel(void) const = 0;
+		virtual void VSetDistanceModel(DistanceModel model) = 0;
 
 		virtual StrongIAudioListenerPtr VCreateListener(void) = 0;
 		virtual StrongIAudioSourcePtr VCreateSource(void) = 0;

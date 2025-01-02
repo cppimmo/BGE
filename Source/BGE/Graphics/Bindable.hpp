@@ -41,8 +41,8 @@ namespace BGE
 	public:
 		virtual ~IBindable(void) = default;
 
-		virtual void VBind(void) const = 0;
-		virtual void VUnbind(void) const = 0;
+		virtual void VBind(void) = 0;
+		virtual void VUnbind(void) = 0;
 	};
 } // End namespace (BGE)
 

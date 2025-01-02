@@ -28,32 +28,42 @@
 #ifndef _BGE_RENDERER_HPP_
 #define _BGE_RENDERER_HPP_
 
+#include "Graphics/Viewport.hpp"
+#include "Graphics/Shaders.hpp"
+#include "Graphics/ShaderProgram.hpp"
+
 namespace BGE
 {
-	class IStringable;
-	class IRenderer;
-	class IRenderState;
+	class IRenderer; // Forward declare;
+	BGE_DECLARE_PTR(IRenderer);
+
+	//! Enum for representing a renderer implementation.
+	enum struct RendererImpl
+	{
+		kOpenGL /**< OpenGL renderer. */
+	};
 
 	class IRenderer
 	{
 	public:
 		virtual ~IRenderer(void) = default;
+
+		virtual bool VInit(void) = 0;
+		virtual void VShutdown(void) = 0;
+		virtual RendererImpl VGetImpl(void) const = 0;
+
+		virtual void VCreateShaderFactory(void) = 0;
+		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
+		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
+
+		virtual void VSetViewport(const IViewport &kViewport) = 0;
+		virtual void VSetBackgroundColor(const glm::vec4 &kColor) = 0;
+		virtual glm::vec4 VGetBackgroundColor(void) = 0;
 		//virtual void VSetBackgroundColor(float r, float g, float b, float a) = 0;
 		//virtual void VShutdown(void) = 0;
 		//virtual bool VPreRender(void) = 0;
 	protected:
 	private:
-	};
-
-	class IRenderState : public IStringable
-	{
-	public:
-		virtual ~IRenderState(void) = default;
-		std::string VToString(void) const = 0;
-	};
-
-	class OpenGLRenderer : public IRenderer
-	{
 	};
 
 	int GetMaxVertexAttribs(void);
