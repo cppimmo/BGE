@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Memory.cpp
+ * @file   AudioBuffer.hpp
  * @author Brian Hoffpauir
- * @date   12.09.2024
- * @brief  .
+ * @date   01.01.2025
+ * @brief  OpenAL AudioBuffer class declaration.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -28,43 +28,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#include "Engine/EngineStd.hpp"
-#include "Memory/Memory.hpp"
+#ifndef _BGE_AL_AUDIOBUFFER_HPP_
+#define _BGE_AL_AUDIOBUFFER_HPP_
+
+// OpenAL headers:
+#include <al.h>
+#include <alc.h>
+
+#include "Audio/Audio.hpp"
 
 namespace BGE
 {
-	MemoryManager::MemoryManager(std::size_t poolSize)
-		: m_pAllocatorPool(nullptr), m_poolSize(poolSize)
-	{
-	}
+	class OpenALAudioBuffer; // Forward declare
+	BGE_DECLARE_PTR(OpenALAudioBuffer);
 
-	MemoryManager::~MemoryManager(void)
+	class OpenALAudioBuffer final : public IAudioBuffer
 	{
-		Shutdown();
-	}
-
-	bool MemoryManager::Init(void)
-	{
-		if ((m_pAllocatorPool = std::malloc(m_poolSize)) == nullptr)
-		{
-			BGE_ERROR("Could not initialize allocator pool");
-			return false;
-		}
-
-		m_bInitialized = true;
-		return true;
-	}
-
-	void MemoryManager::Shutdown(void)
-	{
-		if (m_bInitialized)
-		{
-			std::free(m_pAllocatorPool);
-		}
-	}
-
-	void MemoryManager::DestroyAllocator(IAllocator *pAllocator)
-	{
-		pAllocator->~IAllocator();
-	}
+	private:
+		ALuint m_bufferID; //!< OpenAL buffer identifier.
+		bool m_bInitialized = false; //!< Has the buffer been initialized?
+	public:
+		OpenALAudioBuffer(void);
+		~OpenALAudioBuffer(void) override;
+		// IAudioBuffer's interface:
+		virtual bool VLoadFromResource(StrongResourceHandlePtr pHandle) override;
+		virtual StrongResourceHandlePtr VGetResource(void) const override;
+		virtual void *VGet(void) override;
+		virtual bool VIsLoaded(void) const override;
+	};
 } // End namespace (BGE)
+
+#endif /* !_BGE_AL_AUDIOBUFFER_HPP_ */

@@ -31,6 +31,16 @@
 #ifndef _BGE_MEMORY_HPP_
 #define _BGE_MEMORY_HPP_
 
+#include <type_traits>
+
+// Include the allocators:
+#include "Memory/Allocator.hpp"
+#include "Memory/Allocators/StackAllocator.hpp"
+#include "Memory/Allocators/PoolAllocator.hpp"
+#include "Memory/Allocators/FreeListAllocator.hpp"
+#include "Memory/Allocators/LinearAllocator.hpp"
+#include "Memory/Allocators/SimpleAllocator.hpp"
+
 namespace BGE
 {
 	class MemoryManager; // Foward declare
@@ -58,11 +68,38 @@ namespace BGE
 
 	class MemoryManager final : public INonCopyable, public INonMovable
 	{
+	private:
+		static UniqueMemoryManagerPtr s_pInstance;
+
+		void *m_pAllocatorPool; //!< Pool of memory for custom allocators.
+		std::size_t m_poolSize;
+		bool m_bInitialized = false;
 	public:
-		MemoryManager(void);
-		~MemoryManager(void) {}
+		static MemoryManager &GetInstance(void) noexcept;
+		bool Init(void);
+		void Shutdown(void);
+
+		template <typename Allocator, typename... Args>
+		requires DerivedFromIAllocator<Allocator>
+		Allocator *CreateAllocator(Args... args)
+		{
+			return new(m_pAllocatorPool) Allocator(args...);
+		}
+
+		void DestroyAllocator(IAllocator *pAllocator);
+		MemoryManager(std::size_t poolSize);
+		~MemoryManager(void);
+	private:
+
 	};
 } // End namespace (BGE)
+
+/*
+ * NOTE: Overloaded new and delete operators need to check if the global application layer
+ * memory manager has been initialized.  If not, it should use std::malloc & std::free, and
+ * store addresses of allocated memory so the memory manager does not attempt to free memory
+ * allocated with std::malloc once it has been initialized.
+ */
 
 #if defined(_DEBUG) // Only on Windows IIRC
 #define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator

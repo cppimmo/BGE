@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Memory.cpp
+ * @file   AudioSource.hpp
  * @author Brian Hoffpauir
- * @date   12.09.2024
- * @brief  .
+ * @date   01.01.2025
+ * @brief  OpenAL AudioSource class declaration.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -28,43 +28,54 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#include "Engine/EngineStd.hpp"
-#include "Memory/Memory.hpp"
+#ifndef _BGE_AL_AUDIOSOURCE_HPP_
+#define _BGE_AL_AUDIOSOURCE_HPP_
+
+// OpenAL headers:
+#include <al.h>
+#include <alc.h>
+
+#include "Audio/Audio.hpp"
 
 namespace BGE
 {
-	MemoryManager::MemoryManager(std::size_t poolSize)
-		: m_pAllocatorPool(nullptr), m_poolSize(poolSize)
-	{
-	}
+	class OpenALAudioSource; // Forward declare
+	BGE_DECLARE_PTR(OpenALAudioSource);
 
-	MemoryManager::~MemoryManager(void)
+	/**
+	 * @brief .
+	 */
+	class OpenALAudioSource final : public IAudioSource
 	{
-		Shutdown();
-	}
+	private:
+		ALuint m_sourceID; //!< OpenAL source identifier.
+		StrongIAudioBufferPtr m_pBuffer; //!< Audio buffer managed by this source.
+		glm::vec3 m_position;
+		glm::vec3 m_velocity;
+	public:
+		OpenALAudioSource(void);
+		~OpenALAudioSource(void) override;
+		// IAudioSource's interface:
+		virtual void VSetPosition(const glm::vec3 &kPosition) override;
+		virtual const glm::vec3 &VGetPosition(void) const override;
+		virtual void VSetVelocity(const glm::vec3 &kVelocity) override;
+		virtual const glm::vec3 &VGetVelocity(void) const override;
+		virtual void VSetVolume(float volume) override;
+		virtual float VGetVolume(void) const override;
 
-	bool MemoryManager::Init(void)
-	{
-		if ((m_pAllocatorPool = std::malloc(m_poolSize)) == nullptr)
-		{
-			BGE_ERROR("Could not initialize allocator pool");
-			return false;
-		}
+		virtual void VSetLooping(bool bLooping) override;
+		virtual bool VIsLooping(void) const override;
 
-		m_bInitialized = true;
-		return true;
-	}
+		virtual void VPlay(void) override;
+		virtual void VPause(void) override;
+		virtual void VStop(void) override;
+		virtual bool VIsPlaying(void) const override;
+		virtual float VGetProgress(void) const override;
 
-	void MemoryManager::Shutdown(void)
-	{
-		if (m_bInitialized)
-		{
-			std::free(m_pAllocatorPool);
-		}
-	}
-
-	void MemoryManager::DestroyAllocator(IAllocator *pAllocator)
-	{
-		pAllocator->~IAllocator();
-	}
+		virtual void VAttachBuffer(StrongIAudioBufferPtr pBuffer) override;
+		virtual StrongIAudioBufferPtr VGetBuffer(void) const override;
+		virtual void VDetachBuffer(void) override;
+	};
 } // End namespace (BGE)
+
+#endif /* !_BGE_AL_AUDIOSOURCE_HPP_ */

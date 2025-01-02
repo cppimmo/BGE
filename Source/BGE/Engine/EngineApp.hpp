@@ -64,8 +64,9 @@ namespace BGE
 		}
 		return g_pApp.operator bool();
 	}
+
 	/**
-	 * Application layer class.
+	 * @brief Application layer class.
 	 */
 	class EngineApp : public INonCopyable, public INonMovable
 	{
@@ -81,13 +82,13 @@ namespace BGE
 			float smoothedFPS = 0.0f; //!< Calculated FPS.
 		};
 	protected:
-		bool m_bRunning; // True if game is in the main loop.
-		bool m_bQuitRequested; // True if the exit sequence is nigh.
-		bool m_bQuitting; // True if the exit sequence is being ran.
-		bool m_bHasQuit; // true if the exit sequence has been run.
-		bool m_bEditorRunning; // True if the game editor is running.
+		bool m_bRunning; //!< True if game is in the main loop.
+		bool m_bQuitRequested; //!< True if the exit sequence is nigh.
+		bool m_bQuitting; //!< True if the exit sequence is being ran.
+		bool m_bHasQuit; //!< True if the exit sequence has been run.
+		bool m_bEditorRunning; //!< True if the game editor is running.
 		bool m_bResourceCheck; //!< Check system resources for availability.
-		TextStringMap m_textStrings; // Localized string container.
+
 		Timer m_timer; //!< Application timer.
 		FPSData m_fpsData; //!< Data used to calculate the FPS.
 		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager.

@@ -199,6 +199,16 @@ namespace TestGame
 		m_pSource->VSetLooping(true);
 		m_pSource->VPlay();
 
+		auto &app = BGE::GetEngineApp();
+		auto position = m_pSource->VGetPosition();
+		float radius = 10.0f;
+		float angularSpeed = glm::pi<float>() / 4.0f;
+		BGE::Timer::Seconds time = app.GetTimer().GetElapsedSecs();
+		position.x = radius * std::cos(angularSpeed * time);
+		position.y = 0.0f;
+		position.z = radius * std::sin(angularSpeed * time);
+		m_pSource->VSetPosition(position);
+
 		ImGui::Begin("Test");
 		ImGui::Text("Audio source progress: %1.2f", m_pSource->VGetProgress());
 		ImGui::End();

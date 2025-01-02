@@ -49,8 +49,8 @@ namespace BGE
 	{
 	public:
 		INonMovable(void) = default;
-		INonMovable(const INonMovable &) = delete;
-		INonMovable &operator=(const INonMovable &) = delete;
+		INonMovable(INonMovable &&) = delete;
+		INonMovable &operator=(INonMovable &&) = delete;
 		virtual ~INonMovable(void) = default;
 	};
 

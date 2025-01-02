@@ -31,6 +31,7 @@
 #ifndef _BGE_AUDIO_HPP_
 #define _BGE_AUDIO_HPP_
 
+#include <string_view>
 #include <list>
 
 #include "Resources/ResourceHandle.hpp"
@@ -39,32 +40,40 @@ namespace BGE
 {
 	class IAudioSystem; // Forward declare
 	BGE_DECLARE_PTR(IAudioSystem);
-	class AudioSystem; // Forward declare
-	BGE_DECLARE_PTR(AudioSystem);
-	class IAudioListener; // Forward declare
-	BGE_DECLARE_PTR(IAudioListener);
-	class IAudioSource; // Forward declare
-	BGE_DECLARE_PTR(IAudioSource);
 	class IAudioBuffer; // Forward declare
 	BGE_DECLARE_PTR(IAudioBuffer);
+	class IAudioSource; // Forward declare
+	BGE_DECLARE_PTR(IAudioSource);
+	class IAudioListener; // Forward declare
+	BGE_DECLARE_PTR(IAudioListener);
 
-	using AudioListenerList = std::list<StrongIAudioListenerPtr>;
-	using AudioSourceList = std::list<StrongIAudioSourcePtr>;
+	//! List of strong IAudioBuffer pointers.
 	using AudioBufferList = std::list<StrongIAudioBufferPtr>;
+	//! List of strong IAudioSource pointers.
+	using AudioSourceList = std::list<StrongIAudioSourcePtr>;
+	//! List of strong IAudioListener pointers.
+	using AudioListenerList = std::list<StrongIAudioListenerPtr>;
+
+	//! Enum for representing the audio system used by an implementation.
+	enum struct AudioImpl
+	{
+		kOpenAL /**< OpenAL audio implementation. */
+	};
+	//! Convert an AudioImpl to a string representation.
+	constexpr std::string_view AudioImplToString(AudioImpl impl) noexcept;
 
 	/**
 	 * @brief .
 	 */
-	class IAudioListener
+	class IAudioBuffer
 	{
 	public:
-		virtual ~IAudioListener(void) = default;
+		virtual ~IAudioBuffer(void) = default;
 		// Interface:
-		virtual void VSetVolume(float volume) = 0;
-		virtual float VGetVolume(void) const = 0;
-		virtual void VSetPosition(const glm::vec3 &position) = 0;
-		virtual void VSetVelocity(const glm::vec3 &velocity) = 0;
-		virtual void VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up) = 0;
+		virtual bool VLoadFromResource(StrongResourceHandlePtr pHandle) = 0;
+		virtual StrongResourceHandlePtr VGetResource(void) const = 0;
+		virtual void *VGet(void) = 0;
+		virtual bool VIsLoaded(void) const = 0;
 	};
 	
 	/**
@@ -75,8 +84,10 @@ namespace BGE
 	public:
 		virtual ~IAudioSource(void) = default;
 		// Interface:
-		virtual void VSetPosition(const glm::vec3 &position) = 0;
-		virtual void VSetVelocity(const glm::vec3 &velocity) = 0;
+		virtual void VSetPosition(const glm::vec3 &kPosition) = 0;
+		virtual const glm::vec3 &VGetPosition(void) const = 0;
+		virtual void VSetVelocity(const glm::vec3 &kVelocity) = 0;
+		virtual const glm::vec3 &VGetVelocity(void) const = 0;
 		virtual void VSetVolume(float volume) = 0;
 		virtual float VGetVolume(void) const = 0;
 
@@ -97,16 +108,18 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
-	class IAudioBuffer
+	class IAudioListener
 	{
 	public:
-		virtual ~IAudioBuffer(void) = default;
+		virtual ~IAudioListener(void) = default;
 		// Interface:
-		virtual bool VLoadFromResource(StrongResourceHandlePtr pHandle) = 0;
-		virtual StrongResourceHandlePtr VGetResource(void) const = 0;
-		virtual void *VGet(void) = 0;
-		virtual bool VIsLoaded(void) const = 0;
+		virtual void VSetVolume(float volume) = 0;
+		virtual float VGetVolume(void) const = 0;
+		virtual void VSetPosition(const glm::vec3 &kPosition) = 0;
+		virtual void VSetVelocity(const glm::vec3 &kVelocity) = 0;
+		virtual void VSetOrientation(const glm::vec3 &kForward, const glm::vec3 &kUp) = 0;
 	};
+
 	// TODO: Add audio capture API.
 	/**
 	 * @brief .
@@ -118,6 +131,7 @@ namespace BGE
 		// Interface:
 		virtual bool VInit(void) = 0;
 		virtual void VShutdown(void) = 0;
+		virtual AudioImpl VGetImpl(void) const noexcept = 0;
 
 		virtual StrongIAudioListenerPtr VCreateListener(void) = 0;
 		virtual StrongIAudioSourcePtr VCreateSource(void) = 0;
@@ -135,6 +149,19 @@ namespace BGE
 		virtual void VStopAll(void) = 0;
 		virtual bool VIsInitialized(void) const = 0;
 	};
+
+	inline constexpr std::string_view AudioImplToString(AudioImpl impl) noexcept
+	{
+		using namespace std::string_view_literals;
+		switch (impl)
+		{
+		case AudioImpl::kOpenAL:
+			return "OpenAL"sv;
+		default:
+			return "Unknown";
+			break;
+		}
+	}
 } // End namespace (BGE)
 
 #endif /* !_BGE_AUDIO_HPP_ */

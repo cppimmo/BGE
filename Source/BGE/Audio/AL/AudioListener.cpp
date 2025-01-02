@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Memory.cpp
+ * @file   AudioListener.cpp
  * @author Brian Hoffpauir
- * @date   12.09.2024
- * @brief  .
+ * @date   01.01.2025
+ * @brief  OpenAL AudioListener class implementation.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -29,42 +29,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include "Engine/EngineStd.hpp"
-#include "Memory/Memory.hpp"
+#include "Audio/AL/AudioListener.hpp"
 
 namespace BGE
 {
-	MemoryManager::MemoryManager(std::size_t poolSize)
-		: m_pAllocatorPool(nullptr), m_poolSize(poolSize)
+	OpenALAudioListener::OpenALAudioListener(void)
+		: m_volume(kDEFAULT_VOLUME), m_position(0), m_velocity(0)
 	{
 	}
 
-	MemoryManager::~MemoryManager(void)
+	void OpenALAudioListener::VSetVolume(float volume)
 	{
-		Shutdown();
+		// TODO: Error check on bounds.
+		BGE_ASSERT(volume >= 0.0f);
+		m_volume = volume;
+		alListenerf(AL_GAIN, volume);
 	}
 
-	bool MemoryManager::Init(void)
+	float OpenALAudioListener::VGetVolume(void) const
 	{
-		if ((m_pAllocatorPool = std::malloc(m_poolSize)) == nullptr)
-		{
-			BGE_ERROR("Could not initialize allocator pool");
-			return false;
-		}
-
-		m_bInitialized = true;
-		return true;
+		float volume;
+		alGetListenerf(AL_GAIN, &volume);
+		return volume;
 	}
 
-	void MemoryManager::Shutdown(void)
+	void OpenALAudioListener::VSetPosition(const glm::vec3 &position)
 	{
-		if (m_bInitialized)
-		{
-			std::free(m_pAllocatorPool);
-		}
+		alListener3f(AL_POSITION, position.x, position.y, position.z);
 	}
 
-	void MemoryManager::DestroyAllocator(IAllocator *pAllocator)
+	void OpenALAudioListener::VSetVelocity(const glm::vec3 &velocity)
 	{
-		pAllocator->~IAllocator();
+		alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+	}
+
+	void OpenALAudioListener::VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up)
+	{
+		// Orientation is expressed as “at” and “up” vectors
+		const std::array<float, 6> orientation = { forward.x, forward.y, forward.z, up.x, up.y, up.z };
+		alListenerfv(AL_ORIENTATION, orientation.data());
 	}
 } // End namespace (BGE)

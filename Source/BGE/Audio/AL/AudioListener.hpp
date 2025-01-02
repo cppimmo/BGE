@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Memory.cpp
+ * @file   AudioListener.hpp
  * @author Brian Hoffpauir
- * @date   12.09.2024
- * @brief  .
+ * @date   01.01.2025
+ * @brief  OpenAL AudioListener class declaration.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -28,43 +28,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#include "Engine/EngineStd.hpp"
-#include "Memory/Memory.hpp"
+#ifndef _BGE_AL_AUDIOLISTENER_HPP_
+#define _BGE_AL_AUDIOLISTENER_HPP_
+
+// OpenAL headers:
+#include <al.h>
+#include <alc.h>
+
+#include "Audio/Audio.hpp"
 
 namespace BGE
 {
-	MemoryManager::MemoryManager(std::size_t poolSize)
-		: m_pAllocatorPool(nullptr), m_poolSize(poolSize)
-	{
-	}
+	class OpenALAudioListener; // Forward declare
+	BGE_DECLARE_PTR(OpenALAudioListener);
 
-	MemoryManager::~MemoryManager(void)
+	/**
+	 * @brief .
+	 */
+	class OpenALAudioListener final : public IAudioListener
 	{
-		Shutdown();
-	}
+	private:
+		static constexpr float kDEFAULT_VOLUME = 1.0f; //!< Default listener volume.
 
-	bool MemoryManager::Init(void)
-	{
-		if ((m_pAllocatorPool = std::malloc(m_poolSize)) == nullptr)
-		{
-			BGE_ERROR("Could not initialize allocator pool");
-			return false;
-		}
-
-		m_bInitialized = true;
-		return true;
-	}
-
-	void MemoryManager::Shutdown(void)
-	{
-		if (m_bInitialized)
-		{
-			std::free(m_pAllocatorPool);
-		}
-	}
-
-	void MemoryManager::DestroyAllocator(IAllocator *pAllocator)
-	{
-		pAllocator->~IAllocator();
-	}
+		float m_volume; //!< Master volume of the listener.
+		glm::vec3 m_position; //!< 3D position of the listener.
+		glm::vec3 m_velocity; //!< Velocity of the listener.
+	public:
+		OpenALAudioListener(void);
+		~OpenALAudioListener(void) override = default;
+		// IAudioListener's interface:
+		virtual void VSetVolume(float volume) override;
+		virtual float VGetVolume(void) const override;
+		virtual void VSetPosition(const glm::vec3 &position) override;
+		virtual void VSetVelocity(const glm::vec3 &velocity) override;
+		virtual void VSetOrientation(const glm::vec3 &forward, const glm::vec3 &up) override;
+	};
 } // End namespace (BGE)
+
+#endif /* !_BGE_AL_AUDIOLISTENER_HPP_ */

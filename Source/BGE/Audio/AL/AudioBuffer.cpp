@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Memory.cpp
+ * @file   AudioBuffer.cpp
  * @author Brian Hoffpauir
- * @date   12.09.2024
- * @brief  .
+ * @date   01.01.2025
+ * @brief  OpenAL AudioBuffer class implementation.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -29,42 +29,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include "Engine/EngineStd.hpp"
-#include "Memory/Memory.hpp"
+#include "Audio/AL/AudioBuffer.hpp"
+
+#include "Audio/SoundResource.hpp"
 
 namespace BGE
 {
-	MemoryManager::MemoryManager(std::size_t poolSize)
-		: m_pAllocatorPool(nullptr), m_poolSize(poolSize)
+	OpenALAudioBuffer::OpenALAudioBuffer(void)
 	{
+		alGenBuffers(1, &m_bufferID);
 	}
 
-	MemoryManager::~MemoryManager(void)
+	OpenALAudioBuffer::~OpenALAudioBuffer(void)
 	{
-		Shutdown();
+		alDeleteBuffers(1, &m_bufferID);
 	}
 
-	bool MemoryManager::Init(void)
+	bool OpenALAudioBuffer::VLoadFromResource(StrongResourceHandlePtr pHandle)
 	{
-		if ((m_pAllocatorPool = std::malloc(m_poolSize)) == nullptr)
+		auto pExtraData = std::dynamic_pointer_cast<SoundResourceExtraData>(pHandle->GetExtraData());
+		const SoundData &soundData = pExtraData->GetSoundData();
+
+		ALenum format;
+		const bool bSingleChannel = soundData.channels == 1;
+		const bool bDualChannel = soundData.channels == 2;
+		if (bSingleChannel && soundData.bitsPerSample == 8)
 		{
-			BGE_ERROR("Could not initialize allocator pool");
+			format = AL_FORMAT_MONO8;
+		}
+		else if (bSingleChannel && soundData.bitsPerSample == 16)
+		{
+			format = AL_FORMAT_MONO16;
+		}
+		else if (bDualChannel && soundData.bitsPerSample == 8)
+		{
+			format = AL_FORMAT_STEREO8;
+		}
+		else if (bDualChannel && soundData.bitsPerSample == 16)
+		{
+			format = AL_FORMAT_STEREO16;
+		}
+		else
+		{
+			BGE_ERROR("Unsupported channels/bitrate!");
 			return false;
 		}
 
+		alBufferData(m_bufferID, format, soundData.soundData.data(), soundData.soundData.size(), soundData.sampleRate);
 		m_bInitialized = true;
 		return true;
 	}
 
-	void MemoryManager::Shutdown(void)
+	StrongResourceHandlePtr OpenALAudioBuffer::VGetResource(void) const
 	{
-		if (m_bInitialized)
-		{
-			std::free(m_pAllocatorPool);
-		}
+		return nullptr;
 	}
 
-	void MemoryManager::DestroyAllocator(IAllocator *pAllocator)
+	void *OpenALAudioBuffer::VGet(void)
 	{
-		pAllocator->~IAllocator();
+		return reinterpret_cast<void *>(&m_bufferID);
 	}
-} // End namespace (BGE)
+
+	bool OpenALAudioBuffer::VIsLoaded(void) const
+	{
+		return m_bInitialized;
+	}
+} // End namespace (BEG)
