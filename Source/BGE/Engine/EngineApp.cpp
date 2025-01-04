@@ -31,6 +31,15 @@
 #include "Engine/EngineStd.hpp"
 #include "Engine/EngineApp.hpp"
 
+#include <csignal>
+#include <ranges>
+
+#include <RmlUi/Debugger.h>
+
+// ImGui implementation headers:
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
+
 #include "Events/Events.hpp"
 #include "Events/EventRegistry.hpp"
 #include "MainLoop/Initialization.hpp"
@@ -41,11 +50,6 @@
 #include "Scripting/ScriptExports.hpp"
 #include "Audio/AL/AudioSystem.hpp"
 #include "Graphics/GL/Renderer.hpp"
-
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_opengl3.h"
-
-#include <csignal>
 
 namespace BGE
 {
@@ -86,27 +90,21 @@ namespace BGE
 #ifdef BGE_CONFIG_DEBUG
 		HideConsole(); // TODO: This should be called by Logger based on configuration.
 #endif
+		// Check system resources if enabled
 		if (m_bResourceCheck)
 		{
-			constexpr int kDISK_SPACE_MIB = 1'000;
-			constexpr int kMEMORY_MIB = 1'000;
-
-			if (!IsDiskSpaceAvailable(kDISK_SPACE_MIB))
+			if (VCheckResources())
+				BGE_LOG("App", "System resource check passed");
+			else
 			{
-				BGE_ERROR("Not enough storage!");
-				return false;
-			}
-
-			if (!IsMemoryAvailable(kMEMORY_MIB))
-			{
-				BGE_ERROR("Not enough memory!");
+				BGE_ERROR("System resource check failed!");
 				return false;
 			}
 		}
 #ifdef BGE_CONFIG_DEBUG
-		BGE_INFO("Platform: %s", GetPlatform().data());
-		BGE_INFO("CPU speed: %dMHz", ReadCPUSpeed());
-		BGE_INFO("Logical CPU cores: %d", ReadLogicalCPUCores());
+		BGE_LOG("App", "Platform: %s", GetPlatform().data());
+		BGE_LOG("App", "CPU speed: %dMHz", ReadCPUSpeed());
+		BGE_LOG("App", "Logical CPU cores: %d", ReadLogicalCPUCores());
 #endif
 #ifdef BGE_CONFIG_RELEASE
 		if (!IsOnlyInstance("BGE"))
@@ -191,6 +189,8 @@ namespace BGE
 		// Queue graphics start event
 		BGE_QUEUE_GEVENT(std::make_shared<EventData_GraphicsStarted>());
 
+		// Initialize RmlUi
+
 		// Set window title & icon
 		BGUTSetWindowTitle(VGetGameTitle());
 		std::string iconFileName;
@@ -230,6 +230,16 @@ namespace BGE
 		// Register script exports
 		ScriptExports::Register();
 
+		{
+			const Resource bootstrapScript("Assets\\Scripts\\Bootstrap.lua");
+			auto pBootstrapScriptHandle = m_pResourceCache->GetHandle(bootstrapScript);
+			if (!pBootstrapScriptHandle)
+			{
+				BGE_ERROR("Couldn't load bootstrap script!");
+				return false;
+			}
+		}
+
 		// Call IGameLogic::VPostInit after the scripting system is setup & scripts have run
 		if (!m_pGameLogic->VPostInit())
 		{
@@ -268,6 +278,11 @@ namespace BGE
 		BGE_LOG("App", "Initialization duration: %.2f seconds", seconds);
 		m_timer.Reset(); // Reset the application timer for the main loop
 		return true;
+	}
+
+	bool EngineApp::VLoadGame(void)
+	{
+		return false;
 	}
 
 	void EngineApp::OnUpdate(float deltaTime, float elapsedTime)
@@ -316,12 +331,12 @@ namespace BGE
 		app.GetDebugConsole().VImGuiRoutine();
 	}
 
-	bool EngineApp::OnHandleEvent(const SDL_Event &kEvent)
+	bool EngineApp::OnHandleEvent(const SDL_Event &event)
 	{
 		bool bResult = false;
 		auto &app = GetEngineApp();
 		// TODO: Handle necessary SDL events.
-		switch (kEvent.type)
+		switch (event.type)
 		{
 		case SDL_QUIT:
 			app.OnShutdown();
@@ -330,6 +345,7 @@ namespace BGE
 		case SDL_APP_TERMINATING:
 			break;
 		case SDL_APP_LOWMEMORY:
+			BGE_LOG("App", "Application low on memory!!!");
 			break;
 		case SDL_APP_WILLENTERBACKGROUND:
 			break;
@@ -344,6 +360,48 @@ namespace BGE
 		case SDL_DISPLAYEVENT:
 			break;
 		case SDL_WINDOWEVENT:
+			// Process window event
+			switch (event.window.event)
+			{
+			case SDL_WINDOWEVENT_SHOWN:
+				break;
+			case SDL_WINDOWEVENT_HIDDEN:
+				break;
+			case SDL_WINDOWEVENT_EXPOSED:
+				break;
+			case SDL_WINDOWEVENT_MOVED:
+				break;
+			case SDL_WINDOWEVENT_RESIZED:
+				break;
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				break;
+			case SDL_WINDOWEVENT_MINIMIZED:
+				break;
+			case SDL_WINDOWEVENT_MAXIMIZED:
+				break;
+			case SDL_WINDOWEVENT_RESTORED:
+				break;
+			case SDL_WINDOWEVENT_ENTER:
+				break;
+			case SDL_WINDOWEVENT_LEAVE:
+				break;
+			case SDL_WINDOWEVENT_FOCUS_GAINED:
+				break;
+			case SDL_WINDOWEVENT_FOCUS_LOST:
+				break;
+			case SDL_WINDOWEVENT_CLOSE:
+				break;
+			case SDL_WINDOWEVENT_TAKE_FOCUS:
+				break;
+			case SDL_WINDOWEVENT_HIT_TEST:
+				break;
+			case SDL_WINDOWEVENT_ICCPROF_CHANGED:
+				break;
+			case SDL_WINDOWEVENT_DISPLAY_CHANGED:
+				break;
+			default:
+				break;
+			}
 			break;
 		case SDL_SYSWMEVENT:
 			break;
@@ -397,7 +455,7 @@ namespace BGE
 			for (auto it = gameViews.rbegin(); it != gameViews.rend(); ++it)
 			{
 				BGE_LOG("SDL Events", "Sending event to game view");
-				if ((*it)->VOnHandleEvent(kEvent))
+				if ((*it)->VOnHandleEvent(event))
 				{
 					bResult = true;
 					break; // Breaks out of loop
@@ -507,7 +565,7 @@ namespace BGE
 		return *m_pLocalizer.get();
 	}
 
-	EventManager &EngineApp::GetEventManager(void) noexcept
+	IEventManager &EngineApp::GetEventManager(void) noexcept
 	{
 		BGE_ASSERT(m_pEventManager);
 		return *m_pEventManager.get();
@@ -549,18 +607,106 @@ namespace BGE
 		return *m_pRenderer.get();
 	}
 
+	StrongIGameViewPtr EngineApp::GetHumanView(std::size_t index)
+	{
+		// Collect game views & declare filter for human views
+		const auto &views = m_pGameLogic->GetGameViews();
+		const auto humanFilter = IGameView::CreateFilter(GameViewType::Human);
+
+		// Filter human views
+		std::vector<StrongIGameViewPtr> humanViews;
+		for (const auto &pView : views | std::views::filter(humanFilter))
+		{
+			humanViews.push_back(pView);
+		}
+
+		// Check if index is valid and return the view
+		return (index < humanViews.size()) ? humanViews[index] : nullptr;
+	}
+
+	std::size_t EngineApp::GetHumanViewCount(void) const noexcept
+	{
+		const auto &views = m_pGameLogic->GetGameViews();
+		const auto humanFilter = IGameView::CreateFilter(GameViewType::Human);
+
+		return std::ranges::count_if(views, humanFilter);
+	}
+
 	int EngineApp::GetExitCode(void) const
 	{
 		return BGUTGetExitCode();
 	}
 
-	bool EngineApp::VLoadGame(void)
+	bool EngineApp::IsRunning(void) const noexcept
 	{
-		return false;
+		return m_bRunning;
+	}
+
+	bool EngineApp::VCheckResources(void)
+	{
+		constexpr int kDISK_SPACE_MIB = 1'000;
+		constexpr int kMEMORY_MIB = 1'000;
+
+		if (!IsDiskSpaceAvailable(kDISK_SPACE_MIB))
+		{
+			BGE_LOG("App", "Not enough storage!");
+			return false;
+		}
+
+		if (!IsMemoryAvailable(kMEMORY_MIB))
+		{
+			BGE_LOG("App", "Not enough memory!");
+			return false;
+		}
+		return true;
+	}
+
+	bool EngineApp::VPreloadResources(void)
+	{
+		return true;
+	}
+
+	bool EngineApp::VInitRmlUi(void)
+	{
+		// Install the custom interfaces constructed by the backend before initializing RmlUi
+		//Rml::SetSystemInterface(nullptr);
+		//Rml::SetRenderInterface(nullptr);
+
+		// RmlUi initialisation
+		if (!Rml::Initialise())
+		{
+			return false;
+		}
+
+		int width{}, height{};
+		BGUTGetWindowSize(BGUTGetWindowPtr(), width, height);
+		// Create the main RmlUi context
+		m_pRmlContext = Rml::CreateContext("main", Rml::Vector2i(width, height));
+		if (!m_pRmlContext)
+		{
+			Rml::Shutdown();
+			return false;
+		}
+
+		// Initialize the RmlUi debugger
+		//Rml::Debugger::Initialise(m_pRmlContext);
+
+		return true;
+	}
+
+	void EngineApp::VShutdownRmlUi(void)
+	{
+		// Shutdown RmlUi
+		Rml::Shutdown();
 	}
 
 	void EngineApp::VRegisterGameEvents(void)
 	{
+	}
+
+	bool EngineApp::VAttachAsClient(void)
+	{
+		return true;
 	}
 
 	void EngineApp::VCreateNetworkEventForwarder(void)

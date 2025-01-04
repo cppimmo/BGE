@@ -91,8 +91,11 @@
 // BGE_CONFIG_PROFILE // For profiling (disables certain parts of DEBUG config)
 // BGE_CONFIG_RELEASE // For final versions
 
-//! Macro for inline keyword
+//! Macro for inline keyword.
 #define BGE_INLINE inline
+
+//! Function macro for static assertions.
+#define BGE_STATIC_ASSERT(EXPR) static_assert(EXPR, "static assert failed:" #EXPR)
 
 // Common project headers:
 #include "Utilities/Types.hpp"

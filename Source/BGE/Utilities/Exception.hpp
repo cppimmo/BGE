@@ -1,7 +1,10 @@
-/*=============================================================================*
- * Exception.hpp - Base exception.
+/*******************************************************************************
+ * @file   Exception.hpp
+ * @author Brian Hoffpauir
+ * @date   01.03.2024
+ * @brief  Base exception.
  *
- * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
+ * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,9 +27,11 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *============================================================================*/
+ ******************************************************************************/
 #ifndef _BGE_EXCEPTION_HPP_
 #define _BGE_EXCEPTION_HPP_
+
+#include "Utilities/SourceLocation.hpp"
 
 namespace BGE
 {
@@ -36,24 +41,20 @@ namespace BGE
 	class Exception : public std::exception
 	{   // Not necessary to access from sub-classes:
 	protected:
-		mutable std::string_view m_message;
+		mutable std::string m_message;
 	private:
-		std::string_view m_filename;
-		std::string_view m_functionName;
-		std::size_t m_lineNum;
+		SourceLocation m_location;
 	public: // Constructor & default special member functions.
-		Exception(std::string_view message, std::string_view filename,
-				std::string_view functionName, std::size_t lineNum);
+		explicit Exception(std::string_view message);
+		Exception(std::string_view message, SourceLocation location);
 		Exception(const Exception &) = default;
-		Exception &operator=(const Exception &) = default;
 		Exception(Exception &&) noexcept = default;
+		Exception &operator=(const Exception &) = default;
 		Exception &operator=(Exception &&) noexcept = default;
 
 		virtual std::string_view VWhat(void) const noexcept; // Message
 		virtual std::string_view VType(void) const noexcept; // Exception type as string
-		std::string_view GetFunctionName(void) const noexcept; // Function name
-		std::string_view GetFilename(void) const noexcept; // Filename
-		std::size_t GetLineNum(void) const noexcept; // Line in file
+		const SourceLocation &GetLocation(void) const noexcept;
 	protected: // Subs can override standard what() if needed.
 		virtual const char *what(void) const noexcept { return m_message.data(); }
 	};
@@ -63,8 +64,8 @@ namespace BGE
 #define BGE_THROW(MSG) \
 do \
 { \
-	const auto kSourceLoc = std::source_location::current(); \
-	throw Exception(MSG, kSourceLoc.file_name(), kSourceLoc.function_name(), kSourceLoc.line()) \
+	const BGE::SourceLocation kSourceLoc; \
+	throw BGE::Exception(MSG, kSourceLoc); \
 } \
 while (0) \
 
@@ -73,8 +74,8 @@ do \
 { \
 	if (COND) \
 	{ \
-		const auto kSourceLoc = std::source_location::current(); \
-		throw Exception(MSG, kSourceLoc.file_name(), kSourceLoc.function_name(), kSourceLoc.line()) \
+		const BGE::SourceLocation kSourceLoc; \
+		throw BGE::Exception(MSG, kSourceLoc); \
 	} \
 } \
 while (0) \

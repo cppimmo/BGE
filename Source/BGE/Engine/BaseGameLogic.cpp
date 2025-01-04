@@ -147,30 +147,13 @@ BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) noexcept
     return *m_pProcessManager.get();
 }
 
-const BGE::ProcessManager &BGE::BaseGameLogic::GetProcessManager(void) const noexcept
-{
-    BGE_ASSERT(m_pProcessManager);
-    return *m_pProcessManager.get();
-}
-
 BGE::LuaScriptManager &BGE::BaseGameLogic::GetLuaScriptManager(void) noexcept
 {
     BGE_ASSERT(m_pLuaScriptManager);
     return *m_pLuaScriptManager.get();
 }
 
-const BGE::LuaScriptManager &BGE::BaseGameLogic::GetLuaScriptManager(void) const noexcept
-{
-    BGE_ASSERT(m_pLuaScriptManager);
-    return *m_pLuaScriptManager.get();
-}
-
 BGE::GameViewList &BGE::BaseGameLogic::GetGameViews(void) noexcept
-{
-    return m_gameViews;
-}
-
-const BGE::GameViewList &BGE::BaseGameLogic::GetGameViews(void) const noexcept
 {
     return m_gameViews;
 }

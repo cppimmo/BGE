@@ -39,14 +39,15 @@ namespace BGE
 	BGE_DECLARE_PTR(IGameView);
 
 	using GameViewList = std::list<StrongIGameViewPtr>;
+	using GameViewFilter = std::function<bool(const StrongIGameViewPtr &)>;
 
 	enum struct GameViewType
 	{
-		kHuman,
-		kRemote,
-		kAI,
-		kRecorder,
-		kOther
+		Human,
+		Remote,
+		AI,
+		Recorder,
+		Other
 	};
 
 	using GameViewID = std::uint32_t;
@@ -62,11 +63,13 @@ namespace BGE
 		virtual void VOnRestore(void) = 0;
 		virtual void VOnRender(float deltaTime, float elapsedTime) = 0;
 		virtual void VOnLostDevice(void) = 0;
-		virtual GameViewType VGetType(void) = 0;
-		virtual GameViewID VGetID(void) = 0;
-		virtual void VOnAttach(GameViewID vID, ActorID aID) = 0;
-		virtual bool VOnHandleEvent(const SDL_Event &kEvent) = 0;
+		virtual GameViewType VGetType(void) const = 0;
+		virtual GameViewID VGetID(void) const = 0;
+		virtual void VOnAttach(GameViewID viewID, ActorID actorID) = 0;
+		virtual bool VOnHandleEvent(const SDL_Event &event) = 0;
 		virtual void VOnUpdate(float deltaTime) = 0;
+	public:
+		static GameViewFilter CreateFilter(GameViewType type);
 	};
 } // End namespace (BGE)
 

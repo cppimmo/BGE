@@ -21,6 +21,7 @@ namespace BGE::ScriptExports
 		consoleModule.set_function("Log", InternalScriptExports::ConsoleLog);
 		consoleModule.set_function("Open", InternalScriptExports::ConsoleOpen);
 		consoleModule.set_function("Close", InternalScriptExports::ConsoleClose);
+		consoleModule.set_function("IsEnabled", InternalScriptExports::ConsoleIsEnabled);
 
 		// Assign the table to a global variable/module in Lua
 		luaState["Console"] = consoleModule;
@@ -120,6 +121,13 @@ namespace BGE
 		auto &app = GetEngineApp();
 		auto &dbgConsole = app.GetDebugConsole();
 		dbgConsole.SetEnabled(false);
+	}
+
+	bool InternalScriptExports::ConsoleIsEnabled(void)
+	{
+		auto &app = GetEngineApp();
+		auto &dbgConsole = app.GetDebugConsole();
+		return dbgConsole.IsEnabled();
 	}
 
 	void InternalScriptExports::LoggerFatal(sol::string_view fmt, sol::variadic_args args)

@@ -76,6 +76,11 @@ namespace TestGame
 			return false;
 		}
 
+		BGE_LOG("TestGame", "Buffer frequency (Hz): %d", pBuffer->VGetFrequency());
+		BGE_LOG("TestGame", "Buffer bit depth: %d", pBuffer->VGetBitDepth());
+		BGE_LOG("TestGame", "Buffer channels: %d", pBuffer->VGetChannels());
+		BGE_LOG("TestGame", "Buffer size (MiB): %u", static_cast<decltype(BGE::kONE_MEGABYTE)>(pBuffer->VGetSize()) / BGE::kONE_MEGABYTE);
+
 		m_pSource = audio.VCreateSource();
 		m_pSource->VAttachBuffer(pBuffer);
 

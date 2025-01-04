@@ -146,6 +146,11 @@ namespace BGE
 
 	ZipFile::ZipFile(void)
 	{
+		// Static assertions for ZipFile struct byte sizes.
+		BGE_STATIC_ASSERT(sizeof(ZipFile::TZipDirHeader) == 22);
+		BGE_STATIC_ASSERT(sizeof(ZipFile::TZipDirFileHeader) == 46);
+		BGE_STATIC_ASSERT(sizeof(ZipFile::TZipLocalHeader) == 30);
+
 		m_nEntries=0; m_pFile=NULL; m_pDirData=NULL;
 	}
 

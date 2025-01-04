@@ -99,11 +99,8 @@ namespace BGE
 		virtual void VChangeState(BaseGameState state) override;
 		// Accessors:
 		ProcessManager &GetProcessManager(void) noexcept;
-		const ProcessManager &GetProcessManager(void) const noexcept;
 		LuaScriptManager &GetLuaScriptManager(void) noexcept;
-		const LuaScriptManager &GetLuaScriptManager(void) const noexcept;
 		GameViewList &GetGameViews(void) noexcept;
-		const GameViewList &GetGameViews(void) const noexcept;
 		bool IsProxy(void) const;
 		void SetProxy(bool bProxy) noexcept;
 		bool CanRunScripts(void) const;

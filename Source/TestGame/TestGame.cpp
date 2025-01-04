@@ -109,6 +109,14 @@ namespace TestGame
 		BGE_LOG("TestGame", "What's going on");
 		auto pScriptHandle = resCache.GetHandle(BGE::Resource("Assets\\Scripts\\Test.lua"));
 
+		BGE_LOG("TestGame", "Human views: %u", app.GetHumanViewCount());
+
+		auto pHumanView = app.GetHumanView(0);
+		if (pHumanView)
+		{
+			BGE_LOG("TestGame", "There is a human view at index: %u", 0u);
+		}
+
 		//m_pLuaScriptManager->VExecuteFile("Assets/Scripts/Test.lua");
 
 		return bResult;

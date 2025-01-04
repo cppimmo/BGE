@@ -1,8 +1,8 @@
 /*******************************************************************************
- * @file   Exception.cpp
+ * @file   GameView.cpp
  * @author Brian Hoffpauir
- * @date   01.03.2024
- * @brief  Base exception.
+ * @date   12.09.2024
+ * @brief  .
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -29,32 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include "Engine/EngineStd.hpp"
-#include "Exception.hpp"
+#include "UI/GameView.hpp"
 
 namespace BGE
 {
-	Exception::Exception(std::string_view message)
-		: m_message(std::string(message))
+	GameViewFilter IGameView::CreateFilter(GameViewType type)
 	{
-	}
-
-	Exception::Exception(std::string_view message, SourceLocation location)
-		: m_message(std::string_view(message)), m_location(location)
-	{
-	}
-
-	std::string_view Exception::VWhat(void) const noexcept
-	{
-		return m_message;
-	}
-
-	std::string_view Exception::VType(void) const noexcept
-	{
-		return "Exception";
-	}
-
-	const SourceLocation &Exception::GetLocation(void) const noexcept
-	{
-		return m_location;
+		return [type](const StrongIGameViewPtr &pView) { return pView->VGetType() == type; };
 	}
 } // End namespace (BGE)

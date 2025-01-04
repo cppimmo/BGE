@@ -63,10 +63,10 @@ namespace BGE
 		virtual void VOnRestore(void) override;
 		virtual void VOnRender(float deltaTime, float elapsedTime) override;
 		virtual void VOnLostDevice(void) override;
-		virtual GameViewType VGetType(void) override;
-		virtual GameViewID VGetID(void) override;
-		virtual void VOnAttach(GameViewID vID, ActorID aID) override;
-		virtual bool VOnHandleEvent(const SDL_Event &kEvent) override;
+		virtual GameViewType VGetType(void) const override;
+		virtual GameViewID VGetID(void) const override;
+		virtual void VOnAttach(GameViewID viewID, ActorID actorID) override;
+		virtual bool VOnHandleEvent(const SDL_Event &event) override;
 		virtual void VOnUpdate(float deltaTime) override;
 
 		void AddGamepadHandler(StrongIGamepadHandlerPtr pGamepadHandler);

@@ -10,6 +10,9 @@
 
 namespace TestGame
 {
+	class TestGameView; // Forward declare
+	BGE_DECLARE_PTR(TestGameView);
+
 	class TestGameView : public BGE::HumanView
 	{
 		struct Vertex

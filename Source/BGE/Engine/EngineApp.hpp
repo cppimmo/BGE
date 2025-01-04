@@ -31,6 +31,8 @@
 #ifndef _BGE_ENGINEAPP_HPP_
 #define _BGE_ENGINEAPP_HPP_
 
+#include <RmlUi/Core.h>
+
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
 #include "Engine/BaseGameLogic.hpp"
@@ -94,13 +96,18 @@ namespace BGE
 		FPSData m_fpsData; //!< Data used to calculate the FPS.
 		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager.
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler.
-		UniqueEventManagerPtr m_pEventManager; //!< Main event manager.
+		UniqueIEventManagerPtr m_pEventManager; //!< Main event manager.
 		UniqueEventRegistryPtr m_pEventRegistry; //!< Main event registrar.
 		UniqueBaseGameLogicPtr m_pGameLogic; //!< Game logic.
 		UniqueResourceCachePtr m_pResourceCache; //!< Primary resource cache.
 		UniqueDebugConsolePtr m_pDebugConsole; //!< Engine debug console.
 		UniqueIAudioSystemPtr m_pAudioSystem; //!< Audio system.
 		UniqueIRendererPtr m_pRenderer; //!< Renderer.
+
+		// TODO: Add base socket manager.
+		// TODO: Add network event forwarder.
+
+		Rml::Context *m_pRmlContext = nullptr;
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);
@@ -126,16 +133,24 @@ namespace BGE
 		const FPSData &GetFPSData(void) const noexcept;
 		MemoryManager &GetMemoryManager(void) noexcept;
 		Localizer     &GetLocalizer(void) noexcept;
-		EventManager  &GetEventManager(void) noexcept;
+		IEventManager &GetEventManager(void) noexcept;
 		EventRegistry &GetEventRegistry(void) noexcept;
 		BaseGameLogic &GetGameLogic(void) noexcept;
 		ResourceCache &GetResourceCache(void) noexcept;
 		DebugConsole  &GetDebugConsole(void) noexcept;
 		IAudioSystem  &GetAudioSystem(void) noexcept;
 		IRenderer     &GetRenderer(void) noexcept;
+		StrongIGameViewPtr GetHumanView(std::size_t index = 0);
+		std::size_t GetHumanViewCount(void) const noexcept;
 		int GetExitCode(void) const;
+		bool IsRunning(void) const noexcept;
 	protected:
+		virtual bool VCheckResources(void);
+		virtual bool VPreloadResources(void);
+		virtual bool VInitRmlUi(void);
+		virtual void VShutdownRmlUi(void);
 		virtual void VRegisterGameEvents(void);
+		virtual bool VAttachAsClient(void);
 		virtual void VCreateNetworkEventForwarder(void);
 		virtual void VDestroyNetworkEventForwarder(void);
 	private:

@@ -32,10 +32,12 @@
 #define _BGE_LOGGER_HPP_
 
 #include <SDL.h>
-#include <Utilities/Utils.hpp>
 
 #include <cstddef>
 #include <string_view>
+
+#include "Utilities/Utils.hpp"
+#include "Utilities/SourceLocation.hpp"
 
 //! Logging facilities namespace.
 namespace BGE::Logger

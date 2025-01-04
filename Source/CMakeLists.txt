@@ -174,6 +174,11 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "")
 add_subdirectory(${JSON_DIR})
 
+# RmlUi:
+set(RMLUI_DIR "Lib/RmlUi")
+add_subdirectory(${RMLUI_DIR})
+include_directories("${RMLUI_DIR}/Include")
+
 # Engine Project:
 set(ENGINE_SRC_DIR "BGE")
 
@@ -195,7 +200,7 @@ endif()
 target_link_libraries(Engine
   ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
   FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB
-  vorbis vorbisfile nlohmann_json::nlohmann_json
+  vorbis vorbisfile nlohmann_json::nlohmann_json RmlUi::RmlUi
 ) #${Boost_LIBRARIES})
 
 if(WIN32)

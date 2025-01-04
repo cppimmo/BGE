@@ -109,37 +109,37 @@ void BGE::HumanView::VOnLostDevice(void)
 {
 }
 
-BGE::GameViewType BGE::HumanView::VGetType(void)
+BGE::GameViewType BGE::HumanView::VGetType(void) const
 {
-	return GameViewType::kHuman;
+	return GameViewType::Human;
 }
 
-BGE::GameViewID BGE::HumanView::VGetID(void)
+BGE::GameViewID BGE::HumanView::VGetID(void) const
 {
 	return 0;
 }
 
-void BGE::HumanView::VOnAttach(GameViewID vID, ActorID aID)
+void BGE::HumanView::VOnAttach(GameViewID viewID, ActorID actorID)
 {
 }
 
-bool BGE::HumanView::VOnHandleEvent(const SDL_Event &kEvent)
+bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 {
 	bool bResult = false;
 	// TODO: Handle necessary SDL events.
-	switch (kEvent.type)
+	switch (event.type)
 	{
 	// Remaining cases forwarded to GameLogic/GameViews:
 	case SDL_KEYDOWN: // Keyboard events
 		for (auto &handler : m_keyboardHandlers)
 		{
-			handler->VOnKeyDown(kEvent.key.keysym, kEvent.key.repeat);
+			handler->VOnKeyDown(event.key.keysym, event.key.repeat);
 		}
 		break;
 	case SDL_KEYUP:
 		for (auto &handler : m_keyboardHandlers)
 		{
-			handler->VOnKeyUp(kEvent.key.keysym, kEvent.key.repeat);
+			handler->VOnKeyUp(event.key.keysym, event.key.repeat);
 		}
 		break;
 	case SDL_TEXTEDITING:
@@ -194,19 +194,19 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &kEvent)
 		for (auto &handler : m_gamepadHandlers)
 		{
 			// TODO: Handle return value.
-			handler->VOnAxis(kEvent.caxis.which, static_cast<GamepadAxis>(kEvent.caxis.axis), kEvent.caxis.value);
+			handler->VOnAxis(event.caxis.which, static_cast<GamepadAxis>(event.caxis.axis), event.caxis.value);
 		}
 		break;
 	case SDL_CONTROLLERBUTTONDOWN:
 		for (auto &handler : m_gamepadHandlers)
 		{
-			handler->VOnButtonDown(kEvent.cbutton.which, static_cast<GamepadButton>(kEvent.cbutton.button));
+			handler->VOnButtonDown(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
 		}
 		break;
 	case SDL_CONTROLLERBUTTONUP:
 		for (auto &handler : m_gamepadHandlers)
 		{
-			handler->VOnButtonUp(kEvent.cbutton.which, static_cast<GamepadButton>(kEvent.cbutton.button));
+			handler->VOnButtonUp(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
 		}
 		break;
 	case SDL_CONTROLLERDEVICEADDED:

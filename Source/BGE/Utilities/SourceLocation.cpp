@@ -1,8 +1,9 @@
 /*******************************************************************************
- * @file   Exception.cpp
+ * @file   SourceLocation.cpp
  * @author Brian Hoffpauir
  * @date   01.03.2024
- * @brief  Base exception.
+ * @brief  Implementation of the `SourceLocation` class, providing a wrapper
+ *         around std::source_location.
  *
  * Copyright (c) 2024, Brian Hoffpauir All rights reserved.
  *
@@ -29,31 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 #include "Engine/EngineStd.hpp"
-#include "Exception.hpp"
+#include "Utilities/SourceLocation.hpp"
+
+#include <sstream>
 
 namespace BGE
 {
-	Exception::Exception(std::string_view message)
-		: m_message(std::string(message))
+	SourceLocation::SourceLocation(std::source_location location)
+		: m_location(location)
 	{
 	}
 
-	Exception::Exception(std::string_view message, SourceLocation location)
-		: m_message(std::string_view(message)), m_location(location)
+	std::string SourceLocation::VToString(void) const
 	{
+		// Format the source location in the string stream
+		std::ostringstream oss;
+		oss << "file: "
+			<< m_location.file_name() << '('
+			<< m_location.line() << ':'
+			<< m_location.column() << ") `"
+			<< m_location.function_name() << "`";
+		return oss.str();
 	}
 
-	std::string_view Exception::VWhat(void) const noexcept
-	{
-		return m_message;
-	}
-
-	std::string_view Exception::VType(void) const noexcept
-	{
-		return "Exception";
-	}
-
-	const SourceLocation &Exception::GetLocation(void) const noexcept
+	const std::source_location &SourceLocation::Get(void) const noexcept
 	{
 		return m_location;
 	}

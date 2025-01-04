@@ -25,6 +25,7 @@ namespace BGE
 		static void ConsoleLog(sol::variadic_args args);
 		static void ConsoleOpen(void);
 		static void ConsoleClose(void);
+		static bool ConsoleIsEnabled(void);
 		// Logger table/module:
 		static void LoggerFatal(sol::string_view fmt, sol::variadic_args args);
 		static void LoggerFatalIf(bool bCondition, sol::string_view fmt, sol::variadic_args args);

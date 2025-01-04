@@ -40,3 +40,6 @@
 [submodule "Source/Lib/bullet3"]
 	path = Source/Lib/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "Source/Lib/RmlUi"]
+	path = Source/Lib/RmlUi
+	url = https://github.com/mikke89/RmlUi.git

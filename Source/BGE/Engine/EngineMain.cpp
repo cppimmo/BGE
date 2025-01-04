@@ -30,6 +30,7 @@
  ******************************************************************************/
 #include "Engine/EngineStd.hpp"
 
+#include "Utilities/Exception.hpp"
 #include "MainLoop/CommandParser.hpp"
 
 #include <cstddef>
@@ -67,6 +68,7 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 {
 	// Parse CLI arguments
 	ParseArguments(GetArguments(numArgs, pArgs));
+
 #if BGE_PLATFORM_WINDBG
 	int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Retrieve the current flags
 	// Don't actually free the blocks
@@ -78,43 +80,74 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	_CrtSetDbgFlag(tmpDbgFlag);
 	_CrtSetDumpClient(DebugDumpClient);
 #endif /* BGE_PLATFORM_WINDBG */
+
 	// Initialize logging system (needs to be done first)
 	Logger::Init("Logging.xml");
 
-	// Set the utility callbacks to the static member functions
-	BGUTSetCallbackUpdate(EngineApp::OnUpdate);
-	BGUTSetCallbackRender(EngineApp::OnRender);
-	BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
-
-	BGE_INFO("Welcome to %s (%s) %s", kENGINE_ABBREV.data(), kENGINE_NAME.data(), kVERSION.VToString().c_str());
-	BGE_INFO("Initializing engine...");
-	auto &app = GetEngineApp();
-	// Set signal handlers
-	std::signal(SIGABRT, EngineApp::OnHandleSignal);
-	std::signal(SIGFPE,  EngineApp::OnHandleSignal);
-	std::signal(SIGILL,  EngineApp::OnHandleSignal);
-	std::signal(SIGINT,  EngineApp::OnHandleSignal);
-	std::signal(SIGSEGV, EngineApp::OnHandleSignal);
-	std::signal(SIGTERM, EngineApp::OnHandleSignal);
-	std::atexit(AtExit);
-	// Initialize an instance of the application layer (also initializes BGUT)
-	if (!app.VInitInstance())
+	int retCode = kBGE_EXIT_FAILURE; // Assume failure as app exit will overwrite
+	/*
+	 * NOTE: This exception handler is for uncaught exceptions, the engine typically does
+	 * not use exceptions anywhere else. Any exceptions caught here will likely be from
+	 * 3rd party code.
+	 */
+	try
 	{
-		BGE_ERROR("Failure to initialize instance of application!");
+		// Set the utility callbacks to the static member functions
+		BGUTSetCallbackUpdate(EngineApp::OnUpdate);
+		BGUTSetCallbackRender(EngineApp::OnRender);
+		BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
+
+		BGE_INFO("Welcome to %s (%s) %s", kENGINE_ABBREV.data(), kENGINE_NAME.data(), kVERSION.VToString().c_str());
+		BGE_INFO("Initializing engine...");
+
+		auto &app = GetEngineApp();
+
+		// Set signal handlers
+		std::signal(SIGABRT, EngineApp::OnHandleSignal);
+		std::signal(SIGFPE,  EngineApp::OnHandleSignal);
+		std::signal(SIGILL,  EngineApp::OnHandleSignal);
+		std::signal(SIGINT,  EngineApp::OnHandleSignal);
+		std::signal(SIGSEGV, EngineApp::OnHandleSignal);
+		std::signal(SIGTERM, EngineApp::OnHandleSignal);
+		std::atexit(AtExit);
+
+		// Initialize an instance of the application layer (also initializes BGUT)
+		if (!app.VInitInstance())
+		{
+			BGE_ERROR("Failure to initialize instance of application!");
+			return kBGE_EXIT_FAILURE;
+		}
+		// TODO: Use SDL_Set/GetWindowData to set class object pointer.
+		BGUTMainLoop(); // Enter main loop
+
+		BGE_INFO("Shutting down engine...");
+		BGUTShutdown(); // Shutdown upon exit of main loop
+
+		retCode = app.GetExitCode();
+	}
+	catch (const Exception &ex) // Handle subtypes of custom exception
+	{
+		BGE_ERROR("Unhandled exception caught at entry point: %s", ex.VWhat());
+		return kBGE_EXIT_FAILURE;
+	}
+	catch (const std::exception &ex) // Handle std::exception's
+	{
+		BGE_ERROR("Unhandled exception caught at entry point: %s", ex.what());
+		return kBGE_EXIT_FAILURE;
+	}
+	catch (...) // Handle unknown exceptions
+	{
+		BGE_ERROR("Unknown exception caught at entry point");
 		return kBGE_EXIT_FAILURE;
 	}
 
-	// TODO: Use SDL_Set/GetWindowData to set class object pointer.
-	BGUTMainLoop(); // Enter main loop
-
-	BGE_INFO("Shutting down engine...");
-	BGUTShutdown(); // Shutdown upon exit of main loop
 #if BGE_PLATFORM_WINDBG
 	_CrtDumpMemoryLeaks(); // Report leaks to log
 	std::cout << "Press enter to exit.\n";
 	std::cin.get(); // Wait for enter key, so any leaks can be seen.
 #endif /* BGE_PLATFORM_WINDBG */
-	return app.GetExitCode(); // Return app exit code
+
+	return retCode; // Return app exit code
 }
 
 namespace // Define static functions
