@@ -4,6 +4,8 @@
 #include <UI/HumanView.hpp>
 #include <Graphics/GL/Shaders.hpp>
 #include <Graphics/GL/ShaderProgram.hpp>
+#include <Graphics/Transform.hpp>
+#include <Graphics/Camera.hpp>
 
 #include "TestController.hpp"
 #include <glm/gtc/quaternion.hpp>
@@ -22,23 +24,11 @@ namespace TestGame
 			glm::vec2 uv = glm::vec2(0);
 		};
 
-		struct Transform
-		{
-			glm::vec3 position = glm::vec3(0);
-			glm::vec3 rotation = glm::vec3(0);
-			glm::vec3 scale = glm::vec3(1);
-			glm::mat4 ToMat4(void)
-			{
-				glm::mat4 m = glm::translate(glm::mat4(1), position);
-				m *= glm::mat4_cast(glm::quat(rotation));
-				m = glm::scale(m, scale);
-				return m;
-			}
-		};
-
 		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
 		GLuint m_vao, m_vbo;
 		BGE::StrongIAudioSourcePtr m_pSource;
+		BGE::UniqueCameraPtr m_pCamera;
+		BGE::Transform m_triTransform;
 	public:
 		TestGameView(void)
 		{

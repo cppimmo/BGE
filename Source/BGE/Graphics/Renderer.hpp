@@ -43,6 +43,12 @@ namespace BGE
 		kOpenGL /**< OpenGL renderer. */
 	};
 
+	enum struct BlendMode
+	{
+		kAdditive,
+		kSubtractive
+	};
+
 	class IRenderer
 	{
 	public:
@@ -52,19 +58,34 @@ namespace BGE
 		virtual void VShutdown(void) = 0;
 		virtual RendererImpl VGetImpl(void) const = 0;
 
-		virtual StrongIShaderFactoryPtr VCreateShaderFactory(void) = 0;
-		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
-		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
+		virtual void VBeginFrame(void) = 0; // Begin a new rendering frame.
+		virtual void VEndFrame(void) = 0; // End the frame and present the back buffer.
 
 		virtual void VSetViewport(const IViewport &kViewport) = 0;
 		virtual const IViewport &VGetViewport(void) const = 0;
 		virtual void VSetBackgroundColor(const glm::vec4 &kColor) = 0;
 		virtual glm::vec4 VGetBackgroundColor(void) = 0;
 
+		//virtual StrongITexturePtr VLoadTexture(const std::string& filepath) = 0;
+		//virtual void VBindTexture(StrongITexturePtr texture, unsigned int slot) = 0;
+
+		//virtual StrongIVertexBufferPtr VCreateVertexBuffer(const std::vector<Vertex>& vertices) = 0;
+		//virtual StrongIIndexBufferPtr VCreateIndexBuffer(const std::vector<uint32_t>& indices) = 0;
+		//virtual void VDrawIndexed(unsigned int indexCount) = 0;
+
+		virtual void VEnableDepthTest(bool bEnable) = 0; // Enable/disable depth testing.
+		virtual void VEnableBlending(bool bEnable) = 0; // Enable/disable blending.
+		virtual void VSetBlendMode(BlendMode mode) = 0; // Set blending mode (e.g., additive, subtractive).
+		virtual BlendMode VGetBlendMode(void) const = 0;
+
+		virtual StrongIShaderFactoryPtr VCreateShaderFactory(void) = 0;
+		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
+		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
+
 		virtual bool VTakeScreenshot(void) = 0;
-		//virtual void VSetBackgroundColor(float r, float g, float b, float a) = 0;
-		//virtual void VShutdown(void) = 0;
-		//virtual bool VPreRender(void) = 0;
+
+		virtual void VEnableDebugOutput(bool bEnable) = 0; // Enable OpenGL debug context messages.
+		virtual std::string VGetRendererInfo(void) const = 0; // Return GPU/driver information.
 	protected:
 	private:
 	};

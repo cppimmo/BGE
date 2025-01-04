@@ -312,6 +312,7 @@ namespace BGE
 		clearColor[0] = (std::sin(time * 0.5f) + 1.0f) / 2.0f;
 		clearColor[1] = (std::sin(time * 0.3f) + 1.0f) / 2.0f;
 		clearColor[2] = (std::sin(time * 0.7f) + 1.0f) / 2.0f;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearBufferfv(GL_COLOR, 0, clearColor);
 
 		// Render each game view

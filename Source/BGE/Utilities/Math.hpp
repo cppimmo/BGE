@@ -45,6 +45,17 @@ namespace BGE::Math
 	// Math constants:
 	inline constexpr double kPI = std::numbers::pi;
 	
+	template <Numeric Type>
+	struct Rect
+	{
+		Type left;
+		Type right;
+		Type bottom;
+		Type top;
+	};
+
+	using RectFloat = Rect<float>;
+
 	// Forward declare Vec2 class:
 	template <Numeric Type>
 	class Vec2;

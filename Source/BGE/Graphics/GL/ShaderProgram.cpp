@@ -210,6 +210,7 @@ namespace BGE
 	std::optional<GLint> GLShaderProgram::GetUniformLocation(GLuint programID, std::string_view uniformName) noexcept
 	{
 		GLint result = glGetUniformLocation(programID, uniformName.data());
+		BGE_LOG("GL", "Uniform location (%s): %d", uniformName.data(), result);
 		return (result < 0) ? std::nullopt : std::optional<GLint>(result);
 	}
 
@@ -219,7 +220,7 @@ namespace BGE
 		if (m_uniformLocations.find(name) == m_uniformLocations.end())
 		{
 			auto result = GetUniformLocation(m_programID, uniformName);
-			BGE_ASSERT(!result.has_value());
+			BGE_ASSERT(result.has_value());
 			m_uniformLocations[name] = *result;
 		}
 	}

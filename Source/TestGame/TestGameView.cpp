@@ -47,6 +47,16 @@ namespace TestGame
 		pVertexShader->VDestroy();
 		pFragmentShader->VDestroy();
 
+		BGE::ProjectionDesc projDesc;
+		projDesc.fieldOfView = glm::pi<float>() / 4.0f;
+		projDesc.aspectRatio = 1280.0f / 720.0f;
+		projDesc.nearClip = 0.01f;
+		projDesc.farClip = 1'000.0f;
+		m_pCamera = std::make_unique<BGE::Camera>(BGE::CameraType::kPerspective, projDesc);
+		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 100.0f));
+
+		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+
 		//glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
 		static constexpr GLfloat vertices[3][3 + 3] =
 		{
@@ -114,6 +124,10 @@ namespace TestGame
 		//glm::mat4 view =
 
 		m_pShaderProgram->VBind();
+
+		m_pShaderProgram->VSetMat4("uModel", m_triTransform);
+		m_pShaderProgram->VSetMat4("uView", m_pCamera->GetViewMatrix());
+		m_pShaderProgram->VSetMat4("uProjection", m_pCamera->GetProjectionMatrix());
 
 		//static bool c_bInitialized = false;
 		//if (!c_bInitialized)
