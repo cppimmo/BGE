@@ -65,7 +65,7 @@ namespace BGE
 
 	void Camera::SetOrientation(const glm::quat &kOrientation)
 	{
-		m_orientation = kOrientation;
+		m_orientation = glm::normalize(kOrientation);
 		m_bViewDirty = true;
 	}
 

@@ -4,12 +4,13 @@
 namespace TestGame
 {
 	TestController::TestController(BGE::StrongFirstPersonCameraPtr pFPSCamera)
-		: m_pFPSCamera(pFPSCamera), m_sensitivity(0.1f), m_speed(1.4f), m_runSpeed(5.0f), m_yaw(0.0f), m_pitch(0.0f)
+		: m_pFPSCamera(pFPSCamera), m_sensitivity(0.1f), m_gamepadSensitivity(50.0f), m_speed(1.4f), m_runSpeed(5.0f), m_yaw(0.0f), m_pitch(0.0f)
 	{
 		m_leftAxis = glm::fvec2(0.0f);
 		m_rightAxis = glm::fvec2(0.0f);
 		m_mouseMotion = glm::ivec2(0);
 		m_keys.fill(false); // Set the initial key states to off
+		m_buttons.fill(false); // Set the initial button states to off
 	}
 
 	bool TestController::VOnAxis(BGE::JoystickID ID, BGE::GamepadAxis axis, std::int16_t value)
@@ -69,6 +70,16 @@ namespace TestGame
 		if (button == kGAMEPAD_BUTTON_LEFT_STICK)
 		{
 			m_bRunning = true;
+			return true;
+		}
+		else if (button == kGAMEPAD_BUTTON_A)
+		{
+			m_buttons[kTEST_BUTTON_A] = true;
+			return true;
+		}
+		else if (button == kGAMEPAD_BUTTON_B)
+		{
+			m_buttons[kTEST_BUTTON_B] = true;
 			return true;
 		}
 
@@ -133,6 +144,16 @@ namespace TestGame
 			m_bRunning = false;
 			return true;
 		}
+		else if (button == kGAMEPAD_BUTTON_A)
+		{
+			m_buttons[kTEST_BUTTON_A] = false;
+			return true;
+		}
+		else if (button == kGAMEPAD_BUTTON_B)
+		{
+			m_buttons[kTEST_BUTTON_B] = false;
+			return true;
+		}
 		return false;
 	}
 
@@ -167,6 +188,12 @@ namespace TestGame
 		case SDLK_d:
 			m_keys[kTEST_KEY_D] = true;
 			return true;
+		case SDLK_q:
+			m_keys[kTEST_KEY_Q] = true;
+			return true;
+		case SDLK_e:
+			m_keys[kTEST_KEY_E] = true;
+			return true;
 		default:
 			break;
 		}
@@ -197,6 +224,12 @@ namespace TestGame
 			return true;
 		case SDLK_d:
 			m_keys[kTEST_KEY_D] = false;
+			return true;
+		case SDLK_q:
+			m_keys[kTEST_KEY_Q] = false;
+			return true;
+		case SDLK_e:
+			m_keys[kTEST_KEY_E] = false;
 			return true;
 		default:
 			break;
@@ -242,59 +275,106 @@ namespace TestGame
 		deltaTime /= 1000.0f; // Convert time delta to seconds
 		//BGE_LOG("TestGame", "Speed: %.4f, dt: %.4f, speed * dt: %.4f", m_speed, deltaTime, m_speed * deltaTime);
 		//BGE_LOG("TestGame", "Pos: (x: %07.4f, y: %07.4f, z: %07.4f)", m_pFPSCamera->GetPosition().x, m_pFPSCamera->GetPosition().y, m_pFPSCamera->GetPosition().z);
-		BGE_LOG("TestGame", "(%.8f, %.8f)", m_rightAxis.x, m_rightAxis.y);
+		//BGE_LOG("TestGame", "(%.8f, %.8f)", m_rightAxis.x, m_rightAxis.y);
 
-		float speed = m_speed;
-		if (m_bRunning)
+		float speed = (m_bRunning ? m_runSpeed : m_speed);
+		// Variable for movement deltas
+		glm::vec3 movementDelta(0.0f);
+		float yawDelta{}, pitchDelta{};
+
+		// Gamepad input handling
+		if (std::fabs(m_leftAxis.y) > 0.01f)
 		{
-			speed = m_runSpeed;
+			// Forward/backward movement (NOTE: The y axis needs to be inverted).
+			if (m_leftAxis.y < 0.0f)
+			{
+				movementDelta += glm::vec3(0.0f, 0.0f, -m_leftAxis.y * speed * deltaTime);
+			}
+			else
+			{
+				movementDelta += glm::vec3(0.0f, 0.0f, -m_leftAxis.y * m_speed * deltaTime);
+				// Can't run backwards
+			}
 		}
-		// Gamepad:
-		// Forward/backward movement (NOTE: The y axis needs to be inverted).
-		if (m_leftAxis.y < 0.0f)
+		if (std::fabs(m_leftAxis.x) > 0.01f)
 		{
-			m_pFPSCamera->MoveForward(-m_leftAxis.y * speed * deltaTime);
+			movementDelta += glm::vec3(m_leftAxis.x * m_speed * deltaTime, 0.0f, 0.0f);
 		}
-		else
+		if (std::fabs(m_rightAxis.x) > 0.01f)
 		{
-			// Can't run backwards
-			m_pFPSCamera->MoveForward(-m_leftAxis.y * m_speed * deltaTime);
+			yawDelta += -m_rightAxis.x * m_gamepadSensitivity * deltaTime;
+		}
+		if (std::fabs(m_rightAxis.y) > 0.01f)
+		{
+			// Inverted Y-axis
+			pitchDelta += m_rightAxis.y * m_gamepadSensitivity * deltaTime;
+		}
+
+		if (m_buttons[kTEST_BUTTON_A])
+		{
+			movementDelta -= glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
+		}
+		if (m_buttons[kTEST_BUTTON_B])
+		{
+			movementDelta += glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
 		}
 
 		// Left/right movement
-		m_pFPSCamera->MoveRight(m_leftAxis.x * m_speed * deltaTime);
+		//m_pFPSCamera->MoveRight(m_leftAxis.x * m_speed * deltaTime);
 
 		// Yaw rotation
 		//BGE_LOG("TestGame", "Yaw calc: %08.7f", -m_rightAxis.x * m_sensitivity * deltaTime);
-		m_yaw += -m_rightAxis.x * m_sensitivity * deltaTime;
+		//m_yaw += -m_rightAxis.x * m_sensitivity * deltaTime;
 		//m_yaw = glm::mod(m_yaw, 360.0f); // Normalize yaw angle within [0, 360)
 		//m_pFPSCamera->Rotate(m_yaw, m_pitch);
 
 		// Pitch rotation
-		m_pitch -= -m_rightAxis.y * m_sensitivity * deltaTime; // Invert Y (the best)
-		m_pitch = glm::clamp(m_pitch, -89.0f, 89.0f);
-		m_pFPSCamera->Rotate(m_yaw, m_pitch);
+		//m_pitch -= -m_rightAxis.y * m_sensitivity * deltaTime; // Invert Y (the best)
+		//m_pitch = glm::clamp(m_pitch, -89.0f, 89.0f);
+		//m_pFPSCamera->Rotate(m_yaw, m_pitch);
 
-		// Keyboard:
+		// Keyboard input handling
 		if (m_keys[kTEST_KEY_W])
 		{
-			m_pFPSCamera->MoveForward(speed * deltaTime);
+			movementDelta += glm::vec3(0.0f, 0.0f, speed * deltaTime); // Forward
 		}
-
 		if (m_keys[kTEST_KEY_A])
 		{
-			m_pFPSCamera->MoveRight(-m_speed * deltaTime);
+			movementDelta -= glm::vec3(m_speed * deltaTime, 0.0f, 0.0f); // Left
 		}
-
 		if (m_keys[kTEST_KEY_S])
 		{
-			m_pFPSCamera->MoveForward(-m_speed * deltaTime);
+			movementDelta -= glm::vec3(0.0f, 0.0f, m_speed * deltaTime); // Backward
 		}
-
 		if (m_keys[kTEST_KEY_D])
 		{
-			m_pFPSCamera->MoveRight(m_speed * deltaTime);
+			movementDelta += glm::vec3(m_speed * deltaTime, 0.0f, 0.0f); // Right
 		}
+		if (m_keys[kTEST_KEY_Q])
+		{
+			movementDelta -= glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
+		}
+		if (m_keys[kTEST_KEY_E])
+		{
+			movementDelta += glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
+		}
+
+		// Mouse input handling
+		yawDelta += static_cast<float>(m_mouseMotion.x) * m_sensitivity * deltaTime;
+		pitchDelta += static_cast<float>(m_mouseMotion.y) * m_sensitivity * deltaTime;
+
+		// Apply movement & rotation
+		m_pFPSCamera->MoveForward(movementDelta.z);
+		m_pFPSCamera->MoveUp(movementDelta.y);
+		m_pFPSCamera->MoveRight(movementDelta.x);
+
+		m_yaw = glm::mod(m_yaw + yawDelta, 360.0f); // Normalize yaw to [0, 360)
+		m_pitch = glm::clamp(m_pitch + pitchDelta, -89.0f, 89.0f); // Clamp pitch
+		m_pFPSCamera->Rotate(m_yaw, m_pitch);
+
+		// Reset input axes for the next frame
+		//m_leftAxis = glm::fvec2(0.0f);
+		//m_rightAxis = glm::fvec2(0.0f);
 
 		// Mouse:
 		//m_yaw += m_mouseMotion.x * m_sensitivity * deltaTime;

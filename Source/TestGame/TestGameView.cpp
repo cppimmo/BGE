@@ -28,9 +28,9 @@ namespace TestGame
 		projDesc.nearClip = 0.01f;
 		projDesc.farClip = 1'000.0f;
 		m_pCamera = std::make_shared<BGE::FirstPersonCamera>(projDesc);
-		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 
-		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -5.0f));
 
 		m_pController = std::make_shared<TestController>(m_pCamera);
 		AddGamepadHandler(m_pController);

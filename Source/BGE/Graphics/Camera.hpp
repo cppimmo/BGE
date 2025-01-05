@@ -89,6 +89,12 @@ namespace BGE
 			SetPosition(GetPosition() + forward * distance);
 		}
 
+		void MoveUp(float distance)
+		{
+			glm::vec3 up = glm::normalize(m_orientation * glm::vec3(0.0f, 1.0f, 0.0f));
+			SetPosition(GetPosition() + up * distance);
+		}
+
 		void MoveRight(float distance)
 		{
 			glm::vec3 right = glm::normalize(m_orientation * glm::vec3(1.0f, 0.0f, 0.0f));
@@ -99,7 +105,8 @@ namespace BGE
 		{
 			glm::quat yawQuat = glm::angleAxis(glm::radians(yaw), glm::vec3(0.0f, 1.0f, 0.0f));
 			glm::quat pitchQuat = glm::angleAxis(glm::radians(pitch), glm::vec3(1.0f, 0.0f, 0.0f));
-			SetOrientation(yawQuat * m_orientation * pitchQuat);
+			glm::quat newOrientation = yawQuat * pitchQuat;
+			SetOrientation(newOrientation);
 		}
 	};
 } // End namespace (BGE)

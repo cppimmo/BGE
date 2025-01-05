@@ -20,11 +20,21 @@ namespace TestGame
 			kTEST_KEY_A,
 			kTEST_KEY_S,
 			kTEST_KEY_D,
+			kTEST_KEY_Q,
+			kTEST_KEY_E,
 			kTEST_KEY_COUNT
+		};
+
+		enum TestButtom
+		{
+			kTEST_BUTTON_A,
+			kTEST_BUTTON_B,
+			kTEST_BUTTON_COUNT
 		};
 
 		BGE::StrongFirstPersonCameraPtr m_pFPSCamera;
 		float m_sensitivity;
+		float m_gamepadSensitivity;
 		float m_speed;
 		float m_runSpeed;
 		float m_yaw;
@@ -33,6 +43,7 @@ namespace TestGame
 		glm::fvec2 m_rightAxis;
 		glm::ivec2 m_mouseMotion;
 		std::array<bool, kTEST_KEY_COUNT> m_keys;
+		std::array<bool, kTEST_BUTTON_COUNT> m_buttons;
 		bool m_bRunning = false;
 	public:
 		TestController(BGE::StrongFirstPersonCameraPtr pFPSCamera);
