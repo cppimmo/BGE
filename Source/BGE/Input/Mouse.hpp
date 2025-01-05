@@ -24,7 +24,7 @@ namespace BGE
 		virtual ~IMouseHandler(void) = default;
 
 		virtual bool VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos) = 0;
-		virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::ivec2 &kPreciseScroll) = 0;
+		virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::fvec2 &kPreciseScroll) = 0;
 		virtual bool VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) = 0;
 		virtual bool VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) = 0;
 		virtual int VGetPointerRadius(void) = 0;

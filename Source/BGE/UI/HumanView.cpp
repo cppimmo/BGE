@@ -23,6 +23,16 @@ bool BGE::HumanView::DefaultInputHandler::VOnButtonUp(JoystickID ID, GamepadButt
 	return false;
 }
 
+bool BGE::HumanView::DefaultInputHandler::VOnGamepadConnected(JoystickID ID)
+{
+	return false;
+}
+
+bool BGE::HumanView::DefaultInputHandler::VOnGamepadDisconnected(JoystickID ID)
+{
+	return false;
+}
+
 bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepeat)
 {
 	if (key.sym == SDLK_ESCAPE)
@@ -59,17 +69,20 @@ bool BGE::HumanView::DefaultInputHandler::VOnMouseMove(const glm::ivec2 &kPos, c
 	return false;
 }
 
-bool BGE::HumanView::DefaultInputHandler::VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::ivec2 &kPreciseScroll)
+bool BGE::HumanView::DefaultInputHandler::VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll,
+														const glm::fvec2 &kPreciseScroll)
 {
 	return false;
 }
 
-bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks)
+bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button,
+															 std::uint8_t clicks)
 {
 	return false;
 }
 
-bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks)
+bool BGE::HumanView::DefaultInputHandler::VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button,
+														   std::uint8_t clicks)
 {
 	return false;
 }
@@ -81,19 +94,23 @@ int BGE::HumanView::DefaultInputHandler::VGetPointerRadius(void)
 
 BGE::HumanView::HumanView(void)
 {
-	// Add default keyboard handler
-	auto pDefaultInputHandler = std::make_shared<DefaultInputHandler>(*this);
-	AddGamepadHandler(pDefaultInputHandler);
-	AddKeyboardHandler(pDefaultInputHandler);
-	AddMouseHandler(pDefaultInputHandler);
 }
 
 BGE::HumanView::~HumanView(void)
 {
+	m_bInitialized = false;
+	// TODO: Add a dedicated shutdown member function to views
 }
 
 bool BGE::HumanView::VInit(void)
 {
+	// Add default input handlers
+	auto pDefaultInputHandler = std::make_shared<DefaultInputHandler>(*this);
+	AddGamepadHandler(pDefaultInputHandler);
+	AddKeyboardHandler(pDefaultInputHandler);
+	AddMouseHandler(pDefaultInputHandler);
+
+	m_bInitialized = true;
 	return true;
 }
 
@@ -131,15 +148,15 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 	{
 	// Remaining cases forwarded to GameLogic/GameViews:
 	case SDL_KEYDOWN: // Keyboard events
-		for (auto &handler : m_keyboardHandlers)
+		for (auto &pHandler : m_keyboardHandlers)
 		{
-			handler->VOnKeyDown(event.key.keysym, event.key.repeat);
+			pHandler->VOnKeyDown(event.key.keysym, event.key.repeat);
 		}
 		break;
 	case SDL_KEYUP:
-		for (auto &handler : m_keyboardHandlers)
+		for (auto &pHandler : m_keyboardHandlers)
 		{
-			handler->VOnKeyUp(event.key.keysym, event.key.repeat);
+			pHandler->VOnKeyUp(event.key.keysym, event.key.repeat);
 		}
 		break;
 	case SDL_TEXTEDITING:
@@ -151,27 +168,31 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 	case SDL_TEXTEDITING_EXT:
 		break;
 	case SDL_MOUSEMOTION: // Mouse events
-		for (auto &handler : m_mouseHandlers)
+		for (auto &pHandler : m_mouseHandlers)
 		{
-			//handler->VOnMouseMoved();
+			pHandler->VOnMouseMove(glm::ivec2(event.motion.x, event.motion.y),
+								   glm::ivec2(event.motion.xrel, event.motion.yrel));
 		}
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-		for (auto &handler : m_mouseHandlers)
+		for (auto &pHandler : m_mouseHandlers)
 		{
-			//handler->VOnMouseButtonDown();
+			pHandler->VOnMouseButtonDown(glm::ivec2(event.button.x, event.button.y),
+										 static_cast<MouseButton>(event.button.button), event.button.clicks);
 		}
 		break;
 	case SDL_MOUSEBUTTONUP:
-		for (auto &handler : m_mouseHandlers)
+		for (auto &pHandler : m_mouseHandlers)
 		{
-			//handler->VOnMouseButtonUp();
+			pHandler->VOnMouseButtonUp(glm::ivec2(event.button.x, event.button.y),
+									   static_cast<MouseButton>(event.button.button), event.button.clicks);
 		}
 		break;
 	case SDL_MOUSEWHEEL:
-		for (auto &handler : m_mouseHandlers)
+		for (auto &pHandler : m_mouseHandlers)
 		{
-			//handler->VOnMouseWheel();
+			pHandler->VOnMouseWheel(glm::ivec2(event.wheel.mouseX, event.wheel.mouseY),
+									glm::ivec2(event.wheel.x, event.wheel.y), glm::fvec2(event.wheel.preciseX, event.wheel.preciseY));
 		}
 		break;
 	case SDL_JOYAXISMOTION: // Joystick events
@@ -191,31 +212,39 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 	case SDL_JOYBATTERYUPDATED:
 		break;
 	case SDL_CONTROLLERAXISMOTION: // Game controller events
-		for (auto &handler : m_gamepadHandlers)
+		for (auto &pHandler : m_gamepadHandlers)
 		{
 			// TODO: Handle return value.
-			handler->VOnAxis(event.caxis.which, static_cast<GamepadAxis>(event.caxis.axis), event.caxis.value);
+			pHandler->VOnAxis(event.caxis.which, static_cast<GamepadAxis>(event.caxis.axis), event.caxis.value);
 		}
 		break;
 	case SDL_CONTROLLERBUTTONDOWN:
-		for (auto &handler : m_gamepadHandlers)
+		for (auto &pHandler : m_gamepadHandlers)
 		{
-			handler->VOnButtonDown(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
+			pHandler->VOnButtonDown(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
 		}
 		break;
 	case SDL_CONTROLLERBUTTONUP:
-		for (auto &handler : m_gamepadHandlers)
+		for (auto &pHandler : m_gamepadHandlers)
 		{
-			handler->VOnButtonUp(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
+			pHandler->VOnButtonUp(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
 		}
 		break;
 	case SDL_CONTROLLERDEVICEADDED:
-		BGE_LOG("Input", "Gamepad device added");
-		// TODO: Do something with this event.
+		BGE_LOG("Input", "Gamepad device added (%d)", event.cdevice.which);
+
+		for (auto &pHandler : m_gamepadHandlers)
+		{
+			pHandler->VOnGamepadConnected(event.cdevice.which);
+		}
 		break;
 	case SDL_CONTROLLERDEVICEREMOVED:
-		BGE_LOG("Input", "Gamepad device removed");
-		// TODO: Do something with this event.
+		BGE_LOG("Input", "Gamepad device removed (%d)", event.cdevice.which);
+
+		for (auto &pHandler : m_gamepadHandlers)
+		{
+			pHandler->VOnGamepadDisconnected(event.cdevice.which);
+		}
 		break;
 	case SDL_CONTROLLERDEVICEREMAPPED:
 		// What does this do?
@@ -262,6 +291,11 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 
 void BGE::HumanView::VOnUpdate(float deltaTime)
 {
+}
+
+bool BGE::HumanView::VIsInitialized(void) const
+{
+	return m_bInitialized;
 }
 
 void BGE::HumanView::AddGamepadHandler(StrongIGamepadHandlerPtr pGamepadHandler)

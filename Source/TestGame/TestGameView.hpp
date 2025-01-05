@@ -27,19 +27,15 @@ namespace TestGame
 		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
 		GLuint m_vao, m_vbo;
 		BGE::StrongIAudioSourcePtr m_pSource;
-		BGE::UniqueCameraPtr m_pCamera;
+		BGE::StrongFirstPersonCameraPtr m_pCamera;
 		BGE::Transform m_triTransform;
+		StrongTestControllerPtr m_pController;
 	public:
-		TestGameView(void)
-		{
-			auto pController = std::make_shared<TestController>();
-			AddGamepadHandler(pController);
-			AddKeyboardHandler(pController);
-			VInit();
-		}
+		TestGameView(void);
 		//! IGameView's interface:
 		virtual bool VInit(void) override;
 		virtual void VOnRender(float deltaTime, float elapsedTime) override;
+		virtual void VOnUpdate(float deltaTime) override;
 	protected:
 		virtual void VRegisterDelegates(void) override;
 		virtual void VDeregisterDelegates(void) override;

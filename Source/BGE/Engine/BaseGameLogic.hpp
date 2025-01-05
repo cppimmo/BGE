@@ -95,7 +95,7 @@ namespace BGE
 		virtual void VDestroyActor(ActorID ID) override;
 		virtual bool VLoadGame(std::string_view levelResource) override;
 		virtual void VSetProxy(void) override;
-		virtual void VOnUpdate(float time, float elapsedTime) override;
+		virtual void VOnUpdate(float deltaTime, float elapsedTime) override;
 		virtual void VChangeState(BaseGameState state) override;
 		// Accessors:
 		ProcessManager &GetProcessManager(void) noexcept;

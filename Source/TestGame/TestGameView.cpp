@@ -11,8 +11,34 @@
 
 namespace TestGame
 {
+	TestGameView::TestGameView(void)
+	{
+	}
+
 	bool TestGameView::VInit(void)
 	{
+		if (!HumanView::VInit()) // Call parent
+		{
+			return false;
+		}
+
+		BGE::ProjectionDesc projDesc;
+		projDesc.fieldOfView = 75.0f;
+		projDesc.aspectRatio = 1280.0f / 720.0f;
+		projDesc.nearClip = 0.01f;
+		projDesc.farClip = 1'000.0f;
+		m_pCamera = std::make_shared<BGE::FirstPersonCamera>(projDesc);
+		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+
+		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+
+		m_pController = std::make_shared<TestController>(m_pCamera);
+		AddGamepadHandler(m_pController);
+		AddKeyboardHandler(m_pController);
+		AddMouseHandler(m_pController);
+
+		// NOTE: Most of this code is for testing purposes currently.
+
 		m_pShaderProgram = std::make_unique<BGE::GLShaderProgram>();
 		m_pShaderProgram->VCreate();
 
@@ -46,16 +72,6 @@ namespace TestGame
 		// Individual shaders can be destroyed now
 		pVertexShader->VDestroy();
 		pFragmentShader->VDestroy();
-
-		BGE::ProjectionDesc projDesc;
-		projDesc.fieldOfView = glm::pi<float>() / 4.0f;
-		projDesc.aspectRatio = 1280.0f / 720.0f;
-		projDesc.nearClip = 0.01f;
-		projDesc.farClip = 1'000.0f;
-		m_pCamera = std::make_unique<BGE::Camera>(BGE::CameraType::kPerspective, projDesc);
-		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 100.0f));
-
-		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
 
 		//glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
 		static constexpr GLfloat vertices[3][3 + 3] =
@@ -116,7 +132,7 @@ namespace TestGame
 
 	void TestGameView::VOnRender(float deltaTime, float elapsedTime)
 	{
-		HumanView::VOnRender(deltaTime, elapsedTime);
+		HumanView::VOnRender(deltaTime, elapsedTime); // Call parent
 
 		int width, height;
 		BGE::BGUTGetWindowSize(BGE::BGUTGetWindowPtr(), width, height);
@@ -151,10 +167,18 @@ namespace TestGame
 
 		ImGui::Begin("Test");
 		ImGui::Text("Audio source progress: %1.2f", m_pSource->VGetProgress());
+		ImGui::Text("Right axis: (%08.7f, %08.7f)", m_pController->GetRightAxis().x, m_pController->GetRightAxis().y);
 		ImGui::End();
 
 		glBindVertexArray(m_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+	}
+
+	void TestGameView::VOnUpdate(float deltaTime)
+	{
+		HumanView::VOnUpdate(deltaTime); // Call parent
+
+		m_pController->OnUpdate(deltaTime);
 	}
 
 	void TestGameView::VRegisterDelegates(void)

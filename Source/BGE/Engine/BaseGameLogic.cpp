@@ -66,11 +66,22 @@ bool BGE::BaseGameLogic::VPostInit(void)
 
 void BGE::BaseGameLogic::VAddView(StrongIGameViewPtr pView, ActorID aID)
 {
+    BGE_ASSERT(pView);
+
     // This makes sure that all views have a non-zero view id
 	auto viewID = static_cast<GameViewID>(m_gameViews.size());
+
+    // Add the game view to the list
 	m_gameViews.push_back(pView);
-	pView->VOnAttach(viewID, aID);
-	pView->VOnRestore();
+
+    // Attempt to initialize the game view, if it has not already been done
+    if (!pView->VIsInitialized())
+    {
+        BGE_ERROR_IF(pView->VInit(), "Failed to initialize game view");
+    }
+
+	pView->VOnAttach(viewID, aID); // Call the attach routine
+	pView->VOnRestore(); // Call the store routine
 }
 
 void BGE::BaseGameLogic::VRemoveView(StrongIGameViewPtr pView)
@@ -96,9 +107,9 @@ void BGE::BaseGameLogic::VSetProxy(void)
 {
 }
 
-void BGE::BaseGameLogic::VOnUpdate(float time, float elapsedTime)
+void BGE::BaseGameLogic::VOnUpdate(float deltaTime, float elapsedTime)
 {
-    int deltaMS = static_cast<int>(elapsedTime * 1'000.0f);
+    //int deltaMS = static_cast<int>(elapsedTime * 1'000.0f);
     m_lifetimeTimer.Start();
 
     using enum BaseGameState;
@@ -120,16 +131,16 @@ void BGE::BaseGameLogic::VOnUpdate(float time, float elapsedTime)
     case kWaitingForPlayers:
         break;
     case kRunning:
-        m_pProcessManager->UpdateProcesses(deltaMS);
+        m_pProcessManager->UpdateProcesses(deltaTime);
         break;
     default:
         BGE_ERROR("Unrecognized game state.");
     }
 
     // Update all game views
-    for (auto &view : m_gameViews)
+    for (auto &pView : m_gameViews)
     {
-        view->VOnUpdate(deltaMS);
+        pView->VOnUpdate(deltaTime);
     }
 
     m_lifetimeTimer.Stop();

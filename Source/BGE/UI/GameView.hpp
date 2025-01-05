@@ -68,6 +68,7 @@ namespace BGE
 		virtual void VOnAttach(GameViewID viewID, ActorID actorID) = 0;
 		virtual bool VOnHandleEvent(const SDL_Event &event) = 0;
 		virtual void VOnUpdate(float deltaTime) = 0;
+		virtual bool VIsInitialized(void) const = 0;
 	public:
 		static GameViewFilter CreateFilter(GameViewType type);
 	};

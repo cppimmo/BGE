@@ -113,6 +113,8 @@ namespace BGE
 		virtual bool VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value) = 0;
 		virtual bool VOnButtonDown(JoystickID ID, GamepadButton button) = 0;
 		virtual bool VOnButtonUp(JoystickID ID, GamepadButton button) = 0;
+		virtual bool VOnGamepadConnected(JoystickID ID) = 0;
+		virtual bool VOnGamepadDisconnected(JoystickID ID) = 0;
 		static bool StartRumble(JoystickID ID, RumbleSpeed sharedSpeed, RumbleDuration durationMS);
 		static bool StartRumble(JoystickID ID, RumbleSpeed leftSpeed, RumbleSpeed rightSpeed, RumbleDuration durationMS);
 		static bool StopRumble(JoystickID ID);

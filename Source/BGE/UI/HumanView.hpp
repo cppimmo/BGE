@@ -33,12 +33,14 @@ namespace BGE
 			virtual bool VOnAxis(JoystickID ID, GamepadAxis axis, std::int16_t value) override;
 			virtual bool VOnButtonDown(JoystickID ID, GamepadButton button) override;
 			virtual bool VOnButtonUp(JoystickID ID, GamepadButton button) override;
+			virtual bool VOnGamepadConnected(JoystickID ID) override;
+			virtual bool VOnGamepadDisconnected(JoystickID ID) override;
 			// IKeyboardHandler's interface:
 			virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override;
 			virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override;
 			// IMouseHandler's interface:
 			virtual bool VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos) override;
-			virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::ivec2 &kPreciseScroll) override;
+			virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::fvec2 &kPreciseScroll) override;
 			virtual bool VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) override;
 			virtual bool VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) override;
 			virtual int VGetPointerRadius(void) override;
@@ -55,6 +57,8 @@ namespace BGE
 		GamepadHandlerList  m_gamepadHandlers;
 		KeyboardHandlerList m_keyboardHandlers;
 		MouseHandlerList    m_mouseHandlers;
+
+		bool m_bInitialized = false; //!< Has the view been initialized?
 	public:
 		HumanView(void);
 		virtual ~HumanView(void);
@@ -68,6 +72,7 @@ namespace BGE
 		virtual void VOnAttach(GameViewID viewID, ActorID actorID) override;
 		virtual bool VOnHandleEvent(const SDL_Event &event) override;
 		virtual void VOnUpdate(float deltaTime) override;
+		virtual bool VIsInitialized(void) const override;
 
 		void AddGamepadHandler(StrongIGamepadHandlerPtr pGamepadHandler);
 		void AddKeyboardHandler(StrongIKeyboardHandlerPtr pKeyboardHandler);

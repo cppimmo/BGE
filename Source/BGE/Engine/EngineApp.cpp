@@ -322,8 +322,17 @@ namespace BGE
 			pView->VOnRender(deltaTime, elapsedTime);
 		}
 
-		ImGui::Begin("FPS");
-		ImGui::Text("%03.4f", app.GetFPSData().smoothedFPS);
+		ImGui::Begin("Frame Time");
+
+		// Add left padding by setting the cursor's X position before text rendering.
+		float padding = 20.0f;  // Adjust padding to your desired value
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);
+
+		ImGui::Text("%07.4f FPS", app.GetFPSData().smoothedFPS);
+
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);  // Apply padding again for next line
+		ImGui::Text("%07.4f ms", deltaTime);
+
 		ImGui::End();
 
 		ImGui::ShowDemoWindow();
