@@ -51,6 +51,7 @@ namespace BGE
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4   &kValue) override;
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4x2 &kValue) override;
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4x3 &kValue) override;
+		virtual void VSetStruct(std::string_view uniformName, const UniformStruct &kStruct, const void *pStructData) override;
 	private:
 		static std::optional<GLint> GetUniformLocation(GLuint programID, std::string_view uniformName) noexcept;
 

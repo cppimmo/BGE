@@ -20,14 +20,20 @@ namespace BGE
 
 	class IMouseHandler
 	{
+	private:
+		static bool s_bCursorLocked; //!< Is the mouse cursor locked to the window?
 	public:
 		virtual ~IMouseHandler(void) = default;
-
+		// Interface:
 		virtual bool VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos) = 0;
 		virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::fvec2 &kPreciseScroll) = 0;
 		virtual bool VOnMouseButtonDown(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) = 0;
 		virtual bool VOnMouseButtonUp(const glm::ivec2 &kPos, MouseButton button, std::uint8_t clicks) = 0;
 		virtual int VGetPointerRadius(void) = 0;
+	public:
+		static void LockMouseCursor(void);
+		static void ReleaseMouseCursor(void);
+		static bool IsCursorLocked(void);
 	};
 } // End namespace (BGE)
 

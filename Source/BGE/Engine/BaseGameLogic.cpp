@@ -77,7 +77,7 @@ void BGE::BaseGameLogic::VAddView(StrongIGameViewPtr pView, ActorID aID)
     // Attempt to initialize the game view, if it has not already been done
     if (!pView->VIsInitialized())
     {
-        BGE_ERROR_IF(pView->VInit(), "Failed to initialize game view");
+        BGE_ERROR_IF(!pView->VInit(), "Failed to initialize game view");
     }
 
 	pView->VOnAttach(viewID, aID); // Call the attach routine

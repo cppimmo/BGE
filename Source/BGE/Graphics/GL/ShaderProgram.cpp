@@ -207,6 +207,12 @@ namespace BGE
 		glProgramUniformMatrix4x3fv(m_programID, UniformLocation(uniformName), 1, GL_FALSE, &kValue[0][0]);
 	}
 
+	void GLShaderProgram::VSetStruct(std::string_view uniformName, const UniformStruct &kStruct, const void *pStructData)
+	{
+		UpdateUniformLocation(uniformName);
+
+	}
+
 	std::optional<GLint> GLShaderProgram::GetUniformLocation(GLuint programID, std::string_view uniformName) noexcept
 	{
 		GLint result = glGetUniformLocation(programID, uniformName.data());

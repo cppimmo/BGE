@@ -37,10 +37,12 @@
 
 namespace BGE
 {
+	class ImageResourceExtraData; // Forward declare
 	class BMPResourceLoader;  // Forward declare
 	class JPEGResourceLoader; // Forward declare
 	class PNGResourceLoader;  // Forward declare
 	class TGAResourceLoader;  // Forward declare
+	BGE_DECLARE_PTR(ImageResourceExtraData);
 	BGE_DECLARE_PTR(BMPResourceLoader);
 	BGE_DECLARE_PTR(JPEGResourceLoader);
 	BGE_DECLARE_PTR(PNGResourceLoader);
@@ -51,6 +53,61 @@ namespace BGE
 	 */
 	inline constexpr std::size_t kMAX_TEXTURE_MIPS = 14u;
 
+	enum struct ImageFormat
+	{
+		kUndefined,
+		kRGB,
+		kRGBA,
+		kDepth
+	};
+
+	enum struct ImageType
+	{
+		kUnsignedByte,
+		kByte,
+		kUnsignedShort,
+		kShort,
+		kUnsignedInt,
+		kInt,
+		kFloat
+	};
+
+	struct MipData
+	{
+		int width;
+		int height;
+		int depth;
+		std::size_t mipStride;
+		void *pData;
+	};
+
+	struct ImageData
+	{
+		enum struct Target
+		{
+			kTexture1D, /**< . */
+			kTexture2D, /**< . */
+			kTexture3D, /**< . */
+			kTextureCubeMap, /**< . */
+			kTexture2DArray, /**< . */
+			kTextureCubeMapArray, /**< . */
+			kTexture2DMultisample, /**< . */
+			kTexture2DMultisampleArray, /**< . */
+			kTextureBuffer /**< . */
+		};
+
+		Target target;
+		ImageFormat internalFormat;
+		ImageFormat memoryFormat;
+		ImageType memoryType;
+		std::array<int, 4> swizzle;
+		int mipLevels;
+		int slices;
+		std::size_t sliceStride;
+		std::size_t totalDataSize;
+		std::vector<MipData> mips;
+	};
+#if 0
 	/**
 	 * @brief .
 	 */
@@ -78,6 +135,22 @@ namespace BGE
 		GLsizeiptr sliceStride; //!< Distance between slices of an array texture
 		GLsizeiptr totalDataSize; //!< Total data allocated for texture
 		std::array<ImageMipData, kMAX_TEXTURE_MIPS> mip; //!< Actual mipmap data
+	};
+#endif
+	/**
+	 * @brief .
+	 */
+	class ImageResourceExtraData final : public IResourceExtraData
+	{
+	private:
+		ImageData m_data;
+	public:
+		ImageResourceExtraData(const ImageData &kData);
+		~ImageResourceExtraData(void) override;
+		// IResourceExtraData's interface:
+		virtual std::string VGetExtraData(void) override;
+
+		const ImageData &GetImageData(void) const;
 	};
 
 	/**

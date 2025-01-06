@@ -46,6 +46,7 @@
 #include <cstring>
 #include <cstdarg>
 #include <cmath>
+
 #include <memory>
 #include <new>
 #include <optional>
@@ -94,16 +95,14 @@
 //! Macro for inline keyword.
 #define BGE_INLINE inline
 
-//! Function macro for static assertions.
-#define BGE_STATIC_ASSERT(EXPR) static_assert(EXPR, "static assert failed:" #EXPR)
-
 // Common project headers:
 #include "Utilities/Types.hpp"
 #include "Utilities/Templates.hpp"
 #include "Engine/Interfaces.hpp"
 #include "Utilities/Utils.hpp"
-#include "Memory/Memory.hpp"
+#include "Debugging/Assert.hpp"
 #include "Debugging/Logger.hpp"
+#include "Memory/Memory.hpp"
 #include "Utilities/Exception.hpp"
 #include "Utilities/String.hpp"
 #include "Utilities/Timer.hpp"

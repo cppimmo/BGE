@@ -30,7 +30,7 @@ namespace TestGame
 		m_pCamera = std::make_shared<BGE::FirstPersonCamera>(projDesc);
 		m_pCamera->SetPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 
-		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, -5.0f));
+		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
 		m_pController = std::make_shared<TestController>(m_pCamera);
 		AddGamepadHandler(m_pController);
@@ -74,26 +74,56 @@ namespace TestGame
 		pFragmentShader->VDestroy();
 
 		//glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
-		static constexpr GLfloat vertices[3][3 + 3] =
+		/*static constexpr BGE::Vertex vertices[3] =
 		{
-			{ -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f },
-			{  0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f },
-			{  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f }
-		};
+			BGE::Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f }),
+			BGE::Vertex({  0.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f }),
+			BGE::Vertex({  0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f })
+		};*/
+		BGE::GeometryGenerator generator;
+		//generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
+		generator.CreateSphere(1.0f, 16, 16, m_meshData);
 
+		// Create VBO and upload data
 		glCreateBuffers(1, &m_vbo);
-		glNamedBufferStorage(m_vbo, sizeof(vertices), vertices, 0);
+		glNamedBufferStorage(m_vbo, m_meshData.vertices.size() * sizeof(BGE::Vertex), m_meshData.vertices.data(), 0);
 
+		// Create EBO and upload data
+		glCreateBuffers(1, &m_ebo);
+		glNamedBufferStorage(m_ebo, m_meshData.indices.size() * sizeof(BGE::VertexIndex), m_meshData.indices.data(), 0);
+
+		// Create VAO
 		glCreateVertexArrays(1, &m_vao);
 		glBindVertexArray(m_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+		//glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
-		glEnableVertexAttribArray(0);
+		// Enable and set up vertix attributes
+		glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(BGE::Vertex));
 
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		// Bind the EBO to the VAO
+		glVertexArrayElementBuffer(m_vao, m_ebo);
 
+		// Position attribute (layout location = 0)
+		glEnableVertexArrayAttrib(m_vao, 0);
+		glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, position));
+		glVertexArrayAttribBinding(m_vao, 0, 0);  // Attribute 0 uses binding index 0
+
+		// Normal attribute (layout location = 1)
+		glEnableVertexArrayAttrib(m_vao, 1);
+		glVertexArrayAttribFormat(m_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, normal));
+		glVertexArrayAttribBinding(m_vao, 1, 0);  // Attribute 1 uses binding index 0
+
+		// Tangent attribute (layout location = 2)
+		glEnableVertexArrayAttrib(m_vao, 2);
+		glVertexArrayAttribFormat(m_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, tangent));
+		glVertexArrayAttribBinding(m_vao, 2, 0);  // Attribute 2 uses binding index 0
+
+		// Texcoord attribute (layout location = 3)
+		glEnableVertexArrayAttrib(m_vao, 3);
+		glVertexArrayAttribFormat(m_vao, 3, 2, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, texcoord));
+		glVertexArrayAttribBinding(m_vao, 3, 0);  // Attribute 3 uses binding index 0
+
+		// Audio system test
 		auto &audio = app.GetAudioSystem();
 		auto pBuffer = audio.VCreateBuffer();
 		auto pSoundHandle = resCache.GetHandle(BGE::Resource("Assets\\Music\\calmbgm.ogg"));
@@ -170,8 +200,16 @@ namespace TestGame
 		ImGui::Text("Right axis: (%08.7f, %08.7f)", m_pController->GetRightAxis().x, m_pController->GetRightAxis().y);
 		ImGui::End();
 
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
+
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		// Bind the VAO
 		glBindVertexArray(m_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// Issue the draw call
+		//glDrawArrays(GL_TRIANGLES, 0, 24);
+		glDrawElements(GL_TRIANGLES, m_meshData.indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void TestGameView::VOnUpdate(float deltaTime)

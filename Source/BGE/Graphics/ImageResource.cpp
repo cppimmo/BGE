@@ -36,6 +36,25 @@
 
 namespace BGE
 {
+	ImageResourceExtraData::ImageResourceExtraData(const ImageData &kData)
+		: m_data(kData)
+	{
+	}
+
+	ImageResourceExtraData::~ImageResourceExtraData(void)
+	{
+	}
+
+	std::string ImageResourceExtraData::VGetExtraData(void)
+	{
+		return "";
+	}
+
+	const ImageData &ImageResourceExtraData::GetImageData(void) const
+	{
+		return m_data;
+	}
+
 	std::string BMPResourceLoader::VGetPattern(void) const
 	{
 		return "*.bmp";
@@ -92,12 +111,37 @@ namespace BGE
 			return false;
 		}
 
+		// Populate ImageData
+		ImageData imageData;
+		imageData.target = ImageData::Target::kTexture2D;
+		imageData.internalFormat = (channels == 4) ? ImageFormat::kRGBA : ImageFormat::kRGB;
+		imageData.memoryFormat = imageData.internalFormat;
+		imageData.memoryType = ImageType::kUnsignedByte;
+		imageData.mipLevels = 1; // BMPs typically have no mipmaps
+		imageData.slices = 1;
+		imageData.totalDataSize = width * height * channels;
+
+		MipData mip;
+		mip.width = width;
+		mip.height = height;
+		mip.depth = 1;
+		mip.pData = pImageData;
+		mip.mipStride = mip.width * mip.height * channels;
+
+		imageData.mips.push_back(mip);
+
+		// Attach the image data to the resource handle
+		auto pExtraData = std::make_shared<ImageResourceExtraData>(imageData);
+		if (pExtraData)
+		{
+			pResourceHandle->SetExtraData(pExtraData);
+		}
 		// Use the loaded image data (width, height, channels, imageData)
 		// For example, pass it to the resource handle (assuming it supports setting data)
 		//pResourceHandle->SetData(pImageData, width, height, channels);
 
 		// Free the image data after we're done
-		stbi_image_free(pImageData);
+		//stbi_image_free(pImageData);
 
 		return true;
 	}

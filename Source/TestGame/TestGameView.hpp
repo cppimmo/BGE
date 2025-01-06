@@ -6,6 +6,7 @@
 #include <Graphics/GL/ShaderProgram.hpp>
 #include <Graphics/Transform.hpp>
 #include <Graphics/Camera.hpp>
+#include <Graphics/Geometry.hpp>
 
 #include "TestController.hpp"
 #include <glm/gtc/quaternion.hpp>
@@ -17,19 +18,14 @@ namespace TestGame
 
 	class TestGameView : public BGE::HumanView
 	{
-		struct Vertex
-		{
-			glm::vec3 position = glm::vec3(0);
-			glm::vec3 normal = glm::vec3(0);
-			glm::vec2 uv = glm::vec2(0);
-		};
-
+	private:
 		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
-		GLuint m_vao, m_vbo;
+		GLuint m_vao, m_vbo, m_ebo;
 		BGE::StrongIAudioSourcePtr m_pSource;
 		BGE::StrongFirstPersonCameraPtr m_pCamera;
 		BGE::Transform m_triTransform;
 		StrongTestControllerPtr m_pController;
+		BGE::MeshData m_meshData;
 	public:
 		TestGameView(void);
 		//! IGameView's interface:

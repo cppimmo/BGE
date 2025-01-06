@@ -2,9 +2,9 @@
 
 layout (location = 0) out vec4 outColor;
 
-in vec3 g_vertexColor; // Interpolated color from the vertex shader
+in vec4 g_vertexColor; // Interpolated color from the vertex shader
 
 void main(void)
 {
-	outColor = vec4(g_vertexColor, 1.0); // Output the color
+	outColor = g_vertexColor; // Output the color
 }

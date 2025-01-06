@@ -4,7 +4,7 @@
 namespace TestGame
 {
 	TestController::TestController(BGE::StrongFirstPersonCameraPtr pFPSCamera)
-		: m_pFPSCamera(pFPSCamera), m_sensitivity(0.1f), m_gamepadSensitivity(50.0f), m_speed(1.4f), m_runSpeed(5.0f), m_yaw(0.0f), m_pitch(0.0f)
+		: m_pFPSCamera(pFPSCamera), m_sensitivity(0.75f), m_gamepadSensitivity(50.0f), m_speed(1.4f), m_runSpeed(5.0f), m_yaw(0.0f), m_pitch(0.0f)
 	{
 		m_leftAxis = glm::fvec2(0.0f);
 		m_rightAxis = glm::fvec2(0.0f);
@@ -359,9 +359,11 @@ namespace TestGame
 			movementDelta += glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
 		}
 
+		IMouseHandler::LockMouseCursor();
 		// Mouse input handling
-		yawDelta += static_cast<float>(m_mouseMotion.x) * m_sensitivity * deltaTime;
-		pitchDelta += static_cast<float>(m_mouseMotion.y) * m_sensitivity * deltaTime;
+		yawDelta -= static_cast<float>(m_mouseMotion.x) * m_sensitivity;
+		pitchDelta -= static_cast<float>(m_mouseMotion.y) * m_sensitivity;
+		m_mouseMotion = glm::ivec2(0);
 
 		// Apply movement & rotation
 		m_pFPSCamera->MoveForward(movementDelta.z);

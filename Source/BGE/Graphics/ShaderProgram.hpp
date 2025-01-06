@@ -11,6 +11,25 @@ namespace BGE
 	class ShaderProgram; // Forward declare
 	BGE_DECLARE_PTR(ShaderProgram);
 
+	enum struct UniformFieldType
+	{
+	};
+
+	struct UniformField
+	{
+		std::string name; //!< Field name, e.g., "fieldName" or "structName.fieldName".
+		GLenum type; //!< OpenGL type (e.g., GL_FLOAT_VEC3).
+		std::size_t offset; //!< Offset in a packed structure, if needed.
+	};
+
+	using UniformFieldVector = std::vector<UniformField>;
+
+	struct UniformStruct
+	{
+		std::string name; //!< Name of the struct uniform in GLSL.
+		UniformFieldVector fields; //!< List of fields.
+	};
+
 	/**
 	 * @brief .
 	 */
@@ -43,6 +62,7 @@ namespace BGE
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4   &kValue) = 0;
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4x2 &kValue) = 0;
 		virtual void VSetMat4(std::string_view uniformName, const glm::mat4x3 &kValue) = 0;
+		virtual void VSetStruct(std::string_view uniformName, const UniformStruct &kStruct, const void *pStructData) = 0;
 	};
 } // End namespace (BGE)
 
