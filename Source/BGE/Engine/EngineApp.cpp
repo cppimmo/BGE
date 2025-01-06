@@ -155,6 +155,8 @@ namespace BGE
 		// Sound resource loaders:
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateWAVResourceLoader());
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateOGGResourceLoader());
+		// Assimp resource loader:
+		m_pResourceCache->RegisterLoader(rlFactory.VCreateAssimpResourceLoader());
 
 		// Queue resource cache started event
 		BGE_QUEUE_GEVENT(std::make_shared<EventData_ResourceCacheStarted>());

@@ -225,18 +225,6 @@ do \
 } \
 while (0) \
 
-#define BGE_ASSERT(EXPR) \
-do \
-{ \
-	if (!(EXPR)) \
-	{ \
-		using namespace BGE::Logger; \
-		static ErrorMessenger *pMessenger = new ErrorMessenger(true); \
-		pMessenger->Show(#EXPR, ""); \
-	} \
-} \
-while (0) \
-
 #else // Release mode
 
 #define BGE_FATAL(...) do { ; } while (0)
@@ -249,7 +237,6 @@ while (0) \
 #define BGE_INFO_IF(COND, ...) do { ; } while (0)
 #define BGE_LOG(...) do { ; } while (0)
 #define BGE_LOG_IF(COND, ...) do { ; } while (0)
-#define BGE_ASSERT(EXPR, ...) do { ; } while (0)
 
 #endif /* def BGE_CONFIG_DEBUG || BGE_CONFIG_PROFILE */
 

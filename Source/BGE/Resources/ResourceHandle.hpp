@@ -55,6 +55,7 @@ namespace BGE
 		kPNG,      /**< .png files. */
 		kBMP,      /**< .bmp files. */
 		kTGA,      /**< .tga files. */
+		kAssimp,   /**< Any asset files supported by the Assimp importer. */
 		kUnknown   /**< Files of unknown type. */
 	};
 

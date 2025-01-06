@@ -70,6 +70,7 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreateWAVResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateOGGResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateJSONResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateAssimpResourceLoader(void) = 0;
 	};
 
 	class DefaultResourceLoaderFactory : public IResourceLoaderFactory
@@ -88,6 +89,7 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreateWAVResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateOGGResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateJSONResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateAssimpResourceLoader(void) override;
 	};
 } // End namespace (BGE)
 

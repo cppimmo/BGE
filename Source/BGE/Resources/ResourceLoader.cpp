@@ -8,6 +8,7 @@
 #include "Graphics/ShaderResource.hpp"
 #include "Audio/SoundResource.hpp"
 #include "Resources/JSONResource.hpp"
+#include "Graphics/AssimpResource.hpp"
 
 namespace BGE
 {
@@ -99,5 +100,10 @@ namespace BGE
 	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateJSONResourceLoader(void)
 	{
 		return std::make_shared<JSONResourceLoader>();
+	}
+
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateAssimpResourceLoader(void)
+	{
+		return std::make_shared<AssimpResourceLoader>();
 	}
 } // End namespace (BGE)
