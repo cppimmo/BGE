@@ -3,6 +3,7 @@
 
 namespace BGE
 {
+#if 0
 	IPAddress::IPAddress(std::string_view address, AddressType type)
 		: m_type(type)
 	{
@@ -169,4 +170,5 @@ namespace BGE
 		in6_addr addr;
 		return inet_pton(AF_INET6, address.data(), &addr) == 1;
 	}
+#endif
 } // End namespace (BGE)

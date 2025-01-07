@@ -39,7 +39,7 @@
 
 #include <zlib.h>
 
-#ifdef BGE_PLATFORM_LINUX
+#if BGE_PLATFORM_LINUX
 #include <linux/limits.h>
 static constexpr std::size_t kPATH_MAX = PATH_MAX;
 #else
@@ -50,8 +50,7 @@ namespace
 {
 	bool OpenFile(FILE** ppFile, const std::wstring& resFileName, const char* pMode)
 	{
-//#if BGE_PLATFORM_WIN32
-#ifdef _WIN32
+#ifdef BGE_PLATFORM_WIN
 		// Convert wide string to UTF-8 on Windows
 		int utf8Length = WideCharToMultiByte(CP_UTF8, 0, resFileName.c_str(), -1, nullptr, 0, nullptr, nullptr);
 		if (utf8Length <= 0)

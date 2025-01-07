@@ -6,8 +6,10 @@
 #include <variant>
 #include <compare>
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#if 0
+//#include <winsock.h>
+//#include <netinet/in.h>
+//#include <arpa/inet.h>
 
 namespace BGE
 {
@@ -47,5 +49,6 @@ namespace BGE
 		static bool IsValidIPv6(std::string_view address);
 	};
 } // End namespace (BGE)
+#endif
 
 #endif /* !_BGE_IPADDRESS_HPP_ */

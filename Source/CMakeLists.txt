@@ -63,17 +63,27 @@ set(LIB_DIR "../Source/Lib")
 # SDL library:
 set(SDL_VENDORED "Use vendored (non-system) version of SDL" OFF)
 set(SDL_LIB_DIR "Lib/SDL")
+# Default to vendored SDL on Windows
 if(WIN32)
-  set(SDL_VENDORED ON)
+  set(SDL_VENDORED OFF)
 endif()
 
 if(SDL_VENDORED)
-	#add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
-	#set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
-	#set(SDL2_INCLUDE_DIRS "Lib/SDL/include/SDL3")
+  message(STATUS "Using vendored SDL2")
+  # Add the SDL library subdirectory
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL EXCLUDE_FROM_ALL)
+  
+  # Set include and library directories
+  set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL/include)
+  set(SDL2_LIBRARIES SDL2-static)
+  #add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
+  #set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
+  #set(SDL2_INCLUDE_DIRS "Lib/SDL/include/SDL3")
 else()
+  message(STATUS "Using system-installed SDL2")
+  find_package(SDL2 CONFIG REQUIRED)
 endif()
-find_package(SDL2 REQUIRED)
+
 #message("SDL2_LIBRARIES: ${SDL_LIBRARIES}")
 #message("SDL2_INCLUDE_DIRS: ${SDL_INCLUDE_DIRS}")
 include_directories(${SDL2_INCLUDE_DIRS})
@@ -109,15 +119,24 @@ set(GLM_DIR "Lib/glm")
 add_subdirectory(${GLM_DIR})
 
 # OpenAL-soft library:
+set(OPENAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/openal-soft)
+set(OPENAL_VENDORED "" OFF)
+
 if(WIN32)
+  set(OPENAL_VENDORED OFF)
   # Must set the OPENALDIR environment variable on Windows
   #set(ENV{OPENALDIR} "Lib/openal-soft-makemhr/cmake")
-  set(OPENAL_LIBRARY $ENV{OPENALDIR})
-  string(REGEX REPLACE "cmake" "" INC_DIR "$ENV{OPENALDIR}") # "regex" "replacement regex" OUT_VAR INPUT
-  set(OPENAL_INCLUDE_DIR "${INC_DIR}/include")
+  #set(OPENAL_LIBRARY $ENV{OPENALDIR})
+  #string(REGEX REPLACE "cmake" "" INC_DIR "$ENV{OPENALDIR}") # "regex" "replacement regex" OUT_VAR INPUT
+ # set(OPENAL_INCLUDE_DIR "${INC_DIR}/include")
 endif()
-find_package(OpenAL REQUIRED)
-include_directories(${OPENAL_INCLUDE_DIRS})
+
+if(OPENAL_VENDORED)
+  add_subdirectory(${OPENAL_DIR})
+else()
+  find_package(OpenAL CONFIG REQUIRED)
+  include_directories(${OPENAL_INCLUDE_DIRS})
+endif()
 
 # glad library:
 set(GLAD_DIR "Lib/glad")
@@ -133,34 +152,93 @@ target_include_directories(TinyXml2 PUBLIC ${TINYXML_DIR})
 set(STB_DIR "Lib/stb")
 include_directories(${STB_DIR})
 
-# assimp library:
-set(ASSIMP_DIR "Lib/assimp")
-set(ASSIMP_BUILD_ZLIB OFF)
-set(ZLIB_FOUND FALSE)
-add_subdirectory(${ASSIMP_DIR})
-
 include(FetchContent)
 
 # zlib library:
-set(ZLIB_DIR "Lib/zlib")
+set(ZLIB_VENDORED "Use vendored (non-system) version of zlib" OFF)
+set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/zlib)
 #FetchContent_Declare(
 #    zlib-cmake
 #    URL https://github.com/jimmy-park/zlib-cmake/archive/main.tar.gz
 #)
-find_package(ZLIB)
+#find_package(ZLIB)
 #FetchContent_MakeAvailable(zlib-cmake)
+# Default to vendored zlib on Windows
+if(WIN32)
+  set(ZLIB_VENDORED OFF)
+endif()
+
+if(ZLIB_VENDORED)
+  message(STATUS "Using vendored zlib")
+  # Add the zlib library subdirectory
+  add_subdirectory(${ZLIB_DIR} EXCLUDE_FROM_ALL)
+  set(ZLIB_FOUND TRUE)
+  set(ZLIB_INCLUDE_DIR "${ZLIB_DIR}/include")
+  set(ZLIB_LIBRARIES zlibstatic)
+else()
+  message(STATUS "Using system-installed zlib")
+  #set(ZLIB_ROOT ${ZLIB_DIR})
+  #set(ZLIB_INCLUDE_DIR ${ZLIB_DIR})
+  #set(ZLIB_LIBRARY ${ZLIB_DIR}/build/Release/zlibstatic.lib)
+  #include_directories(${ZLIB_INCLUDE_DIR})
+  #target_link_libraries(your_target ${ZLIB_LIBRARY})
+
+  find_package(ZLIB REQUIRED)
+endif()
+
+# Pass ZLIB variables to Assimp
+#set(ASSIMP_INSTALL OFF)
+#set(ASSIMP_BUILD_ZLIB ON) # Disable Assimp's zlib
+#set(ZLIB_FOUND ${ZLIB_FOUND} CACHE BOOL "Use external ZLIB")
+#set(ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIR} CACHE PATH "ZLIB include directory")
+#set(ZLIB_LIBRARIES ${ZLIB_LIBRARIES} CACHE STRING "ZLIB libraries")
+# assimp library:
+set(ASSIMP_DIR "Lib/assimp")
+set(ASSIMP_VENDORED "Use vendored (non-system version of Assimp" ON)
+#set(ASSIMP_BUILD_ZLIB ON)
+#set(ZLIB_FOUND FALSE)
+
+if(WIN32)
+  set(ASSIMP_VENDORED OFF)
+endif()
+
+if(ASSIMP_VENDORED)
+  add_subdirectory(${ASSIMP_DIR})
+else()
+  find_package(assimp CONFIG REQUIRED)
+endif()
 
 # See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
-find_package(Lua 5.3 REQUIRED)
-include_directories(${LUA_INCLUDE_DIR})
-add_definitions(-DLUA)
+set(LUA_VENDORED "Use vendored (non-system) version of Lua" OFF)
+set(LUA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/lua)
+# Default to vendored Lua on Windows
+if(WIN32)
+  set(LUA_VENDORED ON)
+endif()
 
+if(LUA_VENDORED)
+  add_subdirectory(${LUA_DIR})
+  #add_definitions(-DLUA)
+  set(LUA_LIBRARY lua_static)
+else()
+  find_package(Lua 5.3 REQUIRED)
+  include_directories(${LUA_INCLUDE_DIR})
+  add_definitions(-DLUA)
+endif()
 ### sol2
 set(SOL2_DIR "Lib/sol2")
 set(SOL2_LUA_VERSION "5.3.4" CACHE STRING "The version of Lua used")
 # we build Lua manually
 set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
 add_subdirectory(${SOL2_DIR})
+
+# Ogg:
+set(OGG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/ogg)
+add_subdirectory(${OGG_DIR})
+
+# Let Vorbis know where to find Ogg
+#set(OGG_INCLUDE_DIR ${OGG_DIR}/include)
+#set(OGG_LIBRARY ogg) # The target name from Ogg's CMakeLists
 
 # Vorbis:
 set(VORBIS_DIR "Lib/vorbis")
@@ -174,16 +252,21 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "")
 add_subdirectory(${JSON_DIR})
 
+# FreeType:
+#set(FREETYPE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/freetype)
+#add_subdirectory(${FREETYPE_DIR})
+
 # RmlUi:
-set(RMLUI_DIR "Lib/RmlUi")
-add_subdirectory(${RMLUI_DIR})
-include_directories("${RMLUI_DIR}/Include")
+#set(RMLUI_DIR "Lib/RmlUi")
+#add_subdirectory(${RMLUI_DIR})
+#include_directories("${RMLUI_DIR}/Include")
 
 # Engine Project:
 set(ENGINE_SRC_DIR "BGE")
 
 add_library(Engine SHARED)
 
+target_compile_definitions(Engine PRIVATE BGE_ENGINE_EXPORTS)
 target_include_directories(Engine PUBLIC
   "${ENGINE_SRC_DIR}" ${OPENAL_INCLUDE_DIR}
   "${VORBIS_DIR}/include"
@@ -199,8 +282,11 @@ endif()
 
 target_link_libraries(Engine
   ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
-  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp ZLIB::ZLIB
-  vorbis vorbisfile nlohmann_json::nlohmann_json RmlUi::RmlUi
+  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp::assimp
+  ZLIB::ZLIB
+  #${ZLIB_LIBRARY}
+  vorbis vorbisfile nlohmann_json::nlohmann_json
+  #RmlUi::RmlUi
 ) #${Boost_LIBRARIES})
 
 if(WIN32)
@@ -208,11 +294,11 @@ if(WIN32)
   set_target_properties(Engine PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Engine>)
 endif()
 
-if(WIN32)
-  add_custom_command(TARGET Engine POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-	"${LIB_DIR}/SDL2-2.26.3/lib/x64/SDL2.dll" $<TARGET_FILE_DIR:Engine>)
-endif()
+#if(WIN32)
+#  add_custom_command(TARGET Engine POST_BUILD
+#	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#   "${LIB_DIR}/SDL2-2.26.3/lib/x64/SDL2.dll" $<TARGET_FILE_DIR:Engine>)
+#endif()
 
 # Editor Projects:
 set(EDITOR_SRC_DIR "BGEEditor")
@@ -253,18 +339,18 @@ target_link_libraries(Game Engine)
 add_custom_command(
   TARGET Game
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_if_different
-  "../Game/Engine.xml" $<TARGET_FILE_DIR:Game>
-  "../Game/Logging.xml" $<TARGET_FILE_DIR:Game>
-  "../Game/game_icon.bmp" $<TARGET_FILE_DIR:Game>
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:Game>"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  "${CMAKE_CURRENT_SOURCE_DIR}/../Game/Engine.xml" "$<TARGET_FILE_DIR:Game>"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../Game/Logging.xml" "$<TARGET_FILE_DIR:Game>"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../Game/game_icon.bmp" "$<TARGET_FILE_DIR:Game>"
   COMMENT "Copy engine configuration"
 )
 
 add_custom_command(
   TARGET Game
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy_directory_if_different "../Assets/" $<TARGET_FILE_DIR:Game>"/Assets"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:Game>/Assets"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_CURRENT_SOURCE_DIR}/../Assets/" "$<TARGET_FILE_DIR:Game>/Assets"
   COMMENT "Copy Assets directory"
 )

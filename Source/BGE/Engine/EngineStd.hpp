@@ -32,7 +32,8 @@
 #define _BGE_ENGINESTD_HPP_
 
 // Common library headers:
-#include <SDL2/SDL.h>
+//#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <imgui.h>
 #include <implot.h>
 #include <glad/glad.h>
@@ -77,7 +78,7 @@
 #define BGE_PLATFORM_WIN64 _WIN64
 
 #if BGE_PLATFORM_WIN
-#include "Engine/Winclude.h" // Include Windows header
+#include "Engine/Winclude.hpp" // Include Windows header
 #endif
 
 #define BGE_PLATFORM_WIN32 (_WIN32 && !_WIN64)
@@ -94,6 +95,16 @@
 
 //! Macro for inline keyword.
 #define BGE_INLINE inline
+
+#if BGE_PLATFORM_WIN
+#ifdef BGE_ENGINE_EXPORTS // Preprocessor defintion for Engine shared library
+#define BGE_ENGINE_API __declspec(dllexport)
+#else
+#define BGE_ENGINE_API __declspec(dllimport)
+#endif
+#else
+#define BGE_ENGINE_API
+#endif
 
 // Common project headers:
 #include "Utilities/Types.hpp"
@@ -119,7 +130,7 @@ namespace BGE
 	/**
 	 * @brief Representation of engine version information.
 	 */
-	class Version : public IStringable
+	class Version final: public IStringable
 	{
 	public:
 		int major, minor, patch;
@@ -136,7 +147,7 @@ namespace BGE
 	};
 
 	//! Current engine version.
-	BGE_INLINE constexpr Version kVERSION{ 1, 0, 0 };
+	BGE_INLINE constexpr Version kVERSION = { 1, 0, 0 };
 	//! Long form engine name.
 	BGE_INLINE constexpr std::string_view kENGINE_NAME = "Brian's Game Engine";
 	//! Short form engine name.

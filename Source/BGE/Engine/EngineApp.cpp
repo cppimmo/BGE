@@ -34,7 +34,7 @@
 #include <csignal>
 #include <ranges>
 
-#include <RmlUi/Debugger.h>
+//#include <RmlUi/Debugger.h>
 
 // ImGui implementation headers:
 #include "imgui_impl_sdl2.h"
@@ -54,7 +54,7 @@
 namespace BGE
 {
 	// Initialize global application instance pointer
-	UniqueEngineAppPtr g_pApp = nullptr;
+	BGE_ENGINE_API UniqueEngineAppPtr g_pApp = nullptr;
 
 	EngineApp &GetEngineApp(void)
 	{
@@ -680,6 +680,7 @@ namespace BGE
 
 	bool EngineApp::VInitRmlUi(void)
 	{
+		/*
 		// Install the custom interfaces constructed by the backend before initializing RmlUi
 		//Rml::SetSystemInterface(nullptr);
 		//Rml::SetRenderInterface(nullptr);
@@ -702,14 +703,14 @@ namespace BGE
 
 		// Initialize the RmlUi debugger
 		//Rml::Debugger::Initialise(m_pRmlContext);
-
+		*/
 		return true;
 	}
 
 	void EngineApp::VShutdownRmlUi(void)
 	{
 		// Shutdown RmlUi
-		Rml::Shutdown();
+		//Rml::Shutdown();
 	}
 
 	void EngineApp::VRegisterGameEvents(void)

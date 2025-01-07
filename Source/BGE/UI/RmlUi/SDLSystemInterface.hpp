@@ -1,3 +1,4 @@
+#if 0
 #ifndef _BGE_UI_RMLUI_SDLSYSTEMINTERFACE_HPP_
 #define _BGE_UI_RMLUI_SDLSYSTEMINTERFACE_HPP_
 
@@ -45,3 +46,4 @@ namespace BGE
 } // End namespace (BGE)
 
 #endif /* !_BGE_UI_RMLUI_SDLSYSTEMINTERFACE_HPP_ */
+#endif

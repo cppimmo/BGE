@@ -105,7 +105,8 @@ namespace BGE
  */
 
 #if defined(_DEBUG) // Only on Windows IIRC
-#define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator
+//#define BGE_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__) // Use overloaded debug new operator
+#define BGE_NEW new
 #else
 #define BGE_NEW new
 #endif

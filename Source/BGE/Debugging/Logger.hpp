@@ -31,8 +31,6 @@
 #ifndef _BGE_LOGGER_HPP_
 #define _BGE_LOGGER_HPP_
 
-#include <SDL.h>
-
 #include <cstddef>
 #include <string_view>
 

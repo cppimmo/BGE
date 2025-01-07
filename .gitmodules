@@ -43,3 +43,15 @@
 [submodule "Source/Lib/RmlUi"]
 	path = Source/Lib/RmlUi
 	url = https://github.com/mikke89/RmlUi.git
+[submodule "Source/Lib/zlib"]
+	path = Source/Lib/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "Source/Lib/lua"]
+	path = Source/Lib/lua
+	url = https://github.com/walterschell/Lua.git
+[submodule "Source/Lib/ogg"]
+	path = Source/Lib/ogg
+	url = https://gitlab.xiph.org/xiph/ogg.git
+[submodule "Source/Lib/freetype"]
+	path = Source/Lib/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git

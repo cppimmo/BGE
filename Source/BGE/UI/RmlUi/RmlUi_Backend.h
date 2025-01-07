@@ -1,3 +1,4 @@
+#if 0
 /*
  * This source file is part of RmlUi, the HTML/CSS Interface Middleware
  *
@@ -68,5 +69,7 @@ void BeginFrame();
 void PresentFrame();
 
 } // namespace Backend
+
+#endif
 
 #endif

@@ -31,7 +31,7 @@
 #ifndef _BGE_ENGINEAPP_HPP_
 #define _BGE_ENGINEAPP_HPP_
 
-#include <RmlUi/Core.h>
+//#include <RmlUi/Core.h>
 
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
@@ -48,7 +48,7 @@
 namespace BGE
 {
 	// Set global application pointer to the instance of an app layer class.
-	extern UniqueEngineAppPtr g_pApp; // Global application layer pointer (use as singleton)
+	extern BGE_ENGINE_API UniqueEngineAppPtr g_pApp; // Global application layer pointer (use as singleton)
 	
 	//! Return reference to the global EngineApp instance.
 	EngineApp &GetEngineApp(void);
@@ -94,6 +94,7 @@ namespace BGE
 
 		Timer m_timer; //!< Application timer.
 		FPSData m_fpsData; //!< Data used to calculate the FPS.
+
 		UniqueMemoryManagerPtr m_pMemoryManager; //!< Primary memory manager.
 		UniqueLocalizerPtr m_pLocalizer; //!< Localization handler.
 		UniqueIEventManagerPtr m_pEventManager; //!< Main event manager.
@@ -107,7 +108,7 @@ namespace BGE
 		// TODO: Add base socket manager.
 		// TODO: Add network event forwarder.
 
-		Rml::Context *m_pRmlContext = nullptr;
+		//Rml::Context *m_pRmlContext = nullptr;
 	public:
 		EngineApp(void);
 		virtual ~EngineApp(void);

@@ -32,7 +32,7 @@
 #include "Initialization.hpp"
 
 #if BGE_PLATFORM_WIN
-#include "Engine/Winclude.h"
+#include "Engine/Winclude.hpp"
 #elif BGE_PLATFORM_LINUX
 #include <sys/file.h>
 #include <cerrno>

@@ -16,6 +16,7 @@ namespace BGE
 	{
 		m_desc.type = type;
 		glCreateTextures(ConvertTextureTarget(type), 1, &m_textureID);
+		return glIsTexture(m_textureID) == GL_TRUE;
 	}
 
 	void GLTexture::VDestroy(void)

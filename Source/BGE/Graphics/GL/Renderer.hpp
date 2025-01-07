@@ -37,7 +37,7 @@ namespace BGE
 		virtual void VEnableDepthTest(bool bEnable) override {}
 		virtual void VEnableBlending(bool bEnable) override {}
 		virtual void VSetBlendMode(BlendMode mode) override {}
-		virtual BlendMode VGetBlendMode(void) const override {}
+		virtual BlendMode VGetBlendMode(void) const override { return BlendMode::kAdditive; }
 
 		virtual StrongIShaderFactoryPtr VCreateShaderFactory(void) override;
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) override;
@@ -46,7 +46,7 @@ namespace BGE
 		virtual bool VTakeScreenshot(void) override;
 
 		virtual void VEnableDebugOutput(bool bEnable) override {}
-		virtual std::string VGetRendererInfo(void) const override {}
+		virtual std::string VGetRendererInfo(void) const override { return ""; }
 	};
 } // End namespace (BGE)
 

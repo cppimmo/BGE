@@ -31,7 +31,7 @@ namespace BGE
 	std::size_t ZipResourceFile::VGetRawResource(const Resource &kResource, char *pBuffer)
 	{
 		std::size_t size = 0;
-		std::optional<int> resourceNum = m_pZipFile->Find(kResource.GetName());
+		std::optional<BGE::ZipFileIndex> resourceNum = m_pZipFile->Find(kResource.GetName());
 		if (resourceNum)
 		{
 			size = m_pZipFile->GetFileLen(*resourceNum);

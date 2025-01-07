@@ -1,3 +1,4 @@
+#if 0
 #include "Engine/EngineStd.hpp"
 #include "UI/RmlUi/SDLSystemInterface.hpp"
 
@@ -502,3 +503,4 @@ case SDL_WINDOWEVENT:              \
 		return retval;
 	}
 } // End namespace (BGE)
+#endif

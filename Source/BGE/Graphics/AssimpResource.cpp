@@ -38,22 +38,27 @@ namespace
 		// Assimp::IOStream's interface:
 		virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override
 		{
+			return 0;
 		}
 
 		virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) override
 		{
+			return 0;
 		}
 
 		virtual aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override
 		{
+			return aiReturn_SUCCESS;
 		}
 
 		virtual size_t Tell(void) const override
 		{
+			return 0;
 		}
 
 		virtual size_t FileSize(void) const override
 		{
+			return 0;
 		}
 
 		virtual void Flush (void) override

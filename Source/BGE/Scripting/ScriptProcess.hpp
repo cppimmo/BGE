@@ -30,7 +30,7 @@ namespace BGE
         virtual void VOnFail(void) override;
         virtual void VOnAbort(void) override;
 
-		virtual bool BuildCppDataFromScript(sol::table scriptClass, sol::table constructionData) { }
+		virtual bool BuildCppDataFromScript(sol::table scriptClass, sol::table constructionData) { return true; }
 	private:
 		static void RegisterScriptClassFunctions(sol::table &metatable);
 		static sol::object CreateFromScript(sol::state &state, sol::table self, sol::table constructionData, sol::table originalSubClass);
