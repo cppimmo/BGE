@@ -104,13 +104,16 @@ bool BGE::BGUTInit(std::string_view configFilename)
 
 	// Set OpenGL attributes before window creation
 	BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
+	
 	// Set basic window flags
 	s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	
 	// When the window is set to be resizable
 	if (s_BGUT.bWindowResizable && !s_BGUT.bFullscreenEnabled)
 	{
 		s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(s_BGUT.defWindowFlags | SDL_WINDOW_RESIZABLE);
 	}
+	
 	// When the window is set to be fullscreen
 	if (s_BGUT.bFullscreenEnabled)
 	{
@@ -126,6 +129,7 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		s_BGUT.defWindowWidth = displayMode.w;
 		s_BGUT.defWindowHeight = displayMode.h;
 	}
+	
 	// Create the SDL window
 	s_BGUT.pWindow = SDL_CreateWindow(s_BGUT.defWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, s_BGUT.defWindowFlags);
@@ -134,6 +138,7 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		BGE_ERROR("BGUTInit Failure: SDL window could not be created (%s).", SDL_GetError());
 		return false;
 	}
+	
 	// Attempt to create the OpenGL context
 	s_BGUT.pContext = SDL_GL_CreateContext(s_BGUT.pWindow);
 	if (!s_BGUT.pContext)
@@ -141,40 +146,49 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		BGE_ERROR("BGUTInit Failure: OpenGL context could not be created (%s).", SDL_GetError());
 		return false;
 	}
+	
 	// Set the current OpenGL context
 	if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
 	{
 		BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
 		return false;
 	}
+	
 	// Determine if vertical sync should be enabled
 	if (SDL_GL_SetSwapInterval((s_BGUT.bVSyncEnabled) ? 1 : 0) < 0) // Vertical sync
 	{
 		BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
 		return false;
 	}
+
 	// Set the function loader for OpenGL
-	const int kGladVersion = gladLoadGLLoader(SDL_GL_GetProcAddress);
+	const int kGladVersion = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
 	if (kGladVersion == 0)
 	{
 		BGE_ERROR("BGUTInit Failure: glad OpenGL loader can't be set (%s).", SDL_GetError());
 		return false;
 	}
+	BGE_LOG("BGUT", "Loaded OpenGL %d.%d", GLAD_VERSION_MAJOR(kGladVersion), GLAD_VERSION_MINOR(kGladVersion));
+	
 	// Perform extra setup for the OpenGL debug context
 	if (s_BGUT.bGLDebugEnabled)
 	{
 		GL::DebugContextSetup();
 	}
+	
 	// Only init ImGui when it is enabled (rely on short circuit evaluation)
 	if (s_BGUT.bImGuiEnabled && !BGUTInitImGui(s_BGUT.pWindow))
 	{
 		BGE_ERROR("BGUTInit Failure: Couldn't initialize ImGui!");
 		return false;
 	}
+	
 	// Set the OpenGL viewport
 	BGUTSetViewport(0, 0, s_BGUT.defWindowWidth, s_BGUT.defWindowHeight);
+	
 	// Write some information to the log related to the toolkit
 	BGUTLogInfo();
+	
 	return true;
 }
 
@@ -509,13 +523,15 @@ void BGE::BGUTLogInfo(void)
     logAttrib(SDL_GL_BUFFER_SIZE);
     logAttrib(SDL_GL_DOUBLEBUFFER);
     logAttrib(SDL_GL_DEPTH_SIZE);
+	BGE_LOG("BGUT", "Test 1");
 	// Reading this attribute causes segfaults
     //logAttrib(SDL_GL_STENCIL_SIZE);
-    logAttrib(SDL_GL_ACCUM_RED_SIZE);
-    logAttrib(SDL_GL_ACCUM_GREEN_SIZE);
-    logAttrib(SDL_GL_ACCUM_BLUE_SIZE);
-    logAttrib(SDL_GL_ACCUM_ALPHA_SIZE);
-    logAttrib(SDL_GL_STEREO);
+    //logAttrib(SDL_GL_ACCUM_RED_SIZE);
+    //logAttrib(SDL_GL_ACCUM_GREEN_SIZE);
+    //logAttrib(SDL_GL_ACCUM_BLUE_SIZE);
+    //logAttrib(SDL_GL_ACCUM_ALPHA_SIZE);
+	BGE_LOG("BGUT", "Test 2");
+	logAttrib(SDL_GL_STEREO);
     logAttrib(SDL_GL_MULTISAMPLEBUFFERS);
     logAttrib(SDL_GL_MULTISAMPLESAMPLES);
     logAttrib(SDL_GL_ACCELERATED_VISUAL);
@@ -546,7 +562,7 @@ void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuff
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Use hardware 3D
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	if (bDebugEnabled)
 	{

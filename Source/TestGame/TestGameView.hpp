@@ -20,7 +20,7 @@ namespace TestGame
 	{
 	private:
 		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
-		GLuint m_vao, m_vbo, m_ebo;
+		GLuint m_vao{}, m_vbo{}, m_ebo{};
 		BGE::StrongIAudioSourcePtr m_pSource;
 		BGE::StrongFirstPersonCameraPtr m_pCamera;
 		BGE::Transform m_triTransform;

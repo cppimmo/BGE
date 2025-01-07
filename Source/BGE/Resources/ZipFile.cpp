@@ -59,7 +59,8 @@ namespace
 		std::string utf8FileName(utf8Length, '\0');
 		WideCharToMultiByte(CP_UTF8, 0, resFileName.c_str(), -1, utf8FileName.data(), utf8Length, nullptr, nullptr);
 
-		*ppFile = std::fopen(utf8FileName.c_str(), pMode);
+		//*ppFile = std::fopen(utf8FileName.c_str(), pMode);
+		_wfopen_s(ppFile, resFileName.c_str(), L"rb");
 #else
 		// Convert wide string to UTF-8 for non-Windows platforms
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;

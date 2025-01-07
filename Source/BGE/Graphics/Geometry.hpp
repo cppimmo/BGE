@@ -19,6 +19,7 @@ Specialized Applications:
 	VertexTerrain
 	VertexParticle
     */
+#pragma pack(push, 1)
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -26,6 +27,8 @@ Specialized Applications:
 		glm::vec3 tangent;
 		glm::vec2 texcoord;
 	};
+#pragma pack(pop)
+
 
 	using Vertices = std::vector<Vertex>;
 	//! Represents indices for vertices.

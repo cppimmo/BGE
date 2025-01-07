@@ -84,8 +84,30 @@ namespace TestGame
 		//generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
 		generator.CreateSphere(1.0f, 16, 16, m_meshData);
 
+		if (m_meshData.vertices.empty())
+		{
+			BGE_LOG("TestGame", "Oops!");
+		}
+		sizeof(glm::vec3) + sizeof(glm::vec4) + sizeof(glm::vec2);
 		// Create VBO and upload data
 		glCreateBuffers(1, &m_vbo);
+
+		void *pFunc = SDL_GL_GetProcAddress("glCreateBuffers");
+		if (pFunc != nullptr)
+		{
+			BGE_LOG("TestGame", "glCreateBuffers");
+		}
+
+		pFunc = SDL_GL_GetProcAddress("glIsBuffer");
+		if (pFunc != nullptr)
+		{
+			BGE_LOG("TestGame", "glIsBuffer");
+		}
+
+		if (glIsBuffer(m_vbo) == GL_TRUE)
+		{
+			BGE_LOG("TestGame", "Is buffer!");
+		}
 		glNamedBufferStorage(m_vbo, m_meshData.vertices.size() * sizeof(BGE::Vertex), m_meshData.vertices.data(), 0);
 
 		// Create EBO and upload data

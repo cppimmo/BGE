@@ -139,8 +139,8 @@ else()
 endif()
 
 # glad library:
-set(GLAD_DIR "Lib/glad")
-add_library(glad STATIC "${GLAD_DIR}/src/glad.c")
+set(GLAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lib/glad")
+add_library(glad STATIC "${GLAD_DIR}/src/gl.c")
 target_include_directories(glad PUBLIC "${GLAD_DIR}/include")
 
 # tinyxml2 library:
@@ -335,6 +335,11 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${GAME
 target_sources(Game PRIVATE ${GAME_SRC_FILES})
 
 target_link_libraries(Game Engine)
+
+if(WIN32)
+  # Set the CWD for the debugger to start the program
+  set_target_properties(Game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:Game>)
+endif()
 
 add_custom_command(
   TARGET Game

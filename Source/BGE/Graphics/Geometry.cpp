@@ -74,8 +74,8 @@ namespace BGE
 
 	void GeometryGenerator::CreateSphere(float radius, std::uint32_t sliceCount, std::uint32_t stackCount, MeshData &meshData)
 	{
-		meshData.vertices.clear();
-		meshData.indices.clear();
+		//meshData.vertices.clear();
+		//meshData.indices.clear();
 
 		// Compute the vertices starting at the top pole & moving down the stacks
 		Vertex topVertex({ 0.0f, +radius, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f });
