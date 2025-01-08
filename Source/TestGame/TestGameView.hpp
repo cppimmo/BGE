@@ -27,6 +27,7 @@ namespace TestGame
 		BGE::Transform m_triTransform;
 		StrongTestControllerPtr m_pController;
 		BGE::MeshData m_meshData, m_skyboxMeshData;
+		GLuint m_textureID{};
 
 		void TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData);
 	public:

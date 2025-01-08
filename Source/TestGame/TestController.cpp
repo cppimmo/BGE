@@ -359,7 +359,6 @@ namespace TestGame
 			movementDelta += glm::vec3(0.0f, m_speed * deltaTime, 0.0f);
 		}
 
-		IMouseHandler::LockMouseCursor();
 		// Mouse input handling
 		yawDelta -= static_cast<float>(m_mouseMotion.x) * m_sensitivity;
 		pitchDelta -= static_cast<float>(m_mouseMotion.y) * m_sensitivity;

@@ -184,6 +184,58 @@ namespace BGE
 			return false;
 		}
 
+		int width, height, channels;
+
+		stbi_set_flip_vertically_on_load(true);
+		// Load the JPEG image data
+		unsigned char *pImageData = stbi_load_from_memory(
+			reinterpret_cast<unsigned char *>(pRawBuffer),
+			static_cast<int>(size),
+			&width,
+			&height,
+			&channels,
+			0 // Keep the original number of channels
+		);
+		stbi_set_flip_vertically_on_load(false);
+
+		if (!pImageData)
+		{
+			// Log an error if the image couldn't be loaded
+			BGE_ERROR("Failed to load JPEG image: %s", stbi_failure_reason());
+			return false;
+		}
+
+		// Populate ImageData
+		ImageData imageData;
+		imageData.target = ImageData::Target::kTexture2D;
+		imageData.internalFormat = (channels == 4) ? ImageFormat::kRGBA : ImageFormat::kRGB;
+		imageData.memoryFormat = imageData.internalFormat;
+		imageData.memoryType = ImageType::kUnsignedByte;
+		imageData.mipLevels = 1; // JPEGs typically have no mipmaps
+		imageData.slices = 1;
+		imageData.totalDataSize = width * height * channels;
+
+		MipData mip;
+		mip.width = width;
+		mip.height = height;
+		mip.depth = 1;
+		mip.pData = pImageData;
+		mip.mipStride = mip.width * mip.height * channels;
+
+		imageData.mips.push_back(mip);
+
+		// Attach the image data to the resource handle
+		auto pExtraData = std::make_shared<ImageResourceExtraData>(imageData);
+		if (pExtraData)
+		{
+			pResourceHandle->SetExtraData(pExtraData);
+		}
+		// Use the loaded image data (width, height, channels, imageData)
+		// For example, pass it to the resource handle (assuming it supports setting data)
+		//pResourceHandle->SetData(pImageData, width, height, channels);
+
+		// Free the image data after we're done
+		//stbi_image_free(pImageData);
 		return true;
 	}
 

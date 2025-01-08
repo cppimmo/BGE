@@ -3,9 +3,8 @@
 
 #include "Audio/SoundResource.hpp"
 #include "Resources/JSONResource.hpp"
+#include "Graphics/ImageResource.hpp"
 
-#include <al.h>
-#include <alc.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -95,6 +94,9 @@ namespace TestGame
 
 		m_triTransform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
+		// Lock the mouse cursor for the test controller
+		//BGE::IMouseHandler::LockMouseCursor();
+
 		m_pController = std::make_shared<TestController>(m_pCamera);
 		AddGamepadHandler(m_pController);
 		AddKeyboardHandler(m_pController);
@@ -166,13 +168,79 @@ namespace TestGame
 			BGE::Vertex({  0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f })
 		};*/
 		BGE::GeometryGenerator generator;
-		//generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
-		generator.CreateSphere(1.0f, 16, 16, m_meshData);
-		BGE_LOG("TestGame", "Test 1");
+		generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
+		//generator.CreateSphere(1.0f, 16, 16, m_meshData);
 		TestCreate(m_vao, m_vbo, m_ebo, m_meshData);
-		BGE_LOG("TestGame", "Test 2");
+
+		constexpr unsigned char kMISSING_TEXTURE_DATA[] =
+		{
+			255, 0, 255, 255,
+			0, 0, 0, 255,
+			0, 0, 0, 255,
+			255, 0, 255, 255
+		};
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_textureID);
+
+		// Set texture parameters
+		glTextureParameteri(m_textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(m_textureID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_textureID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTextureStorage2D(m_textureID, 1, GL_RGBA8, 2, 2);
+		glTextureSubImage2D(m_textureID, 0, 0, 0, 2, 2, GL_RGBA, GL_UNSIGNED_BYTE, kMISSING_TEXTURE_DATA);
+#if 0
+		auto pTexHandle = resCache.GetHandle(BGE::Resource("Assets\\Art\\crate2_diffuse.jpeg"));
+		if (!pTexHandle)
+		{
+			BGE_ERROR("Could not load image");
+			return false;
+		}
+		auto pExtraData = std::dynamic_pointer_cast<BGE::ImageResourceExtraData>(pTexHandle->GetExtraData());
+		const BGE::ImageData &kImageData = pExtraData->GetImageData();
+
+		const auto &mip = kImageData.mips[0];
+		GLenum internalFormat = (kImageData.internalFormat == BGE::ImageFormat::kRGBA) ? GL_RGB8 : GL_RGB8;
+		GLenum format = (kImageData.memoryFormat == BGE::ImageFormat::kRGBA) ? GL_RGBA : GL_RGB;
+		GLenum type = GL_UNSIGNED_BYTE;
+		glTextureStorage2D(m_textureID, 1, internalFormat, mip.width, mip.height);
+		glTextureSubImage2D(m_textureID, 0, 0, 0, mip.width, mip.height, format, type, mip.pData);
+
+		glGenerateTextureMipmap(m_textureID);
+#endif
 		generator.CreateBox(1.0f, 1.0f, 1.0f, m_skyboxMeshData);
 		TestCreate(m_skyboxVao, m_skyboxVbo, m_skyboxEbo, m_skyboxMeshData);
+
+		/*glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &m_textureID);
+		glTextureStorage2D(m_textureID, 10, GL_RGB8, 512, 512);
+		std::array<std::string_view, 6> faceFilenames =
+		{
+			"Assets\\Art\\skybox_rainbow_right.png",
+			"Assets\\Art\\skybox_rainbow_left.png",
+			"Assets\\Art\\skybox_rainbow_top.png",
+			"Assets\\Art\\skybox_rainbow_bottom.png",
+			"Assets\\Art\\skybox_rainbow_front.png",
+			"Assets\\Art\\skybox_rainbow_back.png"
+		};
+		for (std::size_t i = 0; i < 6; ++i)
+		{
+			const BGE::Resource kResource(faceFilenames[i]);
+			auto pHandle = resCache.GetHandle(kResource);
+			BGE_ASSERT(pHandle && "Couldn't load cubemap face");
+			auto pExtraData = std::dynamic_pointer_cast<BGE::ImageResourceExtraData>(pHandle->GetExtraData());
+
+			const BGE::ImageData &kImageData = pExtraData->GetImageData();
+			glTextureSubImage2D(m_textureID,
+								0,
+								0, 0,
+								i,
+								512, 512,
+								1,
+								GL_RGBA,
+								GL_UNSIGNED_BYTE,
+								kImageData.mips[0].)
+		}*/
 
 		// Audio system test
 		auto &audio = app.GetAudioSystem();
@@ -254,6 +322,8 @@ namespace TestGame
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
+
+		glBindTextureUnit(0, m_textureID);
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		// Bind the VAO

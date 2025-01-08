@@ -7,3 +7,12 @@ https://opengameart.org/content/10-8bit-coin-sounds
 CALM BGM by syncopika
 Copyright/Attribution Notice: CC-BY 3.0
 https://opengameart.org/content/calm-bgm
+
+
+3 crate textures (w/ bump & normal) by Luke.RUSTLTD
+Copyright/Attribution Notice: CC0 Free to Use
+https://opengameart.org/content/3-crate-textures-w-bump-normal
+
+elyvisions skyboxes by elyvisions (Submitted by Calinou)
+Copyright/Attribution Notice: CC-BY 3.0
+https://opengameart.org/content/elyvisions-skyboxes

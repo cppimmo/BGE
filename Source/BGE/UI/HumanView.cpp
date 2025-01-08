@@ -56,6 +56,13 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 		dbgConsole.SetEnabled(!dbgConsole.IsEnabled());
 		return true;
 	}
+	else if (key.sym == SDLK_BACKSPACE && !bRepeat)
+	{
+		if (IMouseHandler::IsCursorLocked())
+			IMouseHandler::LockMouseCursor();
+		else
+			IMouseHandler::ReleaseMouseCursor();
+	}
 	return false;
 }
 
