@@ -11,6 +11,49 @@
 
 namespace TestGame
 {
+	void TestGameView::TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData)
+	{
+		// Create VBO and upload data
+		glCreateBuffers(1, &vbo);
+
+		glNamedBufferStorage(vbo, meshData.vertices.size() * sizeof(BGE::Vertex), meshData.vertices.data(), 0);
+
+		// Create EBO and upload data
+		glCreateBuffers(1, &ebo);
+		glNamedBufferStorage(ebo, meshData.indices.size() * sizeof(BGE::VertexIndex), meshData.indices.data(), 0);
+
+		// Create VAO
+		glCreateVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		//glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+
+		// Enable and set up vertix attributes
+		glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(BGE::Vertex));
+
+		// Bind the EBO to the VAO
+		glVertexArrayElementBuffer(vao, ebo);
+
+		// Position attribute (layout location = 0)
+		glEnableVertexArrayAttrib(vao, 0);
+		glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, position));
+		glVertexArrayAttribBinding(vao, 0, 0);  // Attribute 0 uses binding index 0
+
+		// Normal attribute (layout location = 1)
+		glEnableVertexArrayAttrib(vao, 1);
+		glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, normal));
+		glVertexArrayAttribBinding(vao, 1, 0);  // Attribute 1 uses binding index 0
+
+		// Tangent attribute (layout location = 2)
+		glEnableVertexArrayAttrib(vao, 2);
+		glVertexArrayAttribFormat(vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, tangent));
+		glVertexArrayAttribBinding(vao, 2, 0);  // Attribute 2 uses binding index 0
+
+		// Texcoord attribute (layout location = 3)
+		glEnableVertexArrayAttrib(vao, 3);
+		glVertexArrayAttribFormat(vao, 3, 2, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, texcoord));
+		glVertexArrayAttribBinding(vao, 3, 0);  // Attribute 3 uses binding index 0
+	}
+
 	TestGameView::TestGameView(void)
 	{
 	}
@@ -45,18 +88,15 @@ namespace TestGame
 		auto &app = BGE::GetEngineApp();
 		auto &resCache = app.GetResourceCache();
 		//resCache.Preload(".glsl", [](int, bool &) {});
-		/*if (pResourceHandle)
-		{
-			BGE_LOG("Resources", "Shaders/test_vert.glsl size: %d", pResourceHandle->GetSize());
-
-			std::string shaderSource = pResourceHandle->GetExtraData()->VGetExtraData();
-			//std::string buf(pResourceHandle->Buffer());
-			BGE_LOG("Resources", "Shaders/test_vert.glsl: %s", shaderSource.c_str());
-		}*/
 
 		auto pShaderFactory = std::make_unique<BGE::GLShaderFactory>();
 
 		auto pVSSourceHandle = resCache.GetHandle(BGE::Resource("Assets\\Shaders\\test_vert.glsl"));
+		if (!pVSSourceHandle)
+		{
+			BGE_ERROR("Couldn't locate vertex shader");
+			return false;
+		}
 		BGE::StrongIShaderPtr pVertexShader = pShaderFactory->VCreateVertexShader();
 		pVertexShader->VCreate();
 		pVertexShader->VCompile(pVSSourceHandle);
@@ -73,6 +113,31 @@ namespace TestGame
 		pVertexShader->VDestroy();
 		pFragmentShader->VDestroy();
 
+		m_pSkyboxProgram = std::make_unique<BGE::GLShaderProgram>();
+		m_pSkyboxProgram->VCreate();
+
+		auto pSkyboxVSSourceHandle = resCache.GetHandle(BGE::Resource("Assets\\Shaders\\skybox_vert.glsl"));
+		if (!pSkyboxVSSourceHandle)
+		{
+			BGE_ERROR("Couldn't locate vertex shader");
+			return false;
+		}
+		BGE::StrongIShaderPtr pSkyboxVertexShader = pShaderFactory->VCreateVertexShader();
+		pSkyboxVertexShader->VCreate();
+		pSkyboxVertexShader->VCompile(pSkyboxVSSourceHandle);
+
+		auto pSkyboxFSSourceHandle = resCache.GetHandle(BGE::Resource("Assets\\Shaders\\skybox_frag.glsl"));
+		BGE::StrongIShaderPtr pSkyboxFragmentShader = pShaderFactory->VCreateFragmentShader();
+		pSkyboxFragmentShader->VCreate();
+		pSkyboxFragmentShader->VCompile(pSkyboxFSSourceHandle);
+
+		m_pSkyboxProgram->VAttachShader(pSkyboxVertexShader);
+		m_pSkyboxProgram->VAttachShader(pSkyboxFragmentShader);
+		m_pSkyboxProgram->VLink();
+		// Individual shaders can be destroyed now
+		pSkyboxVertexShader->VDestroy();
+		pSkyboxFragmentShader->VDestroy();
+
 		//glm::fvec3 vertex(0.0f, 0.0f, 0.0f);
 		/*static constexpr BGE::Vertex vertices[3] =
 		{
@@ -84,66 +149,10 @@ namespace TestGame
 		//generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
 		generator.CreateSphere(1.0f, 16, 16, m_meshData);
 
-		if (m_meshData.vertices.empty())
-		{
-			BGE_LOG("TestGame", "Oops!");
-		}
-		sizeof(glm::vec3) + sizeof(glm::vec4) + sizeof(glm::vec2);
-		// Create VBO and upload data
-		glCreateBuffers(1, &m_vbo);
+		TestCreate(m_vao, m_vbo, m_ebo, m_meshData);
 
-		void *pFunc = SDL_GL_GetProcAddress("glCreateBuffers");
-		if (pFunc != nullptr)
-		{
-			BGE_LOG("TestGame", "glCreateBuffers");
-		}
-
-		pFunc = SDL_GL_GetProcAddress("glIsBuffer");
-		if (pFunc != nullptr)
-		{
-			BGE_LOG("TestGame", "glIsBuffer");
-		}
-
-		if (glIsBuffer(m_vbo) == GL_TRUE)
-		{
-			BGE_LOG("TestGame", "Is buffer!");
-		}
-		glNamedBufferStorage(m_vbo, m_meshData.vertices.size() * sizeof(BGE::Vertex), m_meshData.vertices.data(), 0);
-
-		// Create EBO and upload data
-		glCreateBuffers(1, &m_ebo);
-		glNamedBufferStorage(m_ebo, m_meshData.indices.size() * sizeof(BGE::VertexIndex), m_meshData.indices.data(), 0);
-
-		// Create VAO
-		glCreateVertexArrays(1, &m_vao);
-		glBindVertexArray(m_vao);
-		//glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-
-		// Enable and set up vertix attributes
-		glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, sizeof(BGE::Vertex));
-
-		// Bind the EBO to the VAO
-		glVertexArrayElementBuffer(m_vao, m_ebo);
-
-		// Position attribute (layout location = 0)
-		glEnableVertexArrayAttrib(m_vao, 0);
-		glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, position));
-		glVertexArrayAttribBinding(m_vao, 0, 0);  // Attribute 0 uses binding index 0
-
-		// Normal attribute (layout location = 1)
-		glEnableVertexArrayAttrib(m_vao, 1);
-		glVertexArrayAttribFormat(m_vao, 1, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, normal));
-		glVertexArrayAttribBinding(m_vao, 1, 0);  // Attribute 1 uses binding index 0
-
-		// Tangent attribute (layout location = 2)
-		glEnableVertexArrayAttrib(m_vao, 2);
-		glVertexArrayAttribFormat(m_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, tangent));
-		glVertexArrayAttribBinding(m_vao, 2, 0);  // Attribute 2 uses binding index 0
-
-		// Texcoord attribute (layout location = 3)
-		glEnableVertexArrayAttrib(m_vao, 3);
-		glVertexArrayAttribFormat(m_vao, 3, 2, GL_FLOAT, GL_FALSE, offsetof(BGE::Vertex, texcoord));
-		glVertexArrayAttribBinding(m_vao, 3, 0);  // Attribute 3 uses binding index 0
+		generator.CreateBox(1.0f, 1.0f, 1.0f, m_skyboxMeshData);
+		TestCreate(m_skyboxVao, m_skyboxVbo, m_skyboxEbo, m_skyboxMeshData);
 
 		// Audio system test
 		auto &audio = app.GetAudioSystem();

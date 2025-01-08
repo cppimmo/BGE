@@ -50,7 +50,7 @@ namespace
 {
 	bool OpenFile(FILE** ppFile, const std::wstring& resFileName, const char* pMode)
 	{
-#ifdef BGE_PLATFORM_WIN
+#if BGE_PLATFORM_WIN
 		// Convert wide string to UTF-8 on Windows
 		int utf8Length = WideCharToMultiByte(CP_UTF8, 0, resFileName.c_str(), -1, nullptr, 0, nullptr, nullptr);
 		if (utf8Length <= 0)

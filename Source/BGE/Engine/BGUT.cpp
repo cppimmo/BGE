@@ -31,13 +31,15 @@
 #include "EngineStd.hpp"
 #include "BGUT.hpp"
 
+#include <cstdlib>
+
 #include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 
-#include <cstdlib>
+#include <SDL_opengl.h>
 
 namespace BGE
 {
@@ -102,8 +104,9 @@ bool BGE::BGUTInit(std::string_view configFilename)
 	SDL_LogSetOutputFunction(Logger::LogOutputFunc_SDL, nullptr);
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
 
+	BGE_LOG("BGUT", "Request OpenGL version %d.%d", s_BGUT.glVersion.major, s_BGUT.glVersion.minor);
 	// Set OpenGL attributes before window creation
-	BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
+	//BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
 	
 	// Set basic window flags
 	s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
@@ -129,10 +132,16 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		s_BGUT.defWindowWidth = displayMode.w;
 		s_BGUT.defWindowHeight = displayMode.h;
 	}
-	
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+
 	// Create the SDL window
 	s_BGUT.pWindow = SDL_CreateWindow(s_BGUT.defWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, s_BGUT.defWindowFlags);
+									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN); // s_BGUT.defWindowFlags
 	if (!s_BGUT.pWindow)
 	{
 		BGE_ERROR("BGUTInit Failure: SDL window could not be created (%s).", SDL_GetError());
@@ -148,18 +157,18 @@ bool BGE::BGUTInit(std::string_view configFilename)
 	}
 	
 	// Set the current OpenGL context
-	if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
-	{
-		BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
-		return false;
-	}
+	//if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
+	//{
+	//	BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
+	//	return false;
+	//}
 	
 	// Determine if vertical sync should be enabled
-	if (SDL_GL_SetSwapInterval((s_BGUT.bVSyncEnabled) ? 1 : 0) < 0) // Vertical sync
-	{
-		BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
-		return false;
-	}
+	//if (SDL_GL_SetSwapInterval((s_BGUT.bVSyncEnabled) ? 1 : 0) < 0) // Vertical sync
+	//{
+	//	BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
+	//	return false;
+	//}
 
 	// Set the function loader for OpenGL
 	const int kGladVersion = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
@@ -558,7 +567,7 @@ void BGE::BGUTLogInfo(void)
 void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuffered, bool bDebugEnabled)
 {
 	// Set OpenGL context attributes:
-	SDL_GL_LoadLibrary(nullptr);
+	//SDL_GL_LoadLibrary(nullptr);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Use hardware 3D
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
@@ -574,7 +583,7 @@ void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuff
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, bDoubleBuffered);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, bDoubleBuffered ? 1 : 0);
 	// Set multisampling
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, (s_BGUT.multisamplingLevel > 0) ? 1 : 0);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, s_BGUT.multisamplingLevel); // Set level

@@ -61,14 +61,14 @@ set(LIB_DIR "../Source/Lib")
 
 
 # SDL library:
-set(SDL_VENDORED "Use vendored (non-system) version of SDL" OFF)
+set(SDL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of SDL")
 set(SDL_LIB_DIR "Lib/SDL")
 # Default to vendored SDL on Windows
 if(WIN32)
   set(SDL_VENDORED OFF)
 endif()
 
-if(SDL_VENDORED)
+if(${SDL_VENDORED})
   message(STATUS "Using vendored SDL2")
   # Add the SDL library subdirectory
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL EXCLUDE_FROM_ALL)
@@ -120,7 +120,7 @@ add_subdirectory(${GLM_DIR})
 
 # OpenAL-soft library:
 set(OPENAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/openal-soft)
-set(OPENAL_VENDORED "" OFF)
+set(OPENAL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of OpenAL")
 
 if(WIN32)
   set(OPENAL_VENDORED OFF)
@@ -131,9 +131,11 @@ if(WIN32)
  # set(OPENAL_INCLUDE_DIR "${INC_DIR}/include")
 endif()
 
-if(OPENAL_VENDORED)
+if(${OPENAL_VENDORED})
+  message(STATUS "Using vendored OpenAL")
   add_subdirectory(${OPENAL_DIR})
 else()
+  message(STATUS "Using system-installed OpenAL")
   find_package(OpenAL CONFIG REQUIRED)
   include_directories(${OPENAL_INCLUDE_DIRS})
 endif()
@@ -155,8 +157,8 @@ include_directories(${STB_DIR})
 include(FetchContent)
 
 # zlib library:
-set(ZLIB_VENDORED "Use vendored (non-system) version of zlib" OFF)
-set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/zlib)
+set(ZLIB_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of zlib")
+#set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/zlib)
 #FetchContent_Declare(
 #    zlib-cmake
 #    URL https://github.com/jimmy-park/zlib-cmake/archive/main.tar.gz
@@ -168,7 +170,7 @@ if(WIN32)
   set(ZLIB_VENDORED OFF)
 endif()
 
-if(ZLIB_VENDORED)
+if(${ZLIB_VENDORED})
   message(STATUS "Using vendored zlib")
   # Add the zlib library subdirectory
   add_subdirectory(${ZLIB_DIR} EXCLUDE_FROM_ALL)
@@ -183,7 +185,7 @@ else()
   #include_directories(${ZLIB_INCLUDE_DIR})
   #target_link_libraries(your_target ${ZLIB_LIBRARY})
 
-  find_package(ZLIB REQUIRED)
+  find_package(ZLIB)
 endif()
 
 # Pass ZLIB variables to Assimp
@@ -194,33 +196,37 @@ endif()
 #set(ZLIB_LIBRARIES ${ZLIB_LIBRARIES} CACHE STRING "ZLIB libraries")
 # assimp library:
 set(ASSIMP_DIR "Lib/assimp")
-set(ASSIMP_VENDORED "Use vendored (non-system version of Assimp" ON)
-#set(ASSIMP_BUILD_ZLIB ON)
-#set(ZLIB_FOUND FALSE)
+set(ASSIMP_VENDORED ON CACHE BOOL "Use vendored (non-system version of Assimp")
+set(ASSIMP_BUILD_ZLIB OFF)
+set(ZLIB_FOUND FALSE)
 
 if(WIN32)
   set(ASSIMP_VENDORED OFF)
 endif()
 
-if(ASSIMP_VENDORED)
+if(${ASSIMP_VENDORED})
+  message(STATUS "Using vendored Assimp")
   add_subdirectory(${ASSIMP_DIR})
 else()
+  message(STATUS "Using system-installed Assimp")
   find_package(assimp CONFIG REQUIRED)
 endif()
 
 # See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
-set(LUA_VENDORED "Use vendored (non-system) version of Lua" OFF)
+set(LUA_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of Lua")
 set(LUA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/lua)
 # Default to vendored Lua on Windows
 if(WIN32)
   set(LUA_VENDORED ON)
 endif()
 
-if(LUA_VENDORED)
+if(${LUA_VENDORED})
+  message(STATUS "Using vendored Lua")
   add_subdirectory(${LUA_DIR})
   #add_definitions(-DLUA)
   set(LUA_LIBRARY lua_static)
 else()
+  message(STATUS "Using system-installed Lua")
   find_package(Lua 5.3 REQUIRED)
   include_directories(${LUA_INCLUDE_DIR})
   add_definitions(-DLUA)
@@ -283,8 +289,8 @@ endif()
 target_link_libraries(Engine
   ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
   FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp::assimp
-  ZLIB::ZLIB
-  #${ZLIB_LIBRARY}
+  #ZLIB::ZLIB
+  ${ZLIB_LIBRARY}
   vorbis vorbisfile nlohmann_json::nlohmann_json
   #RmlUi::RmlUi
 ) #${Boost_LIBRARIES})

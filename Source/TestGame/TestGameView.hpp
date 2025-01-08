@@ -19,13 +19,16 @@ namespace TestGame
 	class TestGameView : public BGE::HumanView
 	{
 	private:
-		BGE::UniqueIShaderProgramPtr m_pShaderProgram;
+		BGE::UniqueIShaderProgramPtr m_pShaderProgram, m_pSkyboxProgram;
 		GLuint m_vao{}, m_vbo{}, m_ebo{};
+		GLuint m_skyboxVao{}, m_skyboxVbo{}, m_skyboxEbo{};
 		BGE::StrongIAudioSourcePtr m_pSource;
 		BGE::StrongFirstPersonCameraPtr m_pCamera;
 		BGE::Transform m_triTransform;
 		StrongTestControllerPtr m_pController;
-		BGE::MeshData m_meshData;
+		BGE::MeshData m_meshData, m_skyboxMeshData;
+
+		void TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData);
 	public:
 		TestGameView(void);
 		//! IGameView's interface:
