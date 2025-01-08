@@ -8,5 +8,5 @@ uniform samplerCube uSamplerCube;
 
 void main(void)
 {
-	outColor = texure(uSamplerCube, g_texCoord); // Output the sampled color
+	outColor = texture(uSamplerCube, g_texCoord); // Output the sampled color
 }

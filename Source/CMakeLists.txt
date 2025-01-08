@@ -258,6 +258,8 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "")
 add_subdirectory(${JSON_DIR})
 
+find_package(OpenGL REQUIRED)
+
 # FreeType:
 #set(FREETYPE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/freetype)
 #add_subdirectory(${FREETYPE_DIR})
@@ -286,14 +288,28 @@ if(WIN32)
   target_compile_options(Engine PUBLIC "/MP")
 endif()
 
-target_link_libraries(Engine
-  ${SDL2_LIBRARIES} glm::glm ImGui ImPlot glad TinyXml2
-  FastDelegate OpenAL::OpenAL ${LUA_LIBRARY} sol2::sol2 assimp::assimp
-  #ZLIB::ZLIB
-  ${ZLIB_LIBRARY}
-  vorbis vorbisfile nlohmann_json::nlohmann_json
+target_link_libraries(Engine PUBLIC
+  glad
+  ${SDL2_LIBRARIES}
+  glm::glm
+  ImGui ImPlot
   #RmlUi::RmlUi
-) #${Boost_LIBRARIES})
+  assimp::assimp
+
+  TinyXml2
+  nlohmann_json::nlohmann_json
+  sol2::sol2 
+
+  ${ZLIB_LIBRARY} #ZLIB::ZLIB
+
+  OpenAL::OpenAL
+  vorbis
+  vorbisfile
+  
+  FastDelegate
+
+  ${LUA_LIBRARY}
+)
 
 if(WIN32)
   # Set the CWD for the debugger to start the program

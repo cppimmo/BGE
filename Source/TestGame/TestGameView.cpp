@@ -13,11 +13,31 @@ namespace TestGame
 {
 	void TestGameView::TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData)
 	{
+		void *funcPtr = SDL_GL_GetProcAddress("glClearColor");
+		if (!funcPtr)
+		{
+			std::cerr << "Failed to load glClearColor!" << std::endl;
+		}
+		else
+		{
+			std::cout << "Successfully loaded glClearColor." << std::endl;
+		}
+
+		funcPtr = SDL_GL_GetProcAddress("glCreateBuffers");
+		if (!funcPtr)
+		{
+			std::cerr << "Failed to load glCreateBuffers!" << std::endl;
+		}
+		else
+		{
+			std::cout << "Successfully loaded glCreateBuffers." << std::endl;
+		}
+
 		// Create VBO and upload data
 		glCreateBuffers(1, &vbo);
-
+		BGE_LOG("TestGame", "Test 3");
 		glNamedBufferStorage(vbo, meshData.vertices.size() * sizeof(BGE::Vertex), meshData.vertices.data(), 0);
-
+		BGE_LOG("TestGame", "Test 4");
 		// Create EBO and upload data
 		glCreateBuffers(1, &ebo);
 		glNamedBufferStorage(ebo, meshData.indices.size() * sizeof(BGE::VertexIndex), meshData.indices.data(), 0);
@@ -148,9 +168,9 @@ namespace TestGame
 		BGE::GeometryGenerator generator;
 		//generator.CreateBox(1.0f, 1.0f, 1.0f, m_meshData);
 		generator.CreateSphere(1.0f, 16, 16, m_meshData);
-
+		BGE_LOG("TestGame", "Test 1");
 		TestCreate(m_vao, m_vbo, m_ebo, m_meshData);
-
+		BGE_LOG("TestGame", "Test 2");
 		generator.CreateBox(1.0f, 1.0f, 1.0f, m_skyboxMeshData);
 		TestCreate(m_skyboxVao, m_skyboxVbo, m_skyboxEbo, m_skyboxMeshData);
 

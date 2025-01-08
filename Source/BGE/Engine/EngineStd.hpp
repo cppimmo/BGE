@@ -33,10 +33,10 @@
 
 // Common library headers:
 //#include <SDL2/SDL.h>
+#include <glad/gl.h>
 #include <SDL.h>
 #include <imgui.h>
 #include <implot.h>
-#include <glad/gl.h>
 #include <tinyxml2.h>
 
 // Common standard headers:

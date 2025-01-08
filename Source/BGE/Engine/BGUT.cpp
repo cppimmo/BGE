@@ -49,7 +49,7 @@ namespace BGE
 	struct BGUTData
 	{
 		SDL_Window *pWindow = nullptr;
-		SDL_WindowFlags defWindowFlags{};
+		std::uint32_t defWindowFlags{};
 		SDL_GLContext pContext = nullptr;
 		struct OpenGLVersion
 		{
@@ -109,18 +109,18 @@ bool BGE::BGUTInit(std::string_view configFilename)
 	//BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
 	
 	// Set basic window flags
-	s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	s_BGUT.defWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 	
 	// When the window is set to be resizable
 	if (s_BGUT.bWindowResizable && !s_BGUT.bFullscreenEnabled)
 	{
-		s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(s_BGUT.defWindowFlags | SDL_WINDOW_RESIZABLE);
+		s_BGUT.defWindowFlags |= SDL_WINDOW_RESIZABLE;
 	}
 	
 	// When the window is set to be fullscreen
 	if (s_BGUT.bFullscreenEnabled)
 	{
-		s_BGUT.defWindowFlags = static_cast<SDL_WindowFlags>(s_BGUT.defWindowFlags | SDL_WINDOW_FULLSCREEN_DESKTOP);
+		s_BGUT.defWindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		// Retrive the current display mode:
 		SDL_DisplayMode displayMode;
 		if (SDL_GetCurrentDisplayMode(0, &displayMode) != 0)
@@ -133,15 +133,27 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		s_BGUT.defWindowHeight = displayMode.h;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG | SDL_GL_CONTEXT_DEBUG_FLAG);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	// Create the SDL window
 	s_BGUT.pWindow = SDL_CreateWindow(s_BGUT.defWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN); // s_BGUT.defWindowFlags
+									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, s_BGUT.defWindowFlags);
 	if (!s_BGUT.pWindow)
 	{
 		BGE_ERROR("BGUTInit Failure: SDL window could not be created (%s).", SDL_GetError());
@@ -157,11 +169,11 @@ bool BGE::BGUTInit(std::string_view configFilename)
 	}
 	
 	// Set the current OpenGL context
-	//if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
-	//{
-	//	BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
-	//	return false;
-	//}
+	if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
+	{
+		BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
+		return false;
+	}
 	
 	// Determine if vertical sync should be enabled
 	//if (SDL_GL_SetSwapInterval((s_BGUT.bVSyncEnabled) ? 1 : 0) < 0) // Vertical sync
@@ -177,7 +189,9 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		BGE_ERROR("BGUTInit Failure: glad OpenGL loader can't be set (%s).", SDL_GetError());
 		return false;
 	}
-	BGE_LOG("BGUT", "Loaded OpenGL %d.%d", GLAD_VERSION_MAJOR(kGladVersion), GLAD_VERSION_MINOR(kGladVersion));
+	const int kGladMajorVersion = GLAD_VERSION_MAJOR(kGladVersion);
+	const int kGladMinorVersion = GLAD_VERSION_MINOR(kGladVersion);
+	BGE_LOG("BGUT", "Loaded OpenGL %d.%d", kGladMajorVersion, kGladMinorVersion);
 	
 	// Perform extra setup for the OpenGL debug context
 	if (s_BGUT.bGLDebugEnabled)
@@ -192,6 +206,7 @@ bool BGE::BGUTInit(std::string_view configFilename)
 		return false;
 	}
 	
+	// TODO: This should be the job of the renderer interface.
 	// Set the OpenGL viewport
 	BGUTSetViewport(0, 0, s_BGUT.defWindowWidth, s_BGUT.defWindowHeight);
 	
