@@ -70,6 +70,7 @@
 #include <source_location>
 #include <iostream>
 #include <system_error>
+#include <filesystem>
 
 // Platform macro constants (use #if, etc.):
 // Article about platform detection: https://iq.opengenus.org/detect-operating-system-in-c/

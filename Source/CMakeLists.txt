@@ -16,6 +16,40 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On) # This is needed on Windows to generate
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(LIB_DIR "../Source/Lib")
+set(SDL_LIB_DIR "Lib/SDL")
+set(IMGUI_DIR "Lib/imgui")
+set(IMPLOT_DIR "Lib/implot")
+set(FASTDELEGATE_DIR "Lib/FastDelegate")
+set(GLM_DIR "Lib/glm")
+set(OPENAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/openal-soft)
+set(GLAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lib/glad")
+set(TINYXML_DIR "Lib/tinyxml2")
+set(STB_DIR "Lib/stb")
+set(ASSIMP_DIR "Lib/assimp")
+#set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/zlib)
+set(LUA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/lua)
+set(SOL2_DIR "Lib/sol2")
+set(OGG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/ogg)
+set(VORBIS_DIR "Lib/vorbis")
+set(JSON_DIR "Lib/json")
+
+option(USE_OPENGL "Build OpenGL 4.5 renderer implementation" ON)
+option(USE_D3D11  "Build DirectX 11 renderer implementation" ON)
+set(SDL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of SDL")
+set(OPENAL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of OpenAL")
+set(ZLIB_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of zlib")
+set(ASSIMP_VENDORED ON CACHE BOOL "Use vendored (non-system version of Assimp")
+set(LUA_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of Lua")
+
+if(WIN32)
+  set(SDL_VENDORED OFF) # Use packaged SDL on Windows
+  set(OPENAL_VENDORED OFF) # Use packaged OpenAL on WIndows
+  set(ZLIB_VENDORED OFF) # Use packaged zlib on Windows
+  set(ASSIMP_VENDORED OFF) # Use packaged Assimp on Windows
+  set(LUA_VENDORED ON) # Use vendored Lua on Windows
+endif()
+
 # Add preprocessor defines for the available configurations:
 add_compile_definitions($<$<CONFIG:Debug>:BGE_CONFIG_DEBUG>
   $<$<CONFIG:Profile>:BGE_CONFIG_PROFILE>
@@ -57,17 +91,7 @@ function(create_source_group SRC_FILES)
   source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${SRC_FILES})
 endfunction()
 
-set(LIB_DIR "../Source/Lib")
-
-
 # SDL library:
-set(SDL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of SDL")
-set(SDL_LIB_DIR "Lib/SDL")
-# Default to vendored SDL on Windows
-if(WIN32)
-  set(SDL_VENDORED OFF)
-endif()
-
 if(${SDL_VENDORED})
   message(STATUS "Using vendored SDL2")
   # Add the SDL library subdirectory
@@ -89,7 +113,6 @@ endif()
 include_directories(${SDL2_INCLUDE_DIRS})
 
 # ImGui library:
-set(IMGUI_DIR "Lib/imgui")
 add_library(ImGui STATIC
   "${IMGUI_DIR}/imgui.cpp"
   "${IMGUI_DIR}/imgui_demo.cpp"
@@ -97,12 +120,22 @@ add_library(ImGui STATIC
   "${IMGUI_DIR}/imgui_tables.cpp"
   "${IMGUI_DIR}/imgui_widgets.cpp"
   "${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp"
-  "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp")
+  "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
+  "${IMGUI_DIR}/backends/imgui_impl_dx11.h")
+
+# Conditionally include backend implementations
+if(USE_OPENGL)
+  target_sources(ImGui PRIVATE "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp")
+endif()
+
+if(USE_D3D11)
+  target_sources(ImGui PRIVATE "${IMGUI_DIR}/backends/imgui_impl_dx11.cpp")
+endif()
+
 # Set to public so other targets will inherit
 target_include_directories(ImGui PUBLIC ${SDL2_INCLUDE_DIRS} ${IMGUI_DIR} "${IMGUI_DIR}/backends")
 
 # ImPlot library:
-set(IMPLOT_DIR "Lib/implot")
 add_library(ImPlot STATIC
   "${IMPLOT_DIR}/implot.cpp"
   "${IMPLOT_DIR}/implot_demo.cpp"
@@ -110,27 +143,13 @@ add_library(ImPlot STATIC
 target_include_directories(ImPlot PUBLIC ${IMGUI_DIR} ${IMPLOT_DIR})
 
 # FastDelegate library:
-set(FASTDELEGATE_DIR "Lib/FastDelegate")
 add_library(FastDelegate INTERFACE) # Header only library
 target_include_directories(FastDelegate INTERFACE ${FASTDELEGATE_DIR})
 
 # GLM:
-set(GLM_DIR "Lib/glm")
 add_subdirectory(${GLM_DIR})
 
 # OpenAL-soft library:
-set(OPENAL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/openal-soft)
-set(OPENAL_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of OpenAL")
-
-if(WIN32)
-  set(OPENAL_VENDORED OFF)
-  # Must set the OPENALDIR environment variable on Windows
-  #set(ENV{OPENALDIR} "Lib/openal-soft-makemhr/cmake")
-  #set(OPENAL_LIBRARY $ENV{OPENALDIR})
-  #string(REGEX REPLACE "cmake" "" INC_DIR "$ENV{OPENALDIR}") # "regex" "replacement regex" OUT_VAR INPUT
- # set(OPENAL_INCLUDE_DIR "${INC_DIR}/include")
-endif()
-
 if(${OPENAL_VENDORED})
   message(STATUS "Using vendored OpenAL")
   add_subdirectory(${OPENAL_DIR})
@@ -141,35 +160,18 @@ else()
 endif()
 
 # glad library:
-set(GLAD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Lib/glad")
-add_library(glad STATIC "${GLAD_DIR}/src/gl.c")
+add_library(glad SHARED "${GLAD_DIR}/src/gl.c") # STATIC
+target_compile_definitions(glad PUBLIC GLAD_API_CALL_EXPORT)
 target_include_directories(glad PUBLIC "${GLAD_DIR}/include")
 
 # tinyxml2 library:
-set(TINYXML_DIR "Lib/tinyxml2")
 add_library(TinyXml2 STATIC "${TINYXML_DIR}/tinyxml2.cpp")
 target_include_directories(TinyXml2 PUBLIC ${TINYXML_DIR})
 
 # stb library:
-set(STB_DIR "Lib/stb")
 include_directories(${STB_DIR})
 
-include(FetchContent)
-
 # zlib library:
-set(ZLIB_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of zlib")
-#set(ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/zlib)
-#FetchContent_Declare(
-#    zlib-cmake
-#    URL https://github.com/jimmy-park/zlib-cmake/archive/main.tar.gz
-#)
-#find_package(ZLIB)
-#FetchContent_MakeAvailable(zlib-cmake)
-# Default to vendored zlib on Windows
-if(WIN32)
-  set(ZLIB_VENDORED OFF)
-endif()
-
 if(${ZLIB_VENDORED})
   message(STATUS "Using vendored zlib")
   # Add the zlib library subdirectory
@@ -188,21 +190,9 @@ else()
   find_package(ZLIB)
 endif()
 
-# Pass ZLIB variables to Assimp
-#set(ASSIMP_INSTALL OFF)
-#set(ASSIMP_BUILD_ZLIB ON) # Disable Assimp's zlib
-#set(ZLIB_FOUND ${ZLIB_FOUND} CACHE BOOL "Use external ZLIB")
-#set(ZLIB_INCLUDE_DIR ${ZLIB_INCLUDE_DIR} CACHE PATH "ZLIB include directory")
-#set(ZLIB_LIBRARIES ${ZLIB_LIBRARIES} CACHE STRING "ZLIB libraries")
 # assimp library:
-set(ASSIMP_DIR "Lib/assimp")
-set(ASSIMP_VENDORED ON CACHE BOOL "Use vendored (non-system version of Assimp")
 set(ASSIMP_BUILD_ZLIB OFF)
 set(ZLIB_FOUND FALSE)
-
-if(WIN32)
-  set(ASSIMP_VENDORED OFF)
-endif()
 
 if(${ASSIMP_VENDORED})
   message(STATUS "Using vendored Assimp")
@@ -212,14 +202,7 @@ else()
   find_package(assimp CONFIG REQUIRED)
 endif()
 
-# See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
-set(LUA_VENDORED OFF CACHE BOOL "Use vendored (non-system) version of Lua")
-set(LUA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/lua)
-# Default to vendored Lua on Windows
-if(WIN32)
-  set(LUA_VENDORED ON)
-endif()
-
+# Lua, See: https://github.com/eliasdaler/cmake-lua-with-sol2-example/
 if(${LUA_VENDORED})
   message(STATUS "Using vendored Lua")
   add_subdirectory(${LUA_DIR})
@@ -231,15 +214,14 @@ else()
   include_directories(${LUA_INCLUDE_DIR})
   add_definitions(-DLUA)
 endif()
+
 ### sol2
-set(SOL2_DIR "Lib/sol2")
 set(SOL2_LUA_VERSION "5.3.4" CACHE STRING "The version of Lua used")
 # we build Lua manually
 set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
 add_subdirectory(${SOL2_DIR})
 
 # Ogg:
-set(OGG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/ogg)
 add_subdirectory(${OGG_DIR})
 
 # Let Vorbis know where to find Ogg
@@ -247,18 +229,14 @@ add_subdirectory(${OGG_DIR})
 #set(OGG_LIBRARY ogg) # The target name from Ogg's CMakeLists
 
 # Vorbis:
-set(VORBIS_DIR "Lib/vorbis")
 add_subdirectory(${VORBIS_DIR})
 #find_package(Vorbis REQUIRED) # This will look for libvorbis
 #find_package(VorbisFile REQUIRED) # This will look for libvorbisfile
 
 # nlohmann/json:
-set(JSON_DIR "Lib/json")
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "")
 add_subdirectory(${JSON_DIR})
-
-find_package(OpenGL REQUIRED)
 
 # FreeType:
 #set(FREETYPE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Lib/freetype)

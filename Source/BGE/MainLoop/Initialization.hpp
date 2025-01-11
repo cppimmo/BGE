@@ -35,6 +35,8 @@
 
 namespace BGE
 {
+	//! Force open a console on Windows
+	bool OpenConsole(std::string_view title);
 	//! Retrieve cmdline args as a string container.
 	[[nodiscard]] std::span<std::string_view> GetArguments(int numArgs, char *pArgs[]);
 	//! Get runtime platform string.

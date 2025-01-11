@@ -3,6 +3,8 @@
 
 #include "Graphics/GL/Shaders.hpp"
 #include "Graphics/GL/ShaderProgram.hpp"
+#include "Renderer.hpp"
+#include "Renderer.hpp"
 
 namespace BGE
 {
@@ -15,7 +17,7 @@ namespace BGE
 	{
 	}
 
-	bool GLRenderer::VInit(void)
+	bool GLRenderer::VInit(const EngineOptions &kOptions)
 	{
 		return true;
 	}
@@ -45,6 +47,10 @@ namespace BGE
 		return nullptr;
 	}
 
+	void GLRenderer::VOnResize(std::int32_t width, std::int32_t height)
+	{
+	}
+
 	void GLRenderer::VSetViewport(const IViewport &kViewport)
 	{
 		m_pViewport = std::make_unique<GLViewport>(dynamic_cast<const GLViewport &>(kViewport));
@@ -66,7 +72,7 @@ namespace BGE
 		return m_bgColor;
 	}
 
-	bool GLRenderer::VTakeScreenshot(void)
+	bool GLRenderer::VTakeScreenshot(std::string_view saveGameDir)
 	{
 		return true;
 	}

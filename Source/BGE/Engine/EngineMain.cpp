@@ -32,6 +32,8 @@
 
 #include "Utilities/Exception.hpp"
 #include "MainLoop/CommandParser.hpp"
+#include "MainLoop/Initialization.hpp"
+#include "Engine/EngineOptions.hpp"
 
 #include <cstddef>
 #include <cstdio>
@@ -50,7 +52,7 @@ namespace // Declare static functions
 	void DebugDumpClient(void *pUserPortion, std::size_t blockSize);
 	void PrintVersion(void);
 	void PrintUsage(void);
-	void ParseArguments(std::span<std::string_view> arguments);
+	EngineOptions ParseArguments(std::span<std::string_view> arguments);
 	void AtExit(void);
 } // End namespace
 
@@ -66,8 +68,11 @@ namespace // Declare static functions
  */
 int BGE::EngineMain(int numArgs, char *pArgs[])
 {
+#if BGE_PLATFORM_WINDBG
+	//OpenConsole(kENGINE_NAME);
+#endif /* BGE_PLATFORM_WINDBG */
 	// Parse CLI arguments
-	ParseArguments(GetArguments(numArgs, pArgs));
+	EngineOptions options = ParseArguments(GetArguments(numArgs, pArgs));
 
 #if BGE_PLATFORM_WINDBG
 	int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG); // Retrieve the current flags
@@ -95,7 +100,8 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 		// Set the utility callbacks to the static member functions
 		BGUTSetCallbackUpdate(EngineApp::OnUpdate);
 		BGUTSetCallbackRender(EngineApp::OnRender);
-		BGUTSetCallbackEventHandler(EngineApp::OnHandleEvent);
+		BGUTSetCallbackEventHandler(EngineApp::OnEvent);
+		BGUTSetCallbackResize(EngineApp::OnResize);
 
 		BGE_INFO("Welcome to %s (%s) %s", kENGINE_ABBREV.data(), kENGINE_NAME.data(), kVERSION.VToString().c_str());
 		BGE_INFO("Initializing engine...");
@@ -103,16 +109,16 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 		auto &app = GetEngineApp();
 
 		// Set signal handlers
-		std::signal(SIGABRT, EngineApp::OnHandleSignal);
-		std::signal(SIGFPE,  EngineApp::OnHandleSignal);
-		std::signal(SIGILL,  EngineApp::OnHandleSignal);
-		std::signal(SIGINT,  EngineApp::OnHandleSignal);
-		std::signal(SIGSEGV, EngineApp::OnHandleSignal);
-		std::signal(SIGTERM, EngineApp::OnHandleSignal);
+		std::signal(SIGABRT, EngineApp::OnSignal);
+		std::signal(SIGFPE,  EngineApp::OnSignal);
+		std::signal(SIGILL,  EngineApp::OnSignal);
+		std::signal(SIGINT,  EngineApp::OnSignal);
+		std::signal(SIGSEGV, EngineApp::OnSignal);
+		std::signal(SIGTERM, EngineApp::OnSignal);
 		std::atexit(AtExit);
 
 		// Initialize an instance of the application layer (also initializes BGUT)
-		if (!app.VInitInstance())
+		if (!app.VInitInstance(options, "Engine.xml"))
 		{
 			BGE_ERROR("Failure to initialize instance of application!");
 			return kBGE_EXIT_FAILURE;
@@ -120,9 +126,8 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 		// TODO: Use SDL_Set/GetWindowData to set class object pointer.
 		BGUTMainLoop(); // Enter main loop
 
-		BGE_INFO("Shutting down engine...");
 		BGUTShutdown(); // Shutdown upon exit of main loop
-
+	
 		retCode = app.GetExitCode();
 	}
 	catch (const Exception &ex) // Handle subtypes of custom exception
@@ -142,11 +147,11 @@ int BGE::EngineMain(int numArgs, char *pArgs[])
 	}
 
 #if BGE_PLATFORM_WINDBG
-	_CrtDumpMemoryLeaks(); // Report leaks to log
-	std::cout << "Press enter to exit.\n";
-	std::cin.get(); // Wait for enter key, so any leaks can be seen.
+	//_CrtDumpMemoryLeaks(); // Report leaks to log
+	//std::cout << "Press enter to exit.\n";
+	//std::cin.get(); // Wait for enter key, so any leaks can be seen.
 #endif /* BGE_PLATFORM_WINDBG */
-
+	
 	return retCode; // Return app exit code
 }
 
@@ -181,9 +186,11 @@ Configuration:
 
 Graphics:
   --renderer=ENGINE       Select rendering engine (OpenGL, Vulkan).
+  --renderer-debug        Enable the rendering engine debug layer.
   --resolution=WxH        Set screen resolution (e.g., 1920x1080).
-  --fullscreen=ON|OFF     Toggle fullscreen mode.
-  --vsync=ON|OFF          Enable or disable VSync.
+  --resizable             Enable resizable window.
+  --fullscreen            Toggle fullscreen mode.
+  --vsync                 Enable VSync.
   --fps-limit=FPS         Limit frame rate (e.g., 60).
 
 Audio:
@@ -208,10 +215,11 @@ For detailed information about each option, refer to the documentation.
 )usage";
 	}
 
-	void ParseArguments(std::span<std::string_view> arguments)
+	EngineOptions ParseArguments(std::span<std::string_view> arguments)
 	{
 		// Collect command line args
 		CommandParser parser(arguments);
+		EngineOptions options; // Create the engine options result
 
 		if (parser.Boolean("help"))
 		{
@@ -224,18 +232,61 @@ For detailed information about each option, refer to the documentation.
 			PrintVersion();
 			std::exit(kBGE_EXIT_SUCCESS);
 		}
-		// TODO: Remove this test code.
-		int value = 0;
-		if (parser.Integer("number", value))
-		{
-			std::cout << "Number: " << value << '\n';
-		}
 
 		std::string str;
-		if (parser.String("test", str))
+		if (parser.String("renderer", str))
 		{
-			std::cout << "Test: " << str << '\n';
+			if (str == "OpenGL")
+				options.rendererImpl = RendererImpl::kOpenGL;
+			else if (str == "D3D11")
+				options.rendererImpl = RendererImpl::kD3D11;
+			else
+			{
+				std::cerr << "Incorrect argument for --renderer\n";
+				std::exit(kBGE_EXIT_FAILURE);
+			}
 		}
+
+		if (parser.Boolean("renderer-debug"))
+		{
+			options.bRendererDebug = true;
+		}
+
+		if (parser.Boolean("resizable"))
+		{
+			options.bWindowResizable = true;
+		}
+
+		if (parser.Boolean("fullscreen"))
+		{
+			options.bFullscreen = true;
+		}
+
+		if (parser.Boolean("vsync"))
+		{
+			options.bVSync = true;
+		}
+
+		int msaa = 0;
+		if (parser.Integer("MSAA", msaa))
+		{
+			options.MSAA = msaa;
+		}
+
+		int fpsLimit = 0;
+		if (parser.Integer("fps-limit", fpsLimit))
+		{
+			options.bLimitFrames = true;
+			options.maxFrames = fpsLimit;
+		}
+
+		int masterVolume = 0;
+		if (parser.Integer("masterVolume", masterVolume))
+		{
+			options.masterVolume = masterVolume;
+		}
+
+		return options;
 	}
 
 	void AtExit(void)

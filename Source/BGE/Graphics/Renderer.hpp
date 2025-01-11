@@ -34,13 +34,15 @@
 
 namespace BGE
 {
+	struct EngineOptions; // Forward declare
 	class IRenderer; // Forward declare;
 	BGE_DECLARE_PTR(IRenderer);
 
 	//! Enum for representing a renderer implementation.
 	enum struct RendererImpl
 	{
-		kOpenGL /**< OpenGL renderer. */
+		kOpenGL, /**< OpenGL renderer. */
+		kD3D11   /**< DirectX 11 renderer. */
 	};
 
 	enum struct BlendMode
@@ -54,13 +56,14 @@ namespace BGE
 	public:
 		virtual ~IRenderer(void) = default;
 
-		virtual bool VInit(void) = 0;
+		virtual bool VInit(const EngineOptions &kOptions) = 0;
 		virtual void VShutdown(void) = 0;
 		virtual RendererImpl VGetImpl(void) const = 0;
 
 		virtual void VBeginFrame(void) = 0; // Begin a new rendering frame.
 		virtual void VEndFrame(void) = 0; // End the frame and present the back buffer.
 
+		virtual void VOnResize(std::int32_t width, std::int32_t height) = 0;
 		virtual void VSetViewport(const IViewport &kViewport) = 0;
 		virtual const IViewport &VGetViewport(void) const = 0;
 		virtual void VSetBackgroundColor(const glm::vec4 &kColor) = 0;
@@ -82,15 +85,13 @@ namespace BGE
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
 
-		virtual bool VTakeScreenshot(void) = 0;
+		virtual bool VTakeScreenshot(std::string_view saveGameDir) = 0;
 
 		virtual void VEnableDebugOutput(bool bEnable) = 0; // Enable OpenGL debug context messages.
 		virtual std::string VGetRendererInfo(void) const = 0; // Return GPU/driver information.
 	protected:
-	private:
+		static std::string GetScreenshotFilename(std::string_view saveGameDir);
 	};
-
-	int GetMaxVertexAttribs(void);
 } // End namespace (BGE)
 
 #endif /* !_BGE_RENDERER_HPP_ */

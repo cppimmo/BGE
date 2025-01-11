@@ -33,6 +33,8 @@
 
 #if BGE_PLATFORM_WIN
 #include "Engine/Winclude.hpp"
+#include <io.h>
+#include <fcntl.h>
 #elif BGE_PLATFORM_LINUX
 #include <sys/file.h>
 #include <cerrno>
@@ -43,6 +45,106 @@
 #include <vector>
 
 namespace fs = std::filesystem;
+
+bool BGE::OpenConsole(std::string_view title)
+{
+#if BGE_PLATFORM_WIN
+	int hConsole = 0;
+	HANDLE stdHandle = nullptr;
+	CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+	ZeroMemory(&consoleInfo, sizeof(consoleInfo));
+
+	std::FILE *pFile = nullptr;
+	// Close prior references to console facilities so they can be reopened later
+	if (_get_osfhandle(0) < 0)
+	{
+		_close(0);
+	}
+
+	pFile = freopen("//./NUL", "r", stdin);
+	// auto freopen_sResult = freopen_s(&::pStreamStdin, "//./NUL", "r", stdin);
+	setvbuf(stdin, NULL, _IONBF, 0u);
+	if (_get_osfhandle(1) < 0)
+	{
+		_close(1);
+	}
+
+	pFile = freopen("//./NUL", "w", stdout);
+	// freopen_sResult = freopen_s(&::pStreamStdout, "//./NUL", "w", stdout);
+	setvbuf(stdout, NULL, _IONBF, 0u);
+	if (_get_osfhandle(2) < 0)
+	{
+		_close(2);
+	}
+
+	pFile = freopen("//./NUL", "w", stderr);
+	// freopen_sResult = freopen_s(&pStreamStderr, "//./NUL", "w", stderr);
+	setvbuf(stderr, NULL, _IONBF, 0u);
+
+	::FreeConsole();
+	if (!::AllocConsole())
+	{
+		return false;
+	}
+
+	::SetConsoleTitleA(title.data());
+
+	// Set the screen buffer to be big enough to scroll text
+	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &consoleInfo);
+	consoleInfo.dwSize.Y = 1024;
+	::SetConsoleScreenBufferSize(::GetStdHandle(STD_OUTPUT_HANDLE), consoleInfo.dwSize);
+	// Redirect unbuffered STDIN to the console
+	stdHandle = ::GetStdHandle(STD_INPUT_HANDLE);
+	hConsole = _open_osfhandle(reinterpret_cast<intptr_t>(stdHandle), _O_TEXT);
+
+	if (_dup2(hConsole, _fileno(stdin)) == -1)
+	{
+		return false;
+	}
+
+	::SetStdHandle(STD_INPUT_HANDLE, reinterpret_cast<HANDLE>(_get_osfhandle(_fileno(stdin))));
+	_close(hConsole);
+
+	// Redirect unbuffered STDOUT to the console
+	stdHandle = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	hConsole = _open_osfhandle(reinterpret_cast<intptr_t>(stdHandle), _O_TEXT);
+
+	if (_dup2(hConsole, _fileno(stdout)) == -1)
+	{
+		return false;
+	}
+
+	::SetStdHandle(STD_OUTPUT_HANDLE, reinterpret_cast<HANDLE>(_get_osfhandle(_fileno(stdout))));
+	_close(hConsole);
+
+	// Redirect unbuffered STDERR to the console
+	stdHandle = ::GetStdHandle(STD_ERROR_HANDLE);
+	hConsole = _open_osfhandle(reinterpret_cast<intptr_t>(stdHandle), _O_TEXT);
+
+	if (_dup2(hConsole, _fileno(stderr)) == -1)
+	{
+		return false;
+	}
+
+	::SetStdHandle(STD_ERROR_HANDLE, reinterpret_cast<HANDLE>(_get_osfhandle(_fileno(stderr))));
+	_close(hConsole);
+	// Set the console's attributes
+	::SetConsoleTextAttribute(::GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	::SetConsoleMode(::GetStdHandle(STD_OUTPUT_HANDLE), ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+	::SetConsoleMode(::GetStdHandle(STD_INPUT_HANDLE), ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT);
+	// Set _Crt Report Modes/Files
+	// _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	// _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	// _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	// _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+	// _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	// _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+
+	// Sycronize with the C++ I/O facilities
+	std::ios::sync_with_stdio();
+#endif /* BGE_PLATFORM_WIN */
+	return true;
+}
 
 std::span<std::string_view> BGE::GetArguments(int numArgs, char *pArgs[])
 {

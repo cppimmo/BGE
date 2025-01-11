@@ -50,6 +50,7 @@
 #include "Scripting/ScriptExports.hpp"
 #include "Audio/AL/AudioSystem.hpp"
 #include "Graphics/GL/Renderer.hpp"
+#include "Graphics/D3D11/Renderer.hpp"
 
 namespace BGE
 {
@@ -62,7 +63,8 @@ namespace BGE
 	}
 
 	EngineApp::EngineApp(void)
-		: m_bRunning(false),
+		: m_options{},
+		  m_bRunning(false),
 		  m_bQuitRequested(false),
 		  m_bQuitting(false),
 		  m_bHasQuit(false),
@@ -82,11 +84,18 @@ namespace BGE
 	}
 
 	// Method named InitInstance since only one instance of the game is allowed in most cases.
-	bool EngineApp::VInitInstance(void)
+	bool EngineApp::VInitInstance(const EngineOptions &kOptions, const std::filesystem::path &kConfigPath)
 	{
 		m_timer.Start(); // Start the timer to measure the initialization time
 		BGE_LOG("App", "Beginning initialization...");
-		// TODO: Implement intialization tasks.
+		
+		m_options = kOptions; // Set the options entered from the CLI
+		// Load the engine configuration XML
+		if (!LoadConfig(kConfigPath))
+		{
+			BGE_LOG("App", "Couldn't load config. Using defaults.");
+		}
+
 #ifdef BGE_CONFIG_DEBUG
 		HideConsole(); // TODO: This should be called by Logger based on configuration.
 #endif
@@ -175,15 +184,27 @@ namespace BGE
 		// TODO: Setup event manager.
 
 		// Try to initialize the utility toolkit
-		if (!BGUTInit("Engine.xml"))
+		if (!BGUTInit(m_options))
 		{
 			BGE_ERROR("Couldn't initialize engine!");
 			return false;
 		}
 
+		// Select the configured renderer instance
+		switch (*m_options.rendererImpl)
+		{
+		case RendererImpl::kOpenGL:
+			m_pRenderer = std::make_unique<GLRenderer>();
+			break;
+		case RendererImpl::kD3D11:
+			m_pRenderer = std::make_unique<D3D11Renderer>();
+			break;
+		default:
+			return false;
+		}
+		
 		// Initialize the renderer
-		m_pRenderer = std::make_unique<GLRenderer>();
-		if (!m_pRenderer->VInit())
+		if (!m_pRenderer->VInit(m_options))
 		{
 			BGE_ERROR("Couldn't initialize renderer!");
 			return false;
@@ -233,8 +254,9 @@ namespace BGE
 		ScriptExports::Register();
 
 		{
-			const Resource bootstrapScript("Assets\\Scripts\\Bootstrap.lua");
-			auto pBootstrapScriptHandle = m_pResourceCache->GetHandle(bootstrapScript);
+			// Load the Bootstrap.lua script
+			const Resource kBootstrapScript("Assets\\Scripts\\Bootstrap.lua");
+			auto pBootstrapScriptHandle = m_pResourceCache->GetHandle(kBootstrapScript);
 			if (!pBootstrapScriptHandle)
 			{
 				BGE_ERROR("Couldn't load bootstrap script!");
@@ -308,14 +330,39 @@ namespace BGE
 		auto &app = GetEngineApp();
 		// TODO: Call rendering routines.
 
-		// TODO: Replace with call to VPreRender().
-		float clearColor[4] = { 0.0f, 0.5f, 1.0f, 1.0f };
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClearBufferfv(GL_COLOR, 0, clearColor);
+
 		auto time = app.GetTimer().GetElapsedSecs();
-		clearColor[0] = (std::sin(time * 0.5f) + 1.0f) / 2.0f;
-		clearColor[1] = (std::sin(time * 0.3f) + 1.0f) / 2.0f;
-		clearColor[2] = (std::sin(time * 0.7f) + 1.0f) / 2.0f;
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearBufferfv(GL_COLOR, 0, clearColor);
+		glm::vec4 clearColor = { 0.0f, 0.5f, 1.0f, 1.0f };
+		clearColor.x = (std::sin(time * 0.5f) + 1.0f) / 2.0f;
+		clearColor.y = (std::sin(time * 0.3f) + 1.0f) / 2.0f;
+		clearColor.z = (std::sin(time * 0.7f) + 1.0f) / 2.0f;
+
+		app.GetRenderer().VSetBackgroundColor(clearColor);
+		app.GetRenderer().VBeginFrame();
+
+		if (app.GetOptions().bImGuiEnabled.value())
+		{
+			ImGui::Begin("Frame Time");
+
+			// Add left padding by setting the cursor's X position before text rendering.
+			float padding = 20.0f;  // Adjust padding to your desired value
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);
+
+			ImGui::Text("%07.4f FPS", app.GetFPSData().smoothedFPS);
+
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);  // Apply padding again for next line
+			ImGui::Text("%07.4f ms", deltaTime);
+
+			ImGui::End();
+
+			ImGui::ShowDemoWindow();
+			ImPlot::ShowDemoWindow();
+
+			// Call debug console ImGui routine
+			app.GetDebugConsole().VImGuiRoutine();
+		}
 
 		// Render each game view
 		auto &gameViews = app.GetGameLogic().GetGameViews();
@@ -324,26 +371,10 @@ namespace BGE
 			pView->VOnRender(deltaTime, elapsedTime);
 		}
 
-		ImGui::Begin("Frame Time");
-
-		// Add left padding by setting the cursor's X position before text rendering.
-		float padding = 20.0f;  // Adjust padding to your desired value
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);
-
-		ImGui::Text("%07.4f FPS", app.GetFPSData().smoothedFPS);
-
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding);  // Apply padding again for next line
-		ImGui::Text("%07.4f ms", deltaTime);
-
-		ImGui::End();
-
-		ImGui::ShowDemoWindow();
-		ImPlot::ShowDemoWindow();
-		// Call debug console ImGui routine
-		app.GetDebugConsole().VImGuiRoutine();
+		app.GetRenderer().VEndFrame();
 	}
 
-	bool EngineApp::OnHandleEvent(const SDL_Event &event)
+	bool EngineApp::OnEvent(const SDL_Event &event)
 	{
 		bool bResult = false;
 		auto &app = GetEngineApp();
@@ -481,12 +512,15 @@ namespace BGE
 		return bResult;
 	}
 
-	void EngineApp::OnDisplayChange(int colorDepth, int width, int height)
+	void EngineApp::OnResize(std::int32_t width, std::int32_t height)
 	{
-		// TODO: Implement code which operates on renderer for display change.
+		//glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+		auto &app = GetEngineApp();
+
+		app.GetRenderer().VOnResize(width, height);
 	}
 
-	void EngineApp::OnHandleSignal(int signal)
+	void EngineApp::OnSignal(int signal)
 	{
 		switch (signal)
 		{
@@ -553,6 +587,11 @@ namespace BGE
 
 		m_bRunning = false;
 		m_bHasQuit = true;
+	}
+
+	const EngineOptions &EngineApp::GetOptions(void) const noexcept
+	{
+		return m_options;
 	}
 
 	const Timer &EngineApp::GetTimer(void) const noexcept
@@ -728,6 +767,104 @@ namespace BGE
 
 	void EngineApp::VDestroyNetworkEventForwarder(void)
 	{
+	}
+
+	bool EngineApp::LoadConfig(const std::filesystem::path &kConfigPath)
+	{
+		using namespace tinyxml2;
+
+		tinyxml2::XMLDocument xmlDocument; // Document object
+		XMLError xmlResult; // Result object
+
+		xmlResult = xmlDocument.LoadFile(kConfigPath.string().c_str());
+		if (xmlResult != XML_SUCCESS)
+		{
+			// Failure: Couldn't find config file!
+			return false;
+		}
+		// Fetch the root element: Engine
+		auto *pRoot = xmlDocument.RootElement();
+		if (!pRoot) return false;
+
+		// TODO: Do error checking on the input values.
+		static constexpr const char *c_kpATTRIB_TAG_NAME = "name";
+		static constexpr const char *c_kpATTRIB_VALUE_NAME = "value";
+		for (auto *pElem = pRoot->FirstChildElement(); pElem; pElem = pElem->NextSiblingElement())
+		{
+			const std::string kOptionName(pElem->Attribute(c_kpATTRIB_TAG_NAME));
+			// Look for known options
+			if (kOptionName == "rendererImpl")
+			{
+				const char *pkValue = pElem->Attribute(c_kpATTRIB_VALUE_NAME);
+				if (std::strcmp(pkValue, "OpenGL") == 0)
+					m_options.rendererImpl = RendererImpl::kOpenGL;
+				else if (std::strcmp(pkValue, "D3D11") == 0)
+					m_options.rendererImpl = RendererImpl::kD3D11;
+				else
+					BGE_WARNING("Incorrect renderer value");
+			}
+			else if (kOptionName == "rendererDebug")
+			{
+				const bool kbValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bRendererDebug = kbValue;
+			}
+			else if (kOptionName == "windowTitle")
+			{
+				const char *pkValue = pElem->Attribute(c_kpATTRIB_VALUE_NAME);
+				m_options.windowTitle = pkValue;
+			}
+			else if (kOptionName == "windowWidth")
+			{
+				const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.windowWidth = kValue;
+			}
+			else if (kOptionName == "windowHeight")
+			{
+				const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.windowHeight = kValue;
+			}
+			else if (kOptionName == "windowResizable")
+			{
+				const bool kValue = pElem->Attribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bWindowResizable = kValue;
+			}
+			else if (kOptionName == "fullscreen")
+			{
+				const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bFullscreen = kValue;
+			}
+			else if (kOptionName == "v-sync")
+			{
+				const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bVSync = kValue;
+			}
+			else if (kOptionName == "MSAA")
+			{
+				const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.MSAA = kValue;
+			}
+			else if (kOptionName == "imGuiEnabled")
+			{
+				const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bImGuiEnabled = kValue;
+			}
+			else if (kOptionName == "limitFrames")
+			{
+				const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.bLimitFrames = kValue;
+			}
+			else if (kOptionName == "maxFrames")
+			{
+				const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.maxFrames = kValue;
+			}
+			else if (kOptionName == "masterVolume")
+			{
+				const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
+				m_options.masterVolume = kValue;
+			}
+		}
+		return true;
 	}
 
 	void EngineApp::RegisterEngineEvents(void)

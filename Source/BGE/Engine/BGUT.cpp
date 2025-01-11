@@ -39,31 +39,30 @@
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
 
-#include <SDL_opengl.h>
-
 namespace BGE
 {
+	struct OpenGLVersion
+	{
+		int major, minor;
+	};
+	static constexpr OpenGLVersion kOPENGL_VERSION = { .major = 4, .minor = 5 };
+
 	/**
 	 * BGUTData manages the state of the utility toolkit.
 	 */
 	struct BGUTData
 	{
+		EngineOptions options;
 		SDL_Window *pWindow = nullptr;
-		std::uint32_t defWindowFlags{};
 		SDL_GLContext pContext = nullptr;
-		struct OpenGLVersion
+		std::uint32_t windowFlags{};
+		int windowWidth = 800;
+		int windowHeight = 600;
+		struct ImGuiContexts
 		{
-			int major = 4, minor = 5;
-		} glVersion;
-		bool bGLDebugEnabled = false;
-		std::string defWindowTitle = std::string();
-		int defWindowWidth = 800;
-		int defWindowHeight = 600;
-		bool bWindowResizable = false;
-		bool bFullscreenEnabled = false;
-		bool bVSyncEnabled = false;
-		int multisamplingLevel = 0;
-		bool bImGuiEnabled = false;
+			ImGuiContext *pImGuiContext = nullptr;
+			ImPlotContext *pImPlotContext = nullptr;
+		} imGuiContexts;
 		bool bRunning = false;
 		bool bLimitFrames = false;
 		Uint32 minFrames = 6;
@@ -71,10 +70,10 @@ namespace BGE
 		BGUTUpdateCallback pUpdateCallback = nullptr;
 		BGUTRenderCallback pRenderCallback = nullptr;
 		BGUTEventHandlerCallback pEventHandlerCallback = nullptr;
+		BGUTResizeCallback pResizeCallback = nullptr;
 		int exitCode = kBGE_EXIT_SUCCESS;
 	};
 	
-	static bool BGUTParseConfig(std::string_view configFilename, BGUTData &data);
 	static bool BGUTInitImGui(BGUTWindowPtr pWindow); // also for ImPlot
 	static void BGUTShutdownImGui(void);
 	static void BGUTLogInfo(void);
@@ -84,15 +83,9 @@ namespace BGE
 	static BGUTData s_BGUT = {};
 } // End namespace (BGE)
 
-bool BGE::BGUTInit(std::string_view configFilename)
+bool BGE::BGUTInit(const EngineOptions &kOptions)
 {
-	// Parse engine configuration file
-	if (!BGUTParseConfig(configFilename, s_BGUT))
-	{
-		BGE_ERROR("BGUTInit Failure: Couldn't parse config file!");
-		return false;
-	}
-
+	s_BGUT.options = kOptions;
 	// Decide which parts of SDL should be initialized
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
@@ -104,23 +97,29 @@ bool BGE::BGUTInit(std::string_view configFilename)
 	SDL_LogSetOutputFunction(Logger::LogOutputFunc_SDL, nullptr);
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
 
-	BGE_LOG("BGUT", "Request OpenGL version %d.%d", s_BGUT.glVersion.major, s_BGUT.glVersion.minor);
+	//BGE_LOG("BGUT", "Request OpenGL version %d.%d", s_BGUT.glVersion.major, s_BGUT.glVersion.minor);
 	// Set OpenGL attributes before window creation
-	//BGUTSetAttributes(s_BGUT.glVersion.major, s_BGUT.glVersion.minor, true, s_BGUT.bGLDebugEnabled);
+	
 	
 	// Set basic window flags
-	s_BGUT.defWindowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-	
-	// When the window is set to be resizable
-	if (s_BGUT.bWindowResizable && !s_BGUT.bFullscreenEnabled)
+	s_BGUT.windowFlags = SDL_WINDOW_SHOWN;
+	if (*kOptions.rendererImpl == RendererImpl::kOpenGL)
 	{
-		s_BGUT.defWindowFlags |= SDL_WINDOW_RESIZABLE;
+		s_BGUT.windowFlags |= SDL_WINDOW_OPENGL;
+	}
+
+	// When the window is set to be resizable
+	if (*kOptions.bWindowResizable && !(*kOptions.bFullscreen))
+	{
+		s_BGUT.windowFlags |= SDL_WINDOW_RESIZABLE;
 	}
 	
+	s_BGUT.windowWidth = *kOptions.windowWidth;
+	s_BGUT.windowHeight = *kOptions.windowHeight;
 	// When the window is set to be fullscreen
-	if (s_BGUT.bFullscreenEnabled)
+	if (*kOptions.bFullscreen)
 	{
-		s_BGUT.defWindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		s_BGUT.windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		// Retrive the current display mode:
 		SDL_DisplayMode displayMode;
 		if (SDL_GetCurrentDisplayMode(0, &displayMode) != 0)
@@ -129,86 +128,77 @@ bool BGE::BGUTInit(std::string_view configFilename)
 			return false;
 		}
 		// Set the desired width and height of fullscreen window:
-		s_BGUT.defWindowWidth = displayMode.w;
-		s_BGUT.defWindowHeight = displayMode.h;
+		s_BGUT.windowWidth = displayMode.w;
+		s_BGUT.windowHeight = displayMode.h;
 	}
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG | SDL_GL_CONTEXT_DEBUG_FLAG);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-	//SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	if (*kOptions.rendererImpl == RendererImpl::kOpenGL)
+	{
+		BGUTSetAttributes(kOPENGL_VERSION.major, kOPENGL_VERSION.minor, true, *kOptions.bRendererDebug);
+	}
 
 	// Create the SDL window
-	s_BGUT.pWindow = SDL_CreateWindow(s_BGUT.defWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-									  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, s_BGUT.defWindowFlags);
+	s_BGUT.pWindow = SDL_CreateWindow((*kOptions.windowTitle).c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+									  s_BGUT.windowWidth, s_BGUT.windowHeight, s_BGUT.windowFlags);
 	if (!s_BGUT.pWindow)
 	{
 		BGE_ERROR("BGUTInit Failure: SDL window could not be created (%s).", SDL_GetError());
 		return false;
 	}
 	
-	// Attempt to create the OpenGL context
-	s_BGUT.pContext = SDL_GL_CreateContext(s_BGUT.pWindow);
-	if (!s_BGUT.pContext)
+	// Set the function loader for OpenGL
+	if (*kOptions.rendererImpl == RendererImpl::kOpenGL)
 	{
-		BGE_ERROR("BGUTInit Failure: OpenGL context could not be created (%s).", SDL_GetError());
-		return false;
-	}
+		// Attempt to create the OpenGL context
+		s_BGUT.pContext = SDL_GL_CreateContext(s_BGUT.pWindow);
+		if (!s_BGUT.pContext)
+		{
+			BGE_ERROR("BGUTInit Failure: OpenGL context could not be created (%s).", SDL_GetError());
+			return false;
+		}
 	
-	// Set the current OpenGL context
-	if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
-	{
-		BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
-		return false;
-	}
+		// Set the current OpenGL context
+		if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
+		{
+			BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
+			return false;
+		}
 	
-	// Determine if vertical sync should be enabled
-	//if (SDL_GL_SetSwapInterval((s_BGUT.bVSyncEnabled) ? 1 : 0) < 0) // Vertical sync
+		// Determine if vertical sync should be enabled
+		if (SDL_GL_SetSwapInterval((kOptions.bVSync ? 1 : 0) < 0)) // Vertical sync
+		{
+			BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
+			return false;
+		}
+
+		const int kGladVersion = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+		if (kGladVersion == 0)
+		{
+			BGE_ERROR("BGUTInit Failure: glad OpenGL loader can't be set (%s).", SDL_GetError());
+			return false;
+		}
+		const int kGladMajorVersion = GLAD_VERSION_MAJOR(kGladVersion);
+		const int kGladMinorVersion = GLAD_VERSION_MINOR(kGladVersion);
+		BGE_LOG("BGUT", "Loaded OpenGL %d.%d", kGladMajorVersion, kGladMinorVersion);
+	}
+	// TODO: This should go in the renderer implementation
+	// Perform extra setup for the OpenGL debug context
+	//if (s_BGUT.bGLDebugEnabled)
 	//{
-	//	BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
+	//	GL::DebugContextSetup();
+	//}
+	
+	// TODO: This should go in the renderer implementation
+	// Only init ImGui when it is enabled (rely on short circuit evaluation)
+	//if (s_BGUT.bImGuiEnabled && !BGUTInitImGui(s_BGUT.pWindow))
+	//{
+	//	BGE_ERROR("BGUTInit Failure: Couldn't initialize ImGui!");
 	//	return false;
 	//}
-
-	// Set the function loader for OpenGL
-	const int kGladVersion = gladLoadGL(reinterpret_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
-	if (kGladVersion == 0)
-	{
-		BGE_ERROR("BGUTInit Failure: glad OpenGL loader can't be set (%s).", SDL_GetError());
-		return false;
-	}
-	const int kGladMajorVersion = GLAD_VERSION_MAJOR(kGladVersion);
-	const int kGladMinorVersion = GLAD_VERSION_MINOR(kGladVersion);
-	BGE_LOG("BGUT", "Loaded OpenGL %d.%d", kGladMajorVersion, kGladMinorVersion);
 	
-	// Perform extra setup for the OpenGL debug context
-	if (s_BGUT.bGLDebugEnabled)
-	{
-		GL::DebugContextSetup();
-	}
-	
-	// Only init ImGui when it is enabled (rely on short circuit evaluation)
-	if (s_BGUT.bImGuiEnabled && !BGUTInitImGui(s_BGUT.pWindow))
-	{
-		BGE_ERROR("BGUTInit Failure: Couldn't initialize ImGui!");
-		return false;
-	}
-	
-	// TODO: This should be the job of the renderer interface.
-	// Set the OpenGL viewport
-	BGUTSetViewport(0, 0, s_BGUT.defWindowWidth, s_BGUT.defWindowHeight);
+	// Let the app layer set the viewport
+	//if (s_BGUT.pResizeCallback)
+	//	s_BGUT.pResizeCallback(s_BGUT.windowWidth, s_BGUT.windowHeight);
 	
 	// Write some information to the log related to the toolkit
 	BGUTLogInfo();
@@ -220,7 +210,7 @@ bool BGE::BGUTCreateWindow(std::string_view windowTitle, std::string_view iconFi
 {
 	// Create the SDL window
 	//s_BGUT.pWindow = SDL_CreateWindow(s_BGUT.defWindowTitle.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-	//								  s_BGUT.defWindowWidth, s_BGUT.defWindowHeight, s_BGUT.defWindowFlags);
+	//								  s_BGUT.windowWidth, s_BGUT.windowHeight, s_BGUT.windowFlags);
 	return true;
 }
 
@@ -248,6 +238,13 @@ void BGE::BGUTMainLoop(void)
 				s_BGUT.pEventHandlerCallback(event);
 		}
 
+		// Sleep main loop if the window is minimized
+		if (SDL_GetWindowFlags(s_BGUT.pWindow) & SDL_WINDOW_MINIMIZED)
+		{
+			SDL_Delay(1U);
+			continue;
+		}
+
 		if (kTicksLastStepMillis < kTicksNowMillis)
 		{
 			Uint64 deltaTimeMS = kTicksNowMillis - kTicksLastStepMillis; // Delta time
@@ -259,30 +256,38 @@ void BGE::BGUTMainLoop(void)
 				s_BGUT.pUpdateCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
 
 			kTicksLastStepMillis = kTicksNowMillis; // Set previous step
+			
+			// TODO: ImGui rendering should be placed in a different routine than the render callback
 			// When ImGui is enabled, prepare the new frame
-			if (s_BGUT.bImGuiEnabled)
-			{
-				ImGui_ImplOpenGL3_NewFrame();
-				ImGui_ImplSDL2_NewFrame();
-				ImGui::NewFrame();
-			}
+			//if (s_BGUT.bImGuiEnabled)
+			//{
+			//	ImGui::SetCurrentContext(s_BGUT.imGuiContexts.pImGuiContext);
+			//	ImPlot::SetCurrentContext(s_BGUT.imGuiContexts.pImPlotContext);
+			//
+			//	ImGui_ImplOpenGL3_NewFrame();
+			//	ImGui_ImplSDL2_NewFrame();
+			//	ImGui::NewFrame();
+			//}
 
 			if (s_BGUT.pRenderCallback) // Call render callback
 				s_BGUT.pRenderCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
 			// When ImGui is enabled, call end of frame routines
-			if (s_BGUT.bImGuiEnabled)
-			{
-				ImGui::Render();
-				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			}
+			//if (s_BGUT.bImGuiEnabled)
+			//{
+			//	ImGui::Render();
+			//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			//}
 		}
 		else
 		{
 			if (s_BGUT.bLimitFrames) // Limit frames if needed
-				SDL_Delay(1u);
+				SDL_Delay(1U);
 		}
 		// Swap OpenGL buffers on window
-		SDL_GL_SwapWindow(s_BGUT.pWindow);
+		if (*s_BGUT.options.rendererImpl == RendererImpl::kOpenGL)
+		{
+			SDL_GL_SwapWindow(s_BGUT.pWindow);
+		}
 	}
 	s_BGUT.mainLoopTimer.Stop(); // Stop the mainloop timer
 }
@@ -296,13 +301,17 @@ void BGE::BGUTSendExitCode(int exitCode)
 void BGE::BGUTShutdown(void)
 {
 	// When ImGui is enabled, shutdown its context
-	if (s_BGUT.bImGuiEnabled)
-	{
-		BGUTShutdownImGui();
-	}
+	//if (s_BGUT.bImGuiEnabled)
+	//{
+	//	BGUTShutdownImGui();
+	//}
 	
-	SDL_GL_DeleteContext(s_BGUT.pContext);
-	//gladLoaderUnloadGL(); // Unload glad
+	if (s_BGUT.options.rendererImpl == RendererImpl::kOpenGL)
+	{
+		SDL_GL_DeleteContext(s_BGUT.pContext);
+		//gladLoaderUnloadGL(); // Unload glad
+	}
+
 	SDL_DestroyWindow(s_BGUT.pWindow);
 	SDL_Quit();
 }
@@ -316,7 +325,6 @@ void BGE::BGUTSetWindowTitle(std::string_view title)
 
 void BGE::BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen)
 {
-
 }
 
 void BGE::BGUTSetWindowIcon(std::string_view fileName)
@@ -337,11 +345,6 @@ void BGE::BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height)
 	SDL_SetWindowSize(pWindow, width, height);
 }
 
-void BGE::BGUTSetViewport(int x, int y, int width, int height)
-{
-	glViewport(x, y, width, height);
-}
-
 void BGE::BGUTSetCallbackUpdate(BGUTUpdateCallback pUpdateCallback)
 {
 	s_BGUT.pUpdateCallback = pUpdateCallback;
@@ -355,6 +358,11 @@ void BGE::BGUTSetCallbackRender(BGUTRenderCallback pRenderCallback)
 void BGE::BGUTSetCallbackEventHandler(BGUTEventHandlerCallback pEventHandlerCallback)
 {
 	s_BGUT.pEventHandlerCallback = pEventHandlerCallback;
+}
+
+void BGE::BGUTSetCallbackResize(BGUTResizeCallback pResizeCallback)
+{
+	s_BGUT.pResizeCallback = pResizeCallback;
 }
 
 SDL_Window *BGE::BGUTGetWindowPtr(void)
@@ -372,6 +380,22 @@ SDL_GLContext BGE::BGUTGetContextPtr(void)
 	return s_BGUT.pContext;
 }
 
+void BGE::BGUTSetImGuiContextPtrs(ImGuiContext *pImGuiContext, ImPlotContext *pImPlotContext)
+{
+	s_BGUT.imGuiContexts.pImGuiContext = pImGuiContext;
+	s_BGUT.imGuiContexts.pImPlotContext = pImPlotContext;
+}
+
+ImGuiContext *BGE::BGUTGetImGuiContextPtr(void)
+{
+	return s_BGUT.imGuiContexts.pImGuiContext;
+}
+
+ImPlotContext *BGE::BGUTGetImPlotContextPtr(void)
+{
+	return s_BGUT.imGuiContexts.pImPlotContext;
+}
+
 const BGE::Timer &BGE::BGUTGetMainLoopTimer(void)
 {
 	return s_BGUT.mainLoopTimer;
@@ -382,104 +406,17 @@ int BGE::BGUTGetExitCode(void)
 	return s_BGUT.exitCode;
 }
 
-bool BGE::BGUTParseConfig(std::string_view configFilename, BGUTData &data)
-{
-	using namespace tinyxml2;
-	XMLDocument xmlDocument; // Document object
-	XMLError xmlResult; // Result object
-
-	xmlResult = xmlDocument.LoadFile(configFilename.data());
-	if (xmlResult != XML_SUCCESS)
-	{
-		BGE_ERROR("BGUTParseConfig Failure: Couldn't find config file!");
-		return false;
-	}
-	// Fetch the root element: Engine
-	auto *pRoot = xmlDocument.RootElement();
-	if (!pRoot) return false;
-
-	static constexpr const char *c_kpATTRIB_TAG_NAME = "name";
-	static constexpr const char *c_kpATTRIB_VALUE_NAME = "value";
-	for (auto *pElem = pRoot->FirstChildElement(); pElem; pElem = pElem->NextSiblingElement())
-	{
-		const std::string kOptionName(pElem->Attribute(c_kpATTRIB_TAG_NAME));
-		// Look for known options
-		if (kOptionName == "glVersion")
-		{
-			const int kMajor = pElem->IntAttribute("major");
-			const int kMinor = pElem->IntAttribute("minor");
-			s_BGUT.glVersion = { kMajor, kMinor };
-		}
-		else if (kOptionName == "glDebugEnabled")
-		{
-			const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bGLDebugEnabled = kValue;
-		}
-		else if (kOptionName == "defWindowTitle")
-		{
-			const char *pkValue = pElem->Attribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.defWindowTitle = pkValue;
-		}
-		else if (kOptionName == "defWindowWidth")
-		{
-			const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.defWindowWidth = kValue;
-		}
-		else if (kOptionName == "defWindowHeight")
-		{
-			const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.defWindowHeight = kValue;
-		}
-		else if (kOptionName == "windowResizable")
-		{
-			const bool kValue = pElem->Attribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bWindowResizable = kValue;
-		}
-		else if (kOptionName == "fullscreenEnabled")
-		{
-			const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bFullscreenEnabled = kValue;
-		}
-		else if (kOptionName == "VSyncEnabled")
-		{
-			const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bVSyncEnabled = kValue;
-		}
-		else if (kOptionName == "MSAA")
-		{
-			const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.multisamplingLevel = kValue;
-		}
-		else if (kOptionName == "imGuiEnabled")
-		{
-			const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bImGuiEnabled = kValue;
-		}
-		else if (kOptionName == "limitFrames")
-		{
-			const bool kValue = pElem->BoolAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.bLimitFrames = kValue;
-		}
-		else if (kOptionName == "minFrames")
-		{
-			const int kValue = pElem->IntAttribute(c_kpATTRIB_VALUE_NAME);
-			s_BGUT.minFrames = kValue;
-		}
-	}
-	return true;
-}
-
 bool BGE::BGUTInitImGui(BGUTWindowPtr pWindow)
 {
 	IMGUI_CHECKVERSION(); // What does this do?
 	// Create ImGui context
-	if (!ImGui::CreateContext())
+	if (!(s_BGUT.imGuiContexts.pImGuiContext = ImGui::CreateContext()))
 	{
 		BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImGui context!");
 		return false;
 	}
 	// Create ImPlot context
-	if (!ImPlot::CreateContext())
+	if (!(s_BGUT.imGuiContexts.pImPlotContext = ImPlot::CreateContext()))
 	{
 		BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImPlot context!");
 		return false;
@@ -518,90 +455,40 @@ void BGE::BGUTLogInfo(void)
 	SDL_GetVersion(&version);
 	BGE_INFO("SDL Version: %d.%d.%d", version.major, version.minor, version.patch);
 	BGE_INFO("SDL Revision: %s", SDL_GetRevision());
+
 	// When ImGui is enabled, log the version
-	if (s_BGUT.bImGuiEnabled)
+	if (*s_BGUT.options.bImGuiEnabled)
 	{
 		BGE_INFO("ImGui Version: %s", ImGui::GetVersion());
 	}
-	
-	BGE_INFO("Current OpenGL Version: %d.%d", s_BGUT.glVersion.major, s_BGUT.glVersion.minor);
-
-	/*int attribValue = 0;
-	static constexpr SDL_GLattr kLAST_ATTRIB = SDL_GLattr::SDL_GL_FLOATBUFFERS;
-	static constexpr std::size_t kNUM_ATTRIBS = (static_cast<int>(kLAST_ATTRIB) + 1);
-	for (std::size_t index = 0; index < kNUM_ATTRIBS; ++index)
-	{
-		SDL_GL_GetAttribute(static_cast<SDL_GLattr>(index), &attribValue);
-		BGE_INFO("SDL_GLattr(%u): %d(0x%08X)", index, attribValue, attribValue);
-	}*/
-	auto logAttrib = [](SDL_GLattr attrib) -> void
-	{
-		int attribValue = 0;
-		SDL_GL_GetAttribute(attrib, &attribValue);
-		BGE_INFO("SDL_GLattr(%2u): DEC: %10d, HEX: (0x%08X)", static_cast<int>(attrib), attribValue, attribValue);
-	};
-	logAttrib(SDL_GL_RED_SIZE);
-    logAttrib(SDL_GL_GREEN_SIZE);
-    logAttrib(SDL_GL_BLUE_SIZE);
-    logAttrib(SDL_GL_ALPHA_SIZE);
-    logAttrib(SDL_GL_BUFFER_SIZE);
-    logAttrib(SDL_GL_DOUBLEBUFFER);
-    logAttrib(SDL_GL_DEPTH_SIZE);
-	BGE_LOG("BGUT", "Test 1");
-	// Reading this attribute causes segfaults
-    //logAttrib(SDL_GL_STENCIL_SIZE);
-    //logAttrib(SDL_GL_ACCUM_RED_SIZE);
-    //logAttrib(SDL_GL_ACCUM_GREEN_SIZE);
-    //logAttrib(SDL_GL_ACCUM_BLUE_SIZE);
-    //logAttrib(SDL_GL_ACCUM_ALPHA_SIZE);
-	BGE_LOG("BGUT", "Test 2");
-	logAttrib(SDL_GL_STEREO);
-    logAttrib(SDL_GL_MULTISAMPLEBUFFERS);
-    logAttrib(SDL_GL_MULTISAMPLESAMPLES);
-    logAttrib(SDL_GL_ACCELERATED_VISUAL);
-    logAttrib(SDL_GL_RETAINED_BACKING);
-    logAttrib(SDL_GL_CONTEXT_MAJOR_VERSION);
-    logAttrib(SDL_GL_CONTEXT_MINOR_VERSION);
-    logAttrib(SDL_GL_CONTEXT_EGL);
-    logAttrib(SDL_GL_CONTEXT_FLAGS);
-    logAttrib(SDL_GL_CONTEXT_PROFILE_MASK);
-    logAttrib(SDL_GL_SHARE_WITH_CURRENT_CONTEXT);
-    logAttrib(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE);
-    logAttrib(SDL_GL_CONTEXT_RELEASE_BEHAVIOR);
-    logAttrib(SDL_GL_CONTEXT_RESET_NOTIFICATION);
-    logAttrib(SDL_GL_CONTEXT_NO_ERROR);
-    logAttrib(SDL_GL_FLOATBUFFERS);
-
-	BGE_INFO_IF(glGetString(GL_VENDOR) != 0, "GL_VENDOR: %s", glGetString(GL_VENDOR));
-	BGE_INFO_IF(glGetString(GL_RENDERER) != 0, "GL_RENDERER: %s", glGetString(GL_RENDERER));
-	BGE_INFO_IF(glGetString(GL_VERSION) != 0, "GL_VERSION: %s", glGetString(GL_VERSION));
-	BGE_INFO_IF(glGetString(GL_SHADING_LANGUAGE_VERSION) != 0, "GL_SHADING_LANGUAGE: %s",
-				glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
 void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuffered, bool bDebugEnabled)
 {
 	// Set OpenGL context attributes:
 	//SDL_GL_LoadLibrary(nullptr);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Use hardware 3D
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
+	int contextFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 	if (bDebugEnabled)
 	{
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+		contextFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
 	}
-	//SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	//SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, contextFlags);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, bDoubleBuffered ? 1 : 0);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); // Use hardware 3D
+
 	// Set multisampling
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, (s_BGUT.multisamplingLevel > 0) ? 1 : 0);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, s_BGUT.multisamplingLevel); // Set level
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, (s_BGUT.multisamplingLevel > 0) ? 1 : 0);
+	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, s_BGUT.multisamplingLevel); // Set level
 	//glEnable(GL_MULTISAMPLE);
 }
 
@@ -616,14 +503,14 @@ bool BGE::BGUTDefEventHandler(const SDL_Event &kEvent)
 		switch (kEvent.window.event)
 		{
 		case SDL_WINDOWEVENT_RESIZED:
-			// TODO: Should default size be updated?  Should be configured by renderer?
-			BGUTSetViewport(0, 0, kEvent.window.data1, kEvent.window.data2);
+			if (s_BGUT.pResizeCallback)
+				s_BGUT.pResizeCallback(kEvent.window.data1, kEvent.window.data2);
 			break;
 		}
 		return true;
 	}
 	// Call ImGui event handler when enabled
-	if (s_BGUT.bImGuiEnabled)
+	if (*s_BGUT.options.bImGuiEnabled)
 	{
 		if (ImGui_ImplSDL2_ProcessEvent(&kEvent)) return true;
 	}

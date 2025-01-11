@@ -19,6 +19,7 @@ namespace TestGame
 	class TestGameView : public BGE::HumanView
 	{
 	private:
+#if 0
 		BGE::UniqueIShaderProgramPtr m_pShaderProgram, m_pSkyboxProgram;
 		GLuint m_vao{}, m_vbo{}, m_ebo{};
 		GLuint m_skyboxVao{}, m_skyboxVbo{}, m_skyboxEbo{};
@@ -28,7 +29,7 @@ namespace TestGame
 		StrongTestControllerPtr m_pController;
 		BGE::MeshData m_meshData, m_skyboxMeshData;
 		GLuint m_textureID{};
-
+#endif
 		void TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData);
 	public:
 		TestGameView(void);

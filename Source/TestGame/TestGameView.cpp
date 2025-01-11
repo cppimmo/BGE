@@ -12,26 +12,6 @@ namespace TestGame
 {
 	void TestGameView::TestCreate(GLuint &vao, GLuint &vbo, GLuint &ebo, BGE::MeshData &meshData)
 	{
-		void *funcPtr = SDL_GL_GetProcAddress("glClearColor");
-		if (!funcPtr)
-		{
-			std::cerr << "Failed to load glClearColor!" << std::endl;
-		}
-		else
-		{
-			std::cout << "Successfully loaded glClearColor." << std::endl;
-		}
-
-		funcPtr = SDL_GL_GetProcAddress("glCreateBuffers");
-		if (!funcPtr)
-		{
-			std::cerr << "Failed to load glCreateBuffers!" << std::endl;
-		}
-		else
-		{
-			std::cout << "Successfully loaded glCreateBuffers." << std::endl;
-		}
-
 		// Create VBO and upload data
 		glCreateBuffers(1, &vbo);
 		BGE_LOG("TestGame", "Test 3");
@@ -83,7 +63,7 @@ namespace TestGame
 		{
 			return false;
 		}
-
+#if 0
 		BGE::ProjectionDesc projDesc;
 		projDesc.fieldOfView = 75.0f;
 		projDesc.aspectRatio = 1280.0f / 720.0f;
@@ -275,6 +255,7 @@ namespace TestGame
 				std::cout << element << '\n';
 			}
 		}
+#endif
 
 		return true;
 	}
@@ -283,6 +264,8 @@ namespace TestGame
 	{
 		HumanView::VOnRender(deltaTime, elapsedTime); // Call parent
 
+		//ImGui::SetCurrentContext(BGE::BGUTGetImGuiContextPtr());
+#if 0
 		int width, height;
 		BGE::BGUTGetWindowSize(BGE::BGUTGetWindowPtr(), width, height);
 		glm::mat4 projection = glm::perspective(1.0f, static_cast<float>(width) / static_cast<float>(height), 0.005f, 50.0f);
@@ -331,13 +314,14 @@ namespace TestGame
 		// Issue the draw call
 		//glDrawArrays(GL_TRIANGLES, 0, 24);
 		glDrawElements(GL_TRIANGLES, m_meshData.indices.size(), GL_UNSIGNED_INT, nullptr);
+#endif
 	}
 
 	void TestGameView::VOnUpdate(float deltaTime)
 	{
 		HumanView::VOnUpdate(deltaTime); // Call parent
 
-		m_pController->OnUpdate(deltaTime);
+		//m_pController->OnUpdate(deltaTime);
 	}
 
 	void TestGameView::VRegisterDelegates(void)

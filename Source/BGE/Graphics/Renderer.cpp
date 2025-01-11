@@ -28,9 +28,27 @@
 #include "Engine/EngineStd.hpp"
 #include "Renderer.hpp"
 
-int BGE::GetMaxVertexAttribs(void)
+namespace BGE
 {
-	GLint numAttribs = 0;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &numAttribs);
-	return numAttribs;
-}
+	std::string IRenderer::GetScreenshotFilename(std::string_view saveGameDir)
+	{
+		using BGE::GetSystemTimeString;
+
+		constexpr bool kUSE_UNDERSCORES = true;
+		const auto kTimeString = GetSystemTimeString(kUSE_UNDERSCORES);
+		if (!kTimeString)
+		{
+			return std::string();
+		}
+
+		namespace fs = std::filesystem;
+		fs::path screenshotsPath = fs::path(saveGameDir) / "Screenshots";
+		// Create Screenshots/ path with std::filesystem & verify that it exists
+		std::error_code errorCode;
+		fs::create_directories(screenshotsPath, errorCode);
+		//BGE_ERROR_IF(!errorCode, "Could not create screenshots directory: %s", errorCode.message().c_str());
+		// Save screenshots to Screenshots/ directory in save game location
+		const std::string kScreenshotFilename = ("snap_" + *kTimeString + ".bmp");
+		return (screenshotsPath / kScreenshotFilename).string();
+	}
+} // End namespace (BGE)

@@ -31,21 +31,26 @@
 #ifndef _BGE_BGUT_HPP_
 #define _BGE_BGUT_HPP_
 
+#include <cstdint>
+
 #include "Engine/EngineStd.hpp"
 
 namespace BGE
 {
+	struct EngineOptions; // Forward declare
+
 	// 1st Arg (delta time milliseconds), 2nd Arg (elapsed time milliseconds)
 	using BGUTUpdateCallback = std::add_pointer_t<void(float, float)>;
 	using BGUTRenderCallback = std::add_pointer_t<void(float, float)>;
 	using BGUTEventHandlerCallback = std::add_pointer_t<bool(const SDL_Event &)>;
+	using BGUTResizeCallback = std::add_pointer_t<void(std::int32_t, std::int32_t)>;
 	using BGUTWindowPtr = SDL_Window *;
 	using BGUTWindowID = std::size_t;
 
 	inline constexpr int kBGE_EXIT_SUCCESS = 0; // Pass to BGUTSendExitCode()
 	inline constexpr int kBGE_EXIT_FAILURE = 1;
 
-	bool BGUTInit(std::string_view configFilename);
+	bool BGUTInit(const EngineOptions &kOptions);
 	bool BGUTCreateWindow(std::string_view windowTitle, std::string_view iconFilename);
 	void BGUTSetWindow(BGUTWindowPtr pWindow);
 	void BGUTMainLoop(void);
@@ -56,13 +61,16 @@ namespace BGE
 	void BGUTSetWindowIcon(std::string_view fileName);
 	void BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height);
 	// TODO: This responsibility should be handled by the renderer and the app layer.
-	void BGUTSetViewport(int x, int y, int width, int height);
 	void BGUTSetCallbackUpdate(BGUTUpdateCallback pUpdateCallback);
 	void BGUTSetCallbackRender(BGUTRenderCallback pRenderCallback);
 	void BGUTSetCallbackEventHandler(BGUTEventHandlerCallback pEventHandlerCallback);
+	void BGUTSetCallbackResize(BGUTResizeCallback pResizeCallback);
 	SDL_Window *BGUTGetWindowPtr(void); // BGUTWindowID windowID
 	void BGUTGetWindowSize(BGUTWindowPtr pWindow, int &width, int &height);
 	SDL_GLContext BGUTGetContextPtr(void);
+	void BGUTSetImGuiContextPtrs(ImGuiContext *pImGuiContext, ImPlotContext *pImPlotContext);
+	ImGuiContext *BGUTGetImGuiContextPtr(void);
+	ImPlotContext *BGUTGetImPlotContextPtr(void);
 	const Timer &BGUTGetMainLoopTimer(void);
 	int BGUTGetExitCode(void); // App exit code
 } // End namespace (BGE)

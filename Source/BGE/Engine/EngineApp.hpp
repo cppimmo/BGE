@@ -35,6 +35,7 @@
 
 #include "MainLoop/Initialization.hpp"
 #include "Utilities/Types.hpp"
+#include "Engine/EngineOptions.hpp"
 #include "Engine/BaseGameLogic.hpp"
 #include "Events/EventManager.hpp"
 #include "Events/EventRegistry.hpp"
@@ -85,6 +86,7 @@ namespace BGE
 			float smoothedFPS = 0.0f; //!< Calculated FPS.
 		};
 	protected:
+		EngineOptions m_options; //!< Engine app layer options.
 		bool m_bRunning; //!< True if game is in the main loop.
 		bool m_bQuitRequested; //!< True if the exit sequence is nigh.
 		bool m_bQuitting; //!< True if the exit sequence is being ran.
@@ -114,7 +116,7 @@ namespace BGE
 		virtual ~EngineApp(void);
 
 		// EngineApp interface:
-		virtual bool VInitInstance(void);
+		virtual bool VInitInstance(const EngineOptions &kOptions, const std::filesystem::path &kConfigPath);
 		virtual UniqueBaseGameLogicPtr VCreateGameAndView(void) = 0;
 		virtual bool VLoadGame(void);
 		virtual std::string VGetGameTitle(void) = 0; // Application related data
@@ -124,12 +126,13 @@ namespace BGE
 
 		static void OnUpdate(float deltaTime, float elapsedTime);
 		static void OnRender(float deltaTime, float elsapsedTime);
-		static bool OnHandleEvent(const SDL_Event &kEvent);
-		static void OnDisplayChange(int colorDepth, int width, int height);
+		static bool OnEvent(const SDL_Event &kEvent);
+		static void OnResize(std::int32_t width, std::int32_t height);
 		// Application signal handlers:
-		static void OnHandleSignal(int signal);
+		static void OnSignal(int signal);
 		void OnShutdown(void);
 		// Accessors:
+		const EngineOptions &GetOptions(void) const noexcept;
 		const Timer &GetTimer(void) const noexcept;
 		const FPSData &GetFPSData(void) const noexcept;
 		MemoryManager &GetMemoryManager(void) noexcept;
@@ -155,6 +158,7 @@ namespace BGE
 		virtual void VCreateNetworkEventForwarder(void);
 		virtual void VDestroyNetworkEventForwarder(void);
 	private:
+		bool LoadConfig(const std::filesystem::path &kConfigPath);
 		void RegisterEngineEvents(void);
 		void UpdateFPS(void);
 	};

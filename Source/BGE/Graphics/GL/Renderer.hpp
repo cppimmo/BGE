@@ -22,13 +22,14 @@ namespace BGE
 		GLRenderer(void);
 		virtual ~GLRenderer(void) override;
 
-		virtual bool VInit(void) override;
+		virtual bool VInit(const EngineOptions &kOptions) override;
 		virtual void VShutdown(void) override;
 		virtual RendererImpl VGetImpl(void) const override;
 
 		virtual void VBeginFrame(void) override {}
 		virtual void VEndFrame(void) override {}
 
+		virtual void VOnResize(std::int32_t width, std::int32_t height) override;
 		virtual void VSetViewport(const IViewport &kViewport) override;
 		virtual const IViewport &VGetViewport(void) const override;
 		virtual void VSetBackgroundColor(const glm::vec4 &kColor) override;
@@ -43,7 +44,7 @@ namespace BGE
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) override;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) override;
 
-		virtual bool VTakeScreenshot(void) override;
+		virtual bool VTakeScreenshot(std::string_view saveGameDir) override;
 
 		virtual void VEnableDebugOutput(bool bEnable) override {}
 		virtual std::string VGetRendererInfo(void) const override { return ""; }

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Engine>
-  <Option name="iconFilename" value=""/>
-  <Option name="glVersion" major="4" minor="5"/>
-  <Option name="glDebugEnabled" value="true"/>
-  <Option name="defWindowTitle" value="BGE2"/>
-  <Option name="defWindowWidth" value="1280"/>
-  <Option name="defWindowHeight" value="720"/>
+  <!-- <Option name="iconFilename" value=""/> -->
+  <Option name="rendererImpl" value="D3D11"/> <!-- OpenGL or D3D11 -->
+  <Option name="rendererDebug" value="true"/>
+  <Option name="windowTitle" value="BGE2"/>
+  <Option name="windowWidth" value="1280"/>
+  <Option name="windowHeight" value="720"/>
   <Option name="windowResizable" value="false"/>
-  <Option name="fullscreenEnabled" value="false"/>
-  <Option name="VSyncEnabled" value="true"/>
-  <!-- Multisampling (0=OFF) -->
-  <Option name="MSAA" value="4"/>
+  <Option name="fullscreen" value="false"/>
+  <Option name="v-sync" value="true"/>
+  <Option name="MSAA" value="4"/> <!-- Multisampling (0=OFF, 4=4 subpixels per pixel) -->
   <Option name="imGuiEnabled" value="true"/>
   <Option name="limitFrames" value="true"/>
-  <Option name="minFrames" value="6"/>
+  <Option name="maxFrames" value="60"/>
+  <Option name="masterVolume" value="100"/>
 </Engine>
