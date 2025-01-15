@@ -50,6 +50,7 @@ namespace BGE
 		kOGG,      /**< .ogg files. */
 		kWAV,      /**< .wav files. */
 		kGLSL,     /**< .glsl files. */
+		kHLSL,     /**< .hlsl files. */
 		kSPIRV,    /**< .spv files. */
 		kJPEG,     /**< .jpeg files. */
 		kPNG,      /**< .png files. */

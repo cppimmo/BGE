@@ -67,6 +67,7 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreatePNGResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateTGAResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateGLSLResourceLoader(void) = 0;
+		virtual StrongIResourceLoaderPtr VCreateHLSLResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateWAVResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateOGGResourceLoader(void) = 0;
 		virtual StrongIResourceLoaderPtr VCreateJSONResourceLoader(void) = 0;
@@ -86,6 +87,7 @@ namespace BGE
 		virtual StrongIResourceLoaderPtr VCreatePNGResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateTGAResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateGLSLResourceLoader(void) override;
+		virtual StrongIResourceLoaderPtr VCreateHLSLResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateWAVResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateOGGResourceLoader(void) override;
 		virtual StrongIResourceLoaderPtr VCreateJSONResourceLoader(void) override;

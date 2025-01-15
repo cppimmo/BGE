@@ -14,6 +14,12 @@ namespace BGE
 	class D3D11Renderer; // Forward declare
 	BGE_DECLARE_PTR(D3D11Renderer);
 
+	struct VertexPositionColor
+	{
+		glm::vec3 position;
+		glm::vec3 color;
+	};
+
 	/**
 	 * @brief .
 	 */
@@ -37,6 +43,12 @@ namespace BGE
 		ComPtr<ID3D11RasterizerState> m_pSolidRasterState = nullptr; //!< .
 		ComPtr<ID3D11RasterizerState> m_pWireframeRasterState = nullptr; //!< .
 		ComPtr<ID3D11Debug> m_pDebug = nullptr; //!< .
+
+		ComPtr<ID3D11Buffer> m_pVertexBuffer = nullptr;
+		ComPtr<ID3D11InputLayout> m_pInputLayout = nullptr;
+		ComPtr<ID3D11VertexShader> m_pVertexShader = nullptr;
+		ComPtr<ID3D11PixelShader> m_pPixelShader = nullptr;
+
 		D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE; //!< D3D driver type.
 		ImGuiContext *m_pImGuiContext = nullptr; //< Pointer to ImGui context.
 		ImPlotContext *m_pImPlotContext = nullptr; //< Pointer to ImPlot context.
@@ -74,6 +86,9 @@ namespace BGE
 	private:
 		bool CreateSwapchainResources(void);
 		void DestroySwapchainResources(void);
+		bool CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint, std::string_view profile, ComPtr<ID3DBlob> &pShaderBlob);
+		ComPtr<ID3D11VertexShader> CreateVertexShader(StrongResourceHandlePtr pResourceHandle, ComPtr<ID3DBlob> &pShaderBlob);
+		ComPtr<ID3D11PixelShader> CreatePixelShader(StrongResourceHandlePtr pResourceHandle);
 	};
 } // End namespace (BGE)
 

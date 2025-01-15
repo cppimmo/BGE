@@ -6,7 +6,9 @@
 namespace BGE
 {
 	class GLSLResourceLoader; // Forward declare
+	class HLSLResourceLoader; // Forward declare
 	BGE_DECLARE_PTR(GLSLResourceLoader);
+	BGE_DECLARE_PTR(HLSLResourceLoader);
 
 	/**
 	 * @brief Resource loader for .glsl shader source code files.
@@ -15,6 +17,23 @@ namespace BGE
 	{
 	public:
 		GLSLResourceLoader(void) = default;
+		// IResourceLoader's interface:
+		virtual std::string VGetPattern(void) const override;
+		virtual ResourceType VGetType(void) const override;
+		virtual bool VUseRawFile(void) const override;
+		virtual bool VDiscardRawBufferAfterLoad(void) override;
+		virtual bool VAddNullZero(void) override;
+		virtual std::size_t VGetLoadedResourceSize(char *pRawBuffer, std::size_t rawSize) override;
+		virtual bool VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle) override;
+	};
+
+	/**
+	 * @brief Resource loader for .hlsl shader source code files.
+	 */
+	class HLSLResourceLoader final : public IResourceLoader
+	{
+	public:
+		HLSLResourceLoader(void) = default;
 		// IResourceLoader's interface:
 		virtual std::string VGetPattern(void) const override;
 		virtual ResourceType VGetType(void) const override;

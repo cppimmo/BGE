@@ -87,6 +87,11 @@ namespace BGE
 		return std::make_shared<GLSLResourceLoader>();
 	}
 
+	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateHLSLResourceLoader(void)
+	{
+		return std::make_shared<HLSLResourceLoader>();
+	}
+
 	StrongIResourceLoaderPtr DefaultResourceLoaderFactory::VCreateWAVResourceLoader(void)
 	{
 		return std::make_shared<WAVResourceLoader>();

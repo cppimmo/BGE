@@ -34,6 +34,8 @@ namespace BGE
 	{
 		m_options = kOptions; // Set the options
 
+		HRESULT hr = S_OK;
+
 		// Create the DXGI factory
 		if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&m_pDXGIFactory))))
 		{
@@ -85,8 +87,8 @@ namespace BGE
 
 		// Configure multisampling
 		DXGI_SAMPLE_DESC sampleDesc = { };
-		sampleDesc.Count = 1U;
-		sampleDesc.Quality = 0U;
+		sampleDesc.Count = 1u;
+		sampleDesc.Quality = 0u;
 
 		constexpr DXGI_FORMAT kSWAPCHAIN_FORMAT = DXGI_FORMAT_R8G8B8A8_UNORM;
 		
@@ -116,7 +118,7 @@ namespace BGE
 		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // kSWAPCHAIN_FORMAT;
 		swapChainDesc.SampleDesc = sampleDesc;
 		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapChainDesc.BufferCount = 2;
+		swapChainDesc.BufferCount = 2u;
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // DXGI_SWAP_EFFECT_FLIP_DISCARD
 		swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
 		swapChainDesc.Flags = { };
@@ -188,6 +190,98 @@ namespace BGE
 				BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize OpenGL3 implementation!");
 				return false;
 			}
+		}
+
+		D3D11_RASTERIZER_DESC rasterizerStateDesc = { };
+		rasterizerStateDesc.FillMode = D3D11_FILL_SOLID;
+		rasterizerStateDesc.CullMode = D3D11_CULL_BACK;
+		rasterizerStateDesc.FrontCounterClockwise = false;
+		rasterizerStateDesc.DepthClipEnable = true;
+
+		hr = m_pDevice->CreateRasterizerState(&rasterizerStateDesc, &m_pSolidRasterState);
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		rasterizerStateDesc.FillMode = D3D11_FILL_WIREFRAME;
+		rasterizerStateDesc.CullMode = D3D11_CULL_NONE;
+		rasterizerStateDesc.FrontCounterClockwise = false;
+		rasterizerStateDesc.DepthClipEnable = true;
+
+		hr = m_pDevice->CreateRasterizerState(&rasterizerStateDesc, &m_pWireframeRasterState);
+		if (FAILED(hr))
+		{
+			return false;
+		}
+
+		auto &app = GetEngineApp();
+		auto &resCache = app.GetResourceCache();
+		ComPtr<ID3DBlob> pVertexShaderBlob = nullptr;
+		m_pVertexShader = CreateVertexShader(resCache.GetHandle(Resource("Assets\\Shaders\\test_vert.hlsl")), pVertexShaderBlob);
+		if (!m_pVertexShader)
+		{
+			return false;
+		}
+
+		m_pPixelShader = CreatePixelShader(resCache.GetHandle(Resource("Assets\\Shaders\\test_pixl.hlsl")));
+		if (!m_pPixelShader)
+		{
+			return false;
+		}
+
+		constexpr D3D11_INPUT_ELEMENT_DESC kVERTEX_INPUT_LAYOUT_INFO[] =
+		{
+			{
+				"POSITION",
+				0u,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0u,
+				offsetof(VertexPositionColor, position),
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0u
+			},
+			{
+				"COLOR",
+				0u,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0u,
+				offsetof(VertexPositionColor, color),
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0u
+			}
+		};
+
+		if (FAILED(m_pDevice->CreateInputLayout(
+			kVERTEX_INPUT_LAYOUT_INFO,
+			std::size(kVERTEX_INPUT_LAYOUT_INFO),
+			pVertexShaderBlob->GetBufferPointer(),
+			pVertexShaderBlob->GetBufferSize(),
+			&m_pInputLayout)))
+		{
+			BGE_ERROR("D3D11: Failed to create default vertex input layout");
+			return false;
+		}
+
+		constexpr VertexPositionColor kVERTICES[] =
+		{
+			{ glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f) },
+			{ glm::vec3(0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f) },
+			{ glm::vec3(-0.5f, -0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) }
+		};
+
+		D3D11_BUFFER_DESC bufferDesc = { };
+		bufferDesc.ByteWidth = sizeof(kVERTICES);
+		bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+		bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA subresourceData = { };
+		subresourceData.pSysMem = kVERTICES;
+
+		if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, &subresourceData, &m_pVertexBuffer)))
+		{
+			BGE_ERROR("D3D11: Failed to create triangle vertex buffer");
+			return false;
 		}
 
 		m_bInitialized = true; // Set the initialization flag
@@ -267,14 +361,31 @@ namespace BGE
 
 		// Set the viewport
 		m_pDeviceContext->RSSetViewports(
-			1U,
+			1u,
 			&viewport);
 
 		// Set the render targets
 		m_pDeviceContext->OMSetRenderTargets(
-			1U,
+			1u,
 			m_pRenderTargetView.GetAddressOf(),
 			nullptr);
+
+
+		m_pDeviceContext->IASetInputLayout(m_pInputLayout.Get());
+
+		constexpr UINT kVERTEX_STRIDE = sizeof(VertexPositionColor);
+		constexpr UINT kVERTEX_OFFSET = 0u;
+		m_pDeviceContext->IASetVertexBuffers(0u, 1u, m_pVertexBuffer.GetAddressOf(), &kVERTEX_STRIDE, &kVERTEX_OFFSET);
+
+		m_pDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		m_pDeviceContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0u);
+		
+		m_pDeviceContext->RSSetState(m_pSolidRasterState.Get());
+
+		m_pDeviceContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0u);
+
+		m_pDeviceContext->Draw(3u, 0u);
 	}
 
 	void D3D11Renderer::VEndFrame(void)
@@ -317,11 +428,11 @@ namespace BGE
 		DestroySwapchainResources();
 
 		if (FAILED(m_pSwapChain->ResizeBuffers(
-			0U,
+			0u,
 			static_cast<UINT>(width),
 			static_cast<UINT>(height),
 			DXGI_FORMAT_B8G8R8A8_UNORM,
-			0U)))
+			0u)))
 		{
 			BGE_ERROR("D3D11: Failed to recreate swap chain buffers");
 			return;
@@ -400,8 +511,8 @@ namespace BGE
 		D3D11_TEXTURE2D_DESC stagingDesc = renderTargetDesc;
 		stagingDesc.Usage = D3D11_USAGE_STAGING;
 		stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-		stagingDesc.BindFlags = 0U; // No binding flags needed
-		stagingDesc.MiscFlags = 0U;
+		stagingDesc.BindFlags = 0u; // No binding flags needed
+		stagingDesc.MiscFlags = 0u;
 
 		// TODO: Check the sample count of the render target to support screenshots of multisampled render target view.
 		
@@ -418,7 +529,7 @@ namespace BGE
 
 		// Map the staging texture to access its data on the CPU
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		if (FAILED(m_pDeviceContext->Map(pStagingTexture, 0U, D3D11_MAP_READ, 0U, &mappedResource)))
+		if (FAILED(m_pDeviceContext->Map(pStagingTexture, 0u, D3D11_MAP_READ, 0u, &mappedResource)))
 		{
 			pStagingTexture->Release();
 			return false;
@@ -431,14 +542,14 @@ namespace BGE
 			mappedResource.pData,
 			renderTargetDesc.Width,
 			renderTargetDesc.Height,
-			renderTargetDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? 32 : 24, // Bits per pixel
+			(renderTargetDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? 32 : 24), // Bits per pixel
 			mappedResource.RowPitch,
 			SDL_PIXELFORMAT_ARGB8888);
 
 		if (!pSurface)
 		{
 			BGE_LOG("SDL", "Failed to create SDL_Surface: %s", SDL_GetError());
-			m_pDeviceContext->Unmap(pStagingTexture, 0U);
+			m_pDeviceContext->Unmap(pStagingTexture, 0u);
 			pStagingTexture->Release();
 			pRenderTargetTexture->Release();
 			return false;
@@ -453,7 +564,7 @@ namespace BGE
 
 		// Clean up
 		SDL_FreeSurface(pSurface);
-		m_pDeviceContext->Unmap(pStagingTexture, 0U);
+		m_pDeviceContext->Unmap(pStagingTexture, 0u);
 		pStagingTexture->Release();
 		pRenderTargetTexture->Release();
 
@@ -473,7 +584,7 @@ namespace BGE
 	{
 		ComPtr<ID3D11Texture2D> pBackBuffer = nullptr;
 		if (FAILED(m_pSwapChain->GetBuffer(
-			0U,
+			0u,
 			IID_PPV_ARGS(&pBackBuffer))))
 		{
 			BGE_ERROR("D3D11: Failed to get back buffer form the swap chain");
@@ -495,5 +606,87 @@ namespace BGE
 	void D3D11Renderer::DestroySwapchainResources(void)
 	{
 		m_pRenderTargetView.Reset();
+	}
+
+	bool D3D11Renderer::CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint,
+									  std::string_view profile, ComPtr<ID3DBlob> &pShaderBlob)
+	{
+		BGE_ASSERT(pResourceHandle->GetType() == ResourceType::kHLSL);
+
+		constexpr UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+
+		ComPtr<ID3DBlob> pTempShaderBlob = nullptr;
+		ComPtr<ID3DBlob> pErrorBlob = nullptr;
+
+		auto pExtraData = std::static_pointer_cast<PlaintextResourceExtraData>(pResourceHandle->GetExtraData());
+		std::string shaderSource = pExtraData->VGetExtraData();
+		
+		HRESULT hr = D3DCompile(
+			shaderSource.c_str(), shaderSource.size(),
+			nullptr, nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			entryPoint.data(), profile.data(),
+			compileFlags, 0u,
+			&pTempShaderBlob, &pErrorBlob);
+		if (FAILED(hr))
+		{
+			std::ostringstream oss;
+			oss << "D3D11: Failed to compile shader from source";
+			
+			if (pErrorBlob)
+			{
+				oss << " with message: " << static_cast<const char *>(pErrorBlob->GetBufferPointer());
+			}
+			
+			std::string message = oss.str();
+			BGE_ERROR("%s", message.c_str());
+			return false;
+		}
+
+		pShaderBlob = std::move(pTempShaderBlob);
+		return true;
+	}
+	
+	D3D11Renderer::ComPtr<ID3D11VertexShader> D3D11Renderer::CreateVertexShader(StrongResourceHandlePtr pResourceHandle, ComPtr<ID3DBlob> &pShaderBlob)
+	{
+		if (!CompileShader(pResourceHandle, "Main", "vs_5_0", pShaderBlob))
+		{
+			return nullptr;
+		}
+
+		ComPtr<ID3D11VertexShader> pVertexShader;
+		HRESULT hr = m_pDevice->CreateVertexShader(
+			pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
+			nullptr,
+			&pVertexShader);
+		if (FAILED(hr))
+		{
+			BGE_ERROR("D3D11: Failed to compile vertex shader");
+			return nullptr;
+		}
+
+		return pVertexShader;
+	}
+	
+	D3D11Renderer::ComPtr<ID3D11PixelShader> D3D11Renderer::CreatePixelShader(StrongResourceHandlePtr pResourceHandle)
+	{
+		ComPtr<ID3DBlob> pShaderBlob = nullptr;
+		if (!CompileShader(pResourceHandle, "Main", "ps_5_0", pShaderBlob))
+		{
+			return nullptr;
+		}
+
+		ComPtr<ID3D11PixelShader> pPixelShader;
+		HRESULT hr = m_pDevice->CreatePixelShader(
+			pShaderBlob->GetBufferPointer(), pShaderBlob->GetBufferSize(),
+			nullptr,
+			&pPixelShader);
+		if (FAILED(hr))
+		{
+			BGE_ERROR("D3D11: Failed to compile pixel shader");
+			return nullptr;
+		}
+
+		return pPixelShader;
 	}
 } // End namespace (BGE)

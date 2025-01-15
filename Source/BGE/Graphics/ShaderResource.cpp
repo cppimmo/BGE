@@ -44,6 +44,47 @@ namespace BGE
 		return true;
 	}
 
+	std::string HLSLResourceLoader::VGetPattern(void) const
+	{
+		return "*.hlsl";
+	}
+
+	ResourceType HLSLResourceLoader::VGetType(void) const
+	{
+		return ResourceType::kHLSL;
+	}
+
+	bool HLSLResourceLoader::VUseRawFile(void) const
+	{
+		return false;
+	}
+
+	bool HLSLResourceLoader::VDiscardRawBufferAfterLoad(void)
+	{
+		return true;
+	}
+
+	bool HLSLResourceLoader::VAddNullZero(void)
+	{
+		return true;
+	}
+
+	std::size_t HLSLResourceLoader::VGetLoadedResourceSize(char *pRawBuffer, std::size_t rawSize)
+	{
+		return rawSize;
+	}
+
+	bool HLSLResourceLoader::VLoadResource(char *pRawBuffer, std::size_t size, StrongResourceHandlePtr pResourceHandle)
+	{
+		if (size <= 0)
+			return false;
+
+		// Set the shader plaintext source code extra data
+		auto pExtraData = std::make_shared<PlaintextResourceExtraData>(pRawBuffer);
+		pResourceHandle->SetExtraData(pExtraData);
+		return true;
+	}
+
 	std::string SPIRVResourceLoader::VGetPattern(void) const
 	{
 		// TODO: Add other accepted SPIR-V extensions.

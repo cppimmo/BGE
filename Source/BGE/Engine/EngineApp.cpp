@@ -161,6 +161,7 @@ namespace BGE
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateTGAResourceLoader());
 		// Shader resource loaders:
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateGLSLResourceLoader());
+		m_pResourceCache->RegisterLoader(rlFactory.VCreateHLSLResourceLoader());
 		// Sound resource loaders:
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateWAVResourceLoader());
 		m_pResourceCache->RegisterLoader(rlFactory.VCreateOGGResourceLoader());
