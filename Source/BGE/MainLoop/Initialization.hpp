@@ -40,7 +40,7 @@ namespace BGE
 	//! Retrieve cmdline args as a string container.
 	[[nodiscard]] std::span<std::string_view> GetArguments(int numArgs, char *pArgs[]);
 	//! Get runtime platform string.
-	std::string_view GetPlatform(void);
+	std::string GetPlatform(void);
 	//! Ensure available disk space in MiB.
 	bool IsDiskSpaceAvailable(int neededDiskSpaceMiB);
 	//! Retrieve the # of logical CPU cores.
@@ -56,9 +56,9 @@ namespace BGE
 	//! Ensure that only one instance of the game with GAMETITLE exists.
 	bool IsOnlyInstance(std::string_view gameTitle);
 	//! Retrieve the location of the game executable.
-	std::optional<std::string> GetCurrentDirectory(void);
+	std::optional<std::filesystem::path> GetCurrentDirectory(void);
 	//! Retrieve the location of the save game directory.
-	std::optional<std::string> GetSaveGameDirectory(std::string_view orgName, std::string_view appName);
+	std::optional<std::filesystem::path> GetSaveGameDirectory(std::string_view orgName, std::string_view appName);
 	//! Hide the application console (on Windows).
 	void HideConsole(void);
 } // End namespace (BGE)

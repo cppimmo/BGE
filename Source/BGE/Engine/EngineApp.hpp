@@ -120,8 +120,8 @@ namespace BGE
 		virtual UniqueBaseGameLogicPtr VCreateGameAndView(void) = 0;
 		virtual bool VLoadGame(void);
 		virtual std::string VGetGameTitle(void) = 0; // Application related data
-		virtual std::string VGetGameAppDirectory(void) = 0;
-		virtual std::string VGetIcon(void) = 0; // Icon filename
+		virtual std::filesystem::path VGetGameAppDirectory(void) = 0;
+		virtual std::filesystem::path VGetIconPath(void) = 0; // Icon filename
 		virtual int VGetRendererImpl(void) = 0; // Type of renderer
 
 		static void OnUpdate(float deltaTime, float elapsedTime);

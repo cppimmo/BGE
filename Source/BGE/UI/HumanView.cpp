@@ -44,8 +44,8 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 	{
 		BGE_LOG("Input", "Taking screenshot...");
 		auto &app = GetEngineApp();
-		std::string saveGameDir = app.VGetGameAppDirectory();
-		app.GetRenderer().VTakeScreenshot(saveGameDir);
+
+		app.GetRenderer().VTakeScreenshot(app.VGetGameAppDirectory());
 		return true;
 	}
 	else if (key.sym == SDLK_BACKQUOTE && !bRepeat)

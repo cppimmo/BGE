@@ -128,6 +128,9 @@
 //! Primary engine namespace.
 namespace BGE
 {
+	//! Alias for std::filesystem.
+	namespace fs = std::filesystem;
+
 	/**
 	 * @brief Representation of engine version information.
 	 */

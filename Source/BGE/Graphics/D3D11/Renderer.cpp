@@ -12,15 +12,13 @@
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "dxguid.lib")
 
-//#include "Graphics/GL/Shaders.hpp"
-//#include "Graphics/GL/ShaderProgram.hpp"
-#include "Graphics/GL/Viewport.hpp"
+#include "Graphics/D3D11/Viewport.hpp"
 
 namespace BGE
 {
 	D3D11Renderer::D3D11Renderer(void)
 		: m_options{},
-		  m_pViewport(std::make_unique<GLViewport>(glm::ivec2(1280, 720))),
+		  m_pViewport(std::make_unique<D3D11Viewport>(glm::ivec2(1280, 720))),
 		  m_bgColor(0.1f, 0.1f, 0.1f, 1.0f)
 	{
 	}
@@ -43,6 +41,19 @@ namespace BGE
 			return false;
 		}
 
+		auto adapters = EnumerateAdapters();
+		for (const auto &pAdapter : adapters)
+		{
+			DXGI_ADAPTER_DESC1 adapterDesc = { };
+			HRESULT hr = pAdapter->GetDesc1(&adapterDesc);
+			if (FAILED(hr)) continue;
+
+			//adapterDesc.DedicatedSystemMemory;
+			//adapterDesc.DedicatedVideoMemory;
+			//adapterDesc.Description;
+			//adapterDesc.DeviceId;
+		}
+
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if BGE_CONFIG_DEBUG
 		// If the project is in a debug build & renderer debug is enabled, enable the debug layer.
@@ -53,8 +64,9 @@ namespace BGE
 #endif // BGE_CONFIG_DEBUG
 
 		// Create the device and device context
-		constexpr std::array<D3D_FEATURE_LEVEL, 1> kDEVICE_FEATURE_LEVELS = 
+		constexpr std::array<D3D_FEATURE_LEVEL, 2> kDEVICE_FEATURE_LEVELS = 
 		{
+			D3D_FEATURE_LEVEL_11_1,
 			D3D_FEATURE_LEVEL_11_0
 		};
 		
@@ -80,6 +92,8 @@ namespace BGE
 			BGE_ERROR("D3D11: Failed to get the debug layer from the device");
 			return false;
 		}
+
+		BGE_LOG("D3D11", "\n\n%s", VGetRendererInfo().c_str());
 #endif // BGE_CONFIG_DEBUG
 
 		int width{ }, height{ };
@@ -284,6 +298,9 @@ namespace BGE
 			return false;
 		}
 
+		// Set the default viewport
+		VSetViewport(D3D11Viewport(glm::ivec2(width, height)));
+
 		m_bInitialized = true; // Set the initialization flag
 		return true;
 	}
@@ -341,35 +358,24 @@ namespace BGE
 			ImGui::NewFrame();
 		}
 
-		int width{ }, height{ };
-		BGUTGetWindowSize(BGUTGetWindowPtr(), width, height);
+		// Clear the render target
+		const float kClearColor[] = { m_bgColor.r, m_bgColor.g, m_bgColor.b, m_bgColor.a };
+		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), kClearColor);
 
+		// Setup the viewport
 		D3D11_VIEWPORT viewport = { };
-		viewport.TopLeftX = 0.0f;
-		viewport.TopLeftY = 0.0f;
-		viewport.Width = static_cast<decltype(D3D11_VIEWPORT::Width)>(width);
-		viewport.Height = static_cast<decltype(D3D11_VIEWPORT::Height)>(height);
+		viewport.TopLeftX = static_cast<decltype(D3D11_VIEWPORT::TopLeftX)>(m_pViewport->VGetOffset().x);
+		viewport.TopLeftY = static_cast<decltype(D3D11_VIEWPORT::TopLeftX)>(m_pViewport->VGetOffset().y);
+		viewport.Width = static_cast<decltype(D3D11_VIEWPORT::Width)>(m_pViewport->VGetSize().x);
+		viewport.Height = static_cast<decltype(D3D11_VIEWPORT::Height)>(m_pViewport->VGetSize().y);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
+		//D3D11Viewport::GetD3D11Viewport(m_pViewport.get());
 
-		const float kClearColor[] = { m_bgColor.r, m_bgColor.g, m_bgColor.b, m_bgColor.a };
-
-		// Clear the render target
-		m_pDeviceContext->ClearRenderTargetView(
-			m_pRenderTargetView.Get(),
-			kClearColor);
-
-		// Set the viewport
-		m_pDeviceContext->RSSetViewports(
-			1u,
-			&viewport);
+		m_pDeviceContext->RSSetViewports(1u, &viewport);
 
 		// Set the render targets
-		m_pDeviceContext->OMSetRenderTargets(
-			1u,
-			m_pRenderTargetView.GetAddressOf(),
-			nullptr);
-
+		m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), nullptr);
 
 		m_pDeviceContext->IASetInputLayout(m_pInputLayout.Get());
 
@@ -381,6 +387,17 @@ namespace BGE
 
 		m_pDeviceContext->VSSetShader(m_pVertexShader.Get(), nullptr, 0u);
 		
+		// Scissor test
+		//D3D11_RASTERIZER_DESC rasterDesc = { };
+		//rasterDesc.FillMode = D3D11_FILL_SOLID;
+		//rasterDesc.CullMode = D3D11_CULL_BACK;
+		//rasterDesc.ScissorEnable = true;
+		//ComPtr<ID3D11RasterizerState> pState;
+		//m_pDevice->CreateRasterizerState(&rasterDesc, &pState);
+		//D3D11_RECT rect = { 100, 100, 600, 600 };
+		//m_pDeviceContext->RSSetScissorRects(1u, &rect);
+		//m_pDeviceContext->RSSetState(pState.Get());
+
 		m_pDeviceContext->RSSetState(m_pSolidRasterState.Get());
 
 		m_pDeviceContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0u);
@@ -447,7 +464,7 @@ namespace BGE
 
 	void D3D11Renderer::VSetViewport(const IViewport &kViewport)
 	{
-		m_pViewport = std::make_unique<GLViewport>(dynamic_cast<const GLViewport &>(kViewport));
+		m_pViewport = std::make_unique<D3D11Viewport>(dynamic_cast<const D3D11Viewport &>(kViewport));
 	}
 
 	const IViewport &D3D11Renderer::VGetViewport(void) const
@@ -483,19 +500,18 @@ namespace BGE
 		return BlendMode();
 	}
 
-	bool D3D11Renderer::VTakeScreenshot(std::string_view saveGameDir)
+	bool D3D11Renderer::VTakeScreenshot(const std::filesystem::path &kSaveGameDir)
 	{
 		BGE_ASSERT(m_pRenderTargetView);
 
-		ID3D11Resource *pResource = nullptr;
-		m_pRenderTargetView->GetResource(&pResource); // Query the associated resource
+		// Query the resource associated with the render target view
+		ComPtr<ID3D11Resource> pResource = nullptr;
+		m_pRenderTargetView->GetResource(&pResource);
 
-		ID3D11Texture2D *pRenderTargetTexture = nullptr;
+		ComPtr<ID3D11Texture2D> pRenderTargetTexture = nullptr;
 		if (pResource)
 		{
-			// Cast the resource to ID3D11Texture2D
-			pResource->QueryInterface(IID_PPV_ARGS(&pRenderTargetTexture));
-			pResource->Release(); // Release the intermediate resource
+			pResource.As(&pRenderTargetTexture); // Cast the resource to ID3D11Texture2D
 		}
 
 		if (!pRenderTargetTexture)
@@ -507,31 +523,55 @@ namespace BGE
 		D3D11_TEXTURE2D_DESC renderTargetDesc;
 		pRenderTargetTexture->GetDesc(&renderTargetDesc);
 
+		// Multisampled render targets need to be resolved before staging
+		ComPtr<ID3D11Texture2D> pResolvedTexture = nullptr;
+		if (renderTargetDesc.SampleDesc.Count > 1)
+		{
+			D3D11_TEXTURE2D_DESC resolveDesc = renderTargetDesc;
+			resolveDesc.SampleDesc.Count = 1u; // Disable multisampling
+			resolveDesc.SampleDesc.Quality = 0u;
+			resolveDesc.Usage = D3D11_USAGE_DEFAULT; // Default usage for the intermediate texture
+			resolveDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE; // Allows resolution
+			resolveDesc.CPUAccessFlags = 0u; // No CPU access needed
+			resolveDesc.MiscFlags = 0u;
+
+			if (FAILED(m_pDevice->CreateTexture2D(&resolveDesc, nullptr, &pResolvedTexture)))
+			{
+				BGE_LOG("D3D11", "Failed to create resolved texture");
+				pResolvedTexture->Release();
+				return false;
+			}
+
+			// Resolve the multisampled render target
+			m_pDeviceContext->ResolveSubresource(pResolvedTexture.Get(), 0u, pRenderTargetTexture.Get(), 0u, renderTargetDesc.Format);
+
+			// Replace the render target texture with the resolved texture
+			pRenderTargetTexture = pResolvedTexture;
+		}
+
 		// Create a staging texture (CPU-readable)
 		D3D11_TEXTURE2D_DESC stagingDesc = renderTargetDesc;
+		stagingDesc.SampleDesc.Count = 1u;
+		stagingDesc.SampleDesc.Quality = 0u;
 		stagingDesc.Usage = D3D11_USAGE_STAGING;
 		stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 		stagingDesc.BindFlags = 0u; // No binding flags needed
 		stagingDesc.MiscFlags = 0u;
 
-		// TODO: Check the sample count of the render target to support screenshots of multisampled render target view.
-		
-		ID3D11Texture2D *pStagingTexture = nullptr;
+		ComPtr<ID3D11Texture2D> pStagingTexture = nullptr;
 		if (FAILED(m_pDevice->CreateTexture2D(&stagingDesc, nullptr, &pStagingTexture)))
 		{
 			BGE_LOG("D3D11", "Failed to create staging texture");
-			pRenderTargetTexture->Release();
 			return false;
 		}
 
 		// Copy render target texture to the staging texture
-		m_pDeviceContext->CopyResource(pStagingTexture, pRenderTargetTexture);
+		m_pDeviceContext->CopyResource(pStagingTexture.Get(), pRenderTargetTexture.Get());
 
 		// Map the staging texture to access its data on the CPU
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		if (FAILED(m_pDeviceContext->Map(pStagingTexture, 0u, D3D11_MAP_READ, 0u, &mappedResource)))
+		if (FAILED(m_pDeviceContext->Map(pStagingTexture.Get(), 0u, D3D11_MAP_READ, 0u, &mappedResource)))
 		{
-			pStagingTexture->Release();
 			return false;
 		}
 
@@ -549,14 +589,12 @@ namespace BGE
 		if (!pSurface)
 		{
 			BGE_LOG("SDL", "Failed to create SDL_Surface: %s", SDL_GetError());
-			m_pDeviceContext->Unmap(pStagingTexture, 0u);
-			pStagingTexture->Release();
-			pRenderTargetTexture->Release();
+			m_pDeviceContext->Unmap(pStagingTexture.Get(), 0u);
 			return false;
 		}
 
 		// Save the surface to a BMP file
-		std::string screenshotPath = GetScreenshotFilename(saveGameDir);
+		std::string screenshotPath = GetScreenshotFilename(kSaveGameDir.string());
 		if (SDL_SaveBMP(pSurface, screenshotPath.c_str()))
 		{
 			BGE_LOG("SDL", "Failed to save screenshot: %s", SDL_GetError());
@@ -564,10 +602,7 @@ namespace BGE
 
 		// Clean up
 		SDL_FreeSurface(pSurface);
-		m_pDeviceContext->Unmap(pStagingTexture, 0u);
-		pStagingTexture->Release();
-		pRenderTargetTexture->Release();
-
+		m_pDeviceContext->Unmap(pStagingTexture.Get(), 0u);
 		return true;
 	}
 
@@ -577,9 +612,107 @@ namespace BGE
 
 	std::string D3D11Renderer::VGetRendererInfo(void) const
 	{
-		return std::string();
+		BGE_ASSERT(m_pDevice && m_pDeviceContext);
+		HRESULT hr = S_OK;
+
+		// Retrieve and output the feature level of the device
+		const D3D_FEATURE_LEVEL kFeatureLevel = m_pDevice->GetFeatureLevel();
+		std::string featureLevelStr;
+		switch (kFeatureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+			featureLevelStr = "11.1";
+			break;
+		case D3D_FEATURE_LEVEL_11_0:
+			featureLevelStr = "11.0";
+			break;
+		case D3D_FEATURE_LEVEL_10_1:
+			featureLevelStr = "10.1";
+			break;
+		case D3D_FEATURE_LEVEL_10_0:
+			featureLevelStr = "10.0";
+			break;
+		case D3D_FEATURE_LEVEL_9_3:
+			featureLevelStr = "9.3";
+			break;
+		case D3D_FEATURE_LEVEL_9_2:
+			featureLevelStr = "9.2";
+			break;
+		case D3D_FEATURE_LEVEL_9_1:
+			featureLevelStr = "9.1";
+			break;
+		default:
+			featureLevelStr = "Unknown";
+			break;
+		}
+
+		std::ostringstream oss;
+		oss << "Device feature level: " << featureLevelStr << '\n';
+
+		// Output information of the device's chosen adapter
+		ComPtr<IDXGIDevice1> pDXGIDevice = nullptr;
+		hr = m_pDevice->QueryInterface(IID_PPV_ARGS(&pDXGIDevice));
+		if (FAILED(hr))
+		{
+			return "";
+		}
+
+		ComPtr<IDXGIAdapter> pAdapter = nullptr;
+		hr = pDXGIDevice->GetAdapter(&pAdapter);
+		if (FAILED(hr))
+		{
+			return "";
+		}
+
+		if (pAdapter)
+		{
+			DXGI_ADAPTER_DESC adapterDesc = { };
+			pAdapter->GetDesc(&adapterDesc);
+
+			constexpr auto toMiB = [](std::size_t bytes) -> std::size_t
+			{
+				return bytes / (1024 * 1024);
+			};
+
+			constexpr std::string_view kMEBIBYTE = "MiB";
+			oss << "Adapter desc: " << WStringToString(adapterDesc.Description) << '\n';
+			oss << "Adapter dedicated video mem: " << toMiB(adapterDesc.DedicatedVideoMemory) << ' ' << kMEBIBYTE << '\n';
+			oss << "Adapter dedicated system mem: " << toMiB(adapterDesc.DedicatedSystemMemory) << ' ' << kMEBIBYTE << '\n';
+			oss << "Adapter shader system mem: " << toMiB(adapterDesc.SharedSystemMemory) << ' ' << kMEBIBYTE << '\n';
+		}
+
+		return oss.str();
 	}
 	
+	ID3D11Device *D3D11Renderer::GetDevice(void) noexcept
+	{
+		auto &app = GetEngineApp(); // Retrieve the engine app (contains renderer instance)
+		auto &renderer = dynamic_cast<D3D11Renderer &>(app.GetRenderer()); // Cast to derived type
+
+		return renderer.m_pDevice.Get();
+	}
+
+	ID3D11DeviceContext *D3D11Renderer::GetDeviceContext(void) noexcept
+	{
+		auto &app = GetEngineApp(); // Retrieve the engine app (contains renderer instance)
+		auto &renderer = dynamic_cast<D3D11Renderer &>(app.GetRenderer()); // Cast to derived type
+
+		return renderer.m_pDeviceContext.Get();
+	}
+
+	std::vector<D3D11Renderer::ComPtr<IDXGIAdapter1>> D3D11Renderer::EnumerateAdapters(void)
+	{
+		std::vector<ComPtr<IDXGIAdapter1>> adapters;
+
+		ComPtr<IDXGIAdapter1> pAdapter = nullptr;
+		for (UINT i = 0; m_pDXGIFactory->EnumAdapters1(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
+		{
+			adapters.push_back(pAdapter);
+		}
+
+		return adapters;
+	}
+
 	bool D3D11Renderer::CreateSwapchainResources(void)
 	{
 		ComPtr<ID3D11Texture2D> pBackBuffer = nullptr;

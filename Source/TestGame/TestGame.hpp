@@ -11,8 +11,8 @@ namespace TestGame
 	public:
 		virtual BGE::UniqueBaseGameLogicPtr VCreateGameAndView(void) override;
 		virtual std::string VGetGameTitle(void) override;
-		virtual std::string VGetGameAppDirectory(void) override;
-		virtual std::string VGetIcon(void) override;
+		virtual std::filesystem::path VGetGameAppDirectory(void) override;
+		virtual std::filesystem::path VGetIconPath(void) override;
 		virtual int VGetRendererImpl(void) override;
 	protected:
 		virtual void VRegisterGameEvents(void) override;

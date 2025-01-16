@@ -44,7 +44,7 @@ namespace BGE
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) override;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) override;
 
-		virtual bool VTakeScreenshot(std::string_view saveGameDir) override;
+		virtual bool VTakeScreenshot(const std::filesystem::path &kSaveGameDir) override;
 
 		virtual void VEnableDebugOutput(bool bEnable) override {}
 		virtual std::string VGetRendererInfo(void) const override { return ""; }

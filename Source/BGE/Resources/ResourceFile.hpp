@@ -11,6 +11,9 @@ namespace BGE
 	BGE_DECLARE_PTR(IResourceFile);
 	BGE_DECLARE_PTR(ZipResourceFile);
 
+	/**
+	 * @brief .
+	 */
 	class IResourceFile
 	{
 	public:
@@ -24,6 +27,9 @@ namespace BGE
 		virtual bool VIsUsingDevelopmentDirectories(void) const = 0;
 	};
 
+	/**
+	 * @brief .
+	 */
 	class ZipResourceFile : public IResourceFile
 	{
 		UniqueZipFilePtr m_pZipFile;
@@ -43,7 +49,7 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
-	/*class DevZipResourceFile : public ZipResourceFile
+	class DevZipResourceFile : public ZipResourceFile
 	{
 	public:
 		enum struct Mode
@@ -53,10 +59,11 @@ namespace BGE
 		};
 	private:
 		Mode m_mode;
-		std::wstring m_assetsPath;
-		ZipContentsMap m_dirContentsMap;
-
-		DevZipResourceFile(std::wstring_view assetsPath, Mode mode);
+		std::filesystem::path m_assetsPath;
+		std::unordered_map<std::string, std::size_t> m_dirContentsMap;
+		std::vector<std::filesystem::directory_entry> m_assetFileInfo;
+	public:
+		DevZipResourceFile(const std::filesystem::path &kAssetsPath, Mode mode);
 		// IResourceFile's interface:
 		virtual bool VOpen(void) override;
 		virtual std::size_t VGetRawResourceSize(const Resource &kResource) override;
@@ -64,11 +71,10 @@ namespace BGE
 		virtual std::size_t VGetNumResources(void) const override;
 		virtual std::string VGetResourceName(std::size_t num) const override;
 		virtual bool VIsUsingDevelopmentDirectories(void) const override;
-
-		int Find(std::string_view path);
 	protected:
-		void ReadAssetsDirectory(std::wstring_view fileSpec);
-	};*/
+		void ReadAssetsDirectory(const std::filesystem::path &kPath);
+		static std::string NormalizeResource(const Resource &kResource);
+	};
 } // End namespace (BGE)
 
 #endif /* !_BGE_RESOURCEFILE_HPP_ */

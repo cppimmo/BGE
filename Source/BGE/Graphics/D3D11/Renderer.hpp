@@ -49,7 +49,7 @@ namespace BGE
 		ComPtr<ID3D11VertexShader> m_pVertexShader = nullptr;
 		ComPtr<ID3D11PixelShader> m_pPixelShader = nullptr;
 
-		D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE; //!< D3D driver type.
+		D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE_HARDWARE; //!< D3D driver type.
 		ImGuiContext *m_pImGuiContext = nullptr; //< Pointer to ImGui context.
 		ImPlotContext *m_pImPlotContext = nullptr; //< Pointer to ImPlot context.
 		bool m_bInitialized = false; //!< Was the renderer intialized?
@@ -79,11 +79,15 @@ namespace BGE
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) override;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) override;
 
-		virtual bool VTakeScreenshot(std::string_view saveGameDir) override;
+		virtual bool VTakeScreenshot(const std::filesystem::path &kSaveGameDir) override;
 
 		virtual void VEnableDebugOutput(bool bEnable) override;
 		virtual std::string VGetRendererInfo(void) const override;
+
+		static ID3D11Device *GetDevice(void) noexcept;
+		static ID3D11DeviceContext *GetDeviceContext(void) noexcept;
 	private:
+		std::vector<ComPtr<IDXGIAdapter1>> EnumerateAdapters(void);
 		bool CreateSwapchainResources(void);
 		void DestroySwapchainResources(void);
 		bool CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint, std::string_view profile, ComPtr<ID3DBlob> &pShaderBlob);

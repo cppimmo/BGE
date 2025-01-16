@@ -327,9 +327,9 @@ void BGE::BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen)
 {
 }
 
-void BGE::BGUTSetWindowIcon(std::string_view fileName)
+void BGE::BGUTSetWindowIcon(const std::filesystem::path &kFilePath)
 {
-	SDL_Surface *pIconSurface = SDL_LoadBMP(fileName.data());
+	SDL_Surface *pIconSurface = SDL_LoadBMP(kFilePath.string().c_str());
 	if (!pIconSurface)
 	{
 		BGE_WARNING("Could't set window icon!");

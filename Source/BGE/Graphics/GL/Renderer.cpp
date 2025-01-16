@@ -19,6 +19,8 @@ namespace BGE
 
 	bool GLRenderer::VInit(const EngineOptions &kOptions)
 	{
+
+
 		return true;
 	}
 
@@ -49,6 +51,10 @@ namespace BGE
 
 	void GLRenderer::VOnResize(std::int32_t width, std::int32_t height)
 	{
+		const glm::ivec2 kOffset = m_pViewport->VGetOffset(); // (x, y)
+		const glm::ivec2 kSize = m_pViewport->VGetSize(); // (width, height)
+
+		glViewport(kOffset.x, kOffset.y, kSize.x, kSize.y);
 	}
 
 	void GLRenderer::VSetViewport(const IViewport &kViewport)
@@ -72,7 +78,7 @@ namespace BGE
 		return m_bgColor;
 	}
 
-	bool GLRenderer::VTakeScreenshot(std::string_view saveGameDir)
+	bool GLRenderer::VTakeScreenshot(const std::filesystem::path &kSaveGameDir)
 	{
 		return true;
 	}

@@ -85,7 +85,7 @@ namespace BGE
 		virtual StrongIShaderProgramPtr VCreateShaderProgram(std::string_view name) = 0;
 		virtual StrongIShaderProgramPtr VGetShaderProgram(std::string_view name) = 0;
 
-		virtual bool VTakeScreenshot(std::string_view saveGameDir) = 0;
+		virtual bool VTakeScreenshot(const std::filesystem::path &kSaveGameDir) = 0;
 
 		virtual void VEnableDebugOutput(bool bEnable) = 0; // Enable OpenGL debug context messages.
 		virtual std::string VGetRendererInfo(void) const = 0; // Return GPU/driver information.

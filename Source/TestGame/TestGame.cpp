@@ -33,7 +33,7 @@ namespace TestGame
 		return "Test Game";
 	}
 
-	std::string TestGameApp::VGetGameAppDirectory(void)
+	std::filesystem::path TestGameApp::VGetGameAppDirectory(void)
 	{
 		auto saveGameDir = BGE::GetSaveGameDirectory("cppimmo", BGE::SnakeCaseString(VGetGameTitle()));
 		if (!saveGameDir)
@@ -45,7 +45,7 @@ namespace TestGame
 		return *saveGameDir;
 	}
 
-	std::string TestGameApp::VGetIcon(void)
+	std::filesystem::path TestGameApp::VGetIconPath(void)
 	{
 		return "game_icon.bmp";
 	}

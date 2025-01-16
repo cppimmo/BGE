@@ -1,5 +1,8 @@
 #include "Engine/EngineStd.hpp"
 #include "Graphics/GL/Viewport.hpp"
+#include "Viewport.hpp"
+#include "Viewport.hpp"
+#include "Viewport.hpp"
 
 namespace BGE
 {

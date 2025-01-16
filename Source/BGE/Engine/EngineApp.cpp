@@ -137,7 +137,8 @@ namespace BGE
 		BGE_QUEUE_GEVENT(std::make_shared<EventData_EventSystemStarted>());
 
 		// Initialize the resource cache
-		auto pResourceFile = std::make_shared<ZipResourceFile>(L"Assets.zip");
+		//auto pResourceFile = std::make_shared<ZipResourceFile>(L"Assets.zip");
+		auto pResourceFile = std::make_shared<DevZipResourceFile>(L"Assets.zip", DevZipResourceFile::Mode::kEditor);
 		m_pResourceCache = std::make_unique<ResourceCache>(50_MiB, pResourceFile);
 		if (!m_pResourceCache->Init())
 		{
@@ -217,10 +218,10 @@ namespace BGE
 
 		// Set window title & icon
 		BGUTSetWindowTitle(VGetGameTitle());
-		std::string iconFileName;
-		if (!(iconFileName = VGetIcon()).empty())
+		fs::path iconFilePath;
+		if (!(iconFilePath = VGetIconPath()).empty())
 		{
-			BGUTSetWindowIcon(iconFileName);
+			BGUTSetWindowIcon(iconFilePath);
 		}
 
 		// Initialize the audio system
