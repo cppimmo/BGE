@@ -41,19 +41,6 @@ namespace BGE
 			return false;
 		}
 
-		auto adapters = EnumerateAdapters();
-		for (const auto &pAdapter : adapters)
-		{
-			DXGI_ADAPTER_DESC1 adapterDesc = { };
-			HRESULT hr = pAdapter->GetDesc1(&adapterDesc);
-			if (FAILED(hr)) continue;
-
-			//adapterDesc.DedicatedSystemMemory;
-			//adapterDesc.DedicatedVideoMemory;
-			//adapterDesc.Description;
-			//adapterDesc.DeviceId;
-		}
-
 		UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #if BGE_CONFIG_DEBUG
 		// If the project is in a debug build & renderer debug is enabled, enable the debug layer.
@@ -86,7 +73,7 @@ namespace BGE
 			return false;
 		}
 
-#if BGE_CONFIG_DEBUG
+#ifdef BGE_CONFIG_DEBUG
 		if (*m_options.bRendererDebug && FAILED(m_pDevice.As(&m_pDebug)))
 		{
 			BGE_ERROR("D3D11: Failed to get the debug layer from the device");
@@ -164,47 +151,39 @@ namespace BGE
 			return false;
 		}
 
-		if (*kOptions.bImGuiEnabled)
-		{
-			IMGUI_CHECKVERSION(); // What does this do?
+#if 0
+		// Create depth stencil state
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc = { };
+		depthStencilDesc.DepthEnable = TRUE;
+		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+		ComPtr<ID3D11DepthStencilState> pDepthStencilState;
+		m_pDevice->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState);
 
-			// Create ImGui context
-			if (!(m_pImGuiContext = ImGui::CreateContext()))
-			{
-				BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImGui context!");
-				return false;
-			}
-			// Create ImPlot context
-			if (!(m_pImPlotContext = ImPlot::CreateContext()))
-			{
-				BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImPlot context!");
-				return false;
-			}
+		m_pDeviceContext->OMSetDepthStencilState(pDepthStencilState.Get(), 1u);
 
-			BGUTSetImGuiContextPtrs(m_pImGuiContext, m_pImPlotContext);
+		ComPtr<ID3D11Texture2D> pDepthStencil;
+		D3D11_TEXTURE2D_DESC depthStencilTextureDesc = { };
+		depthStencilTextureDesc.Width = width;
+		depthStencilTextureDesc.Height = height;
+		depthStencilTextureDesc.MipLevels = 1u;
+		depthStencilTextureDesc.ArraySize = 1u;
+		depthStencilTextureDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		depthStencilTextureDesc.SampleDesc.Count = 1u;
+		depthStencilTextureDesc.SampleDesc.Quality = 0u;
+		depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+		depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		m_pDevice->CreateTexture2D(&depthStencilTextureDesc, nullptr, &pDepthStencil);
 
-			ImGuiIO &io = ImGui::GetIO();
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable gamepad controls
-			//io.IniFilename = nullptr; // TODO: Set ImGui config filename/location.
-			
-			// Set ImGui style colors
-			ImGui::StyleColorsDark();
-			
-			// Setup platform/renderer backends
-			if (!ImGui_ImplSDL2_InitForD3D(BGUTGetWindowPtr()))
-			{
-				BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize SDL2 implementation!");
-				return false;
-			}
+		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = { };
+		depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		depthStencilViewDesc.Texture2D.MipSlice = 0u;
 
-			// TODO: Define the GLSL version string elsewhere.
-			if (!ImGui_ImplDX11_Init(m_pDevice.Get(), m_pDeviceContext.Get()))
-			{
-				BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize OpenGL3 implementation!");
-				return false;
-			}
-		}
+		m_pDevice->CreateDepthStencilView(pDepthStencil.Get(), &depthStencilViewDesc, &m_pDepthTarget);
+
+		m_pDeviceContext->OMSetRenderTargets(1u, m_pRenderTargetView.GetAddressOf(), m_pDepthTarget.Get());
+#endif
 
 		D3D11_RASTERIZER_DESC rasterizerStateDesc = { };
 		rasterizerStateDesc.FillMode = D3D11_FILL_SOLID;
@@ -229,16 +208,57 @@ namespace BGE
 			return false;
 		}
 
+		// Initialize ImGui & ImPlot
+		IMGUI_CHECKVERSION(); // What does this do?
+
+		// Create ImGui context
+		if (!(m_pImGuiContext = ImGui::CreateContext()))
+		{
+			BGE_ERROR("D3D11: Couldn't create ImGui context!");
+			return false;
+		}
+
+		// Create ImPlot context
+		if (!(m_pImPlotContext = ImPlot::CreateContext()))
+		{
+			BGE_ERROR("D3D11: Couldn't create ImPlot context!");
+			return false;
+		}
+
+		BGUTSetImGuiContextPtrs(m_pImGuiContext, m_pImPlotContext);
+
+		ImGuiIO &io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable gamepad controls
+		//io.IniFilename = nullptr; // TODO: Set ImGui config filename/location.
+
+		// Set ImGui style colors
+		ImGui::StyleColorsDark();
+
+		// Setup platform/renderer backends
+		if (!ImGui_ImplSDL2_InitForD3D(BGUTGetWindowPtr()))
+		{
+			BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize SDL2 implementation!");
+			return false;
+		}
+
+		// TODO: Define the GLSL version string elsewhere.
+		if (!ImGui_ImplDX11_Init(m_pDevice.Get(), m_pDeviceContext.Get()))
+		{
+			BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize OpenGL3 implementation!");
+			return false;
+		}
+
 		auto &app = GetEngineApp();
 		auto &resCache = app.GetResourceCache();
 		ComPtr<ID3DBlob> pVertexShaderBlob = nullptr;
-		m_pVertexShader = CreateVertexShader(resCache.GetHandle(Resource("Assets\\Shaders\\test_vert.hlsl")), pVertexShaderBlob);
+		m_pVertexShader = CreateVertexShader(resCache.GetHandle(Resource("Assets\\Shaders\\Test.vs.hlsl")), pVertexShaderBlob);
 		if (!m_pVertexShader)
 		{
 			return false;
 		}
 
-		m_pPixelShader = CreatePixelShader(resCache.GetHandle(Resource("Assets\\Shaders\\test_pixl.hlsl")));
+		m_pPixelShader = CreatePixelShader(resCache.GetHandle(Resource("Assets\\Shaders\\Test.ps.hlsl")));
 		if (!m_pPixelShader)
 		{
 			return false;
@@ -361,6 +381,8 @@ namespace BGE
 		// Clear the render target
 		const float kClearColor[] = { m_bgColor.r, m_bgColor.g, m_bgColor.b, m_bgColor.a };
 		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView.Get(), kClearColor);
+
+		//m_pDeviceContext->ClearDepthStencilView(m_pDepthTarget.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 
 		// Setup the viewport
 		D3D11_VIEWPORT viewport = { };

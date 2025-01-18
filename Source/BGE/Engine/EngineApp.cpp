@@ -43,7 +43,6 @@
 #include "Events/Events.hpp"
 #include "Events/EventRegistry.hpp"
 #include "MainLoop/Initialization.hpp"
-#include "Graphics/Debug.hpp"
 #include "Utilities/Utils.hpp"
 #include "Memory/Memory.hpp"
 #include "Resources/ResourceLoader.hpp"
@@ -114,7 +113,7 @@ namespace BGE
 		BGE_LOG("App", "Platform: %s", GetPlatform().data());
 		BGE_LOG("App", "CPU speed: %dMHz", ReadCPUSpeed());
 		BGE_LOG("App", "Logical CPU cores: %d", ReadLogicalCPUCores());
-#endif
+#endif /* BGE_CONFIG_DEBUG */
 #ifdef BGE_CONFIG_RELEASE
 		if (!IsOnlyInstance("BGE"))
 		{
@@ -126,7 +125,7 @@ namespace BGE
 		{
 			return false;
 		}
-#endif
+#endif /* BGE_CONFIG_RELEASE */
 		// Register all events
 		RegisterEngineEvents();
 		VRegisterGameEvents();
@@ -197,9 +196,11 @@ namespace BGE
 		{
 		case RendererImpl::kOpenGL:
 			m_pRenderer = std::make_unique<GLRenderer>();
+			BGE_LOG("App", "Using OpenGL 4.5 renderer");
 			break;
 		case RendererImpl::kD3D11:
 			m_pRenderer = std::make_unique<D3D11Renderer>();
+			BGE_LOG("App", "Using DirectX 11 renderer");
 			break;
 		default:
 			return false;
@@ -331,9 +332,6 @@ namespace BGE
 	{
 		auto &app = GetEngineApp();
 		// TODO: Call rendering routines.
-
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glClearBufferfv(GL_COLOR, 0, clearColor);
 
 		auto time = app.GetTimer().GetElapsedSecs();
 		glm::vec4 clearColor = { 0.0f, 0.5f, 1.0f, 1.0f };

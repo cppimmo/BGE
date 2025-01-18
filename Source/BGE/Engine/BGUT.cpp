@@ -28,16 +28,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-#include "EngineStd.hpp"
-#include "BGUT.hpp"
+#include "Engine/EngineStd.hpp"
+#include "Engine/BGUT.hpp"
 
 #include <cstdlib>
 
-#include "Graphics/Debug.hpp"
-#include "Utilities/Utils.hpp"
+#include <imgui_impl_sdl2.h>
 
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_opengl3.h"
+#include "Utilities/Utils.hpp"
 
 namespace BGE
 {
@@ -188,14 +186,6 @@ bool BGE::BGUTInit(const EngineOptions &kOptions)
 	//	GL::DebugContextSetup();
 	//}
 	
-	// TODO: This should go in the renderer implementation
-	// Only init ImGui when it is enabled (rely on short circuit evaluation)
-	//if (s_BGUT.bImGuiEnabled && !BGUTInitImGui(s_BGUT.pWindow))
-	//{
-	//	BGE_ERROR("BGUTInit Failure: Couldn't initialize ImGui!");
-	//	return false;
-	//}
-	
 	// Let the app layer set the viewport
 	//if (s_BGUT.pResizeCallback)
 	//	s_BGUT.pResizeCallback(s_BGUT.windowWidth, s_BGUT.windowHeight);
@@ -256,27 +246,9 @@ void BGE::BGUTMainLoop(void)
 				s_BGUT.pUpdateCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
 
 			kTicksLastStepMillis = kTicksNowMillis; // Set previous step
-			
-			// TODO: ImGui rendering should be placed in a different routine than the render callback
-			// When ImGui is enabled, prepare the new frame
-			//if (s_BGUT.bImGuiEnabled)
-			//{
-			//	ImGui::SetCurrentContext(s_BGUT.imGuiContexts.pImGuiContext);
-			//	ImPlot::SetCurrentContext(s_BGUT.imGuiContexts.pImPlotContext);
-			//
-			//	ImGui_ImplOpenGL3_NewFrame();
-			//	ImGui_ImplSDL2_NewFrame();
-			//	ImGui::NewFrame();
-			//}
 
 			if (s_BGUT.pRenderCallback) // Call render callback
 				s_BGUT.pRenderCallback(static_cast<float>(deltaTimeMS), s_BGUT.mainLoopTimer.GetElapsedSecs());
-			// When ImGui is enabled, call end of frame routines
-			//if (s_BGUT.bImGuiEnabled)
-			//{
-			//	ImGui::Render();
-			//	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			//}
 		}
 		else
 		{
@@ -300,12 +272,6 @@ void BGE::BGUTSendExitCode(int exitCode)
 
 void BGE::BGUTShutdown(void)
 {
-	// When ImGui is enabled, shutdown its context
-	//if (s_BGUT.bImGuiEnabled)
-	//{
-	//	BGUTShutdownImGui();
-	//}
-	
 	if (s_BGUT.options.rendererImpl == RendererImpl::kOpenGL)
 	{
 		SDL_GL_DeleteContext(s_BGUT.pContext);
@@ -321,7 +287,6 @@ void BGE::BGUTSetWindowTitle(std::string_view title)
 	if (!s_BGUT.pWindow) return;
 	SDL_SetWindowTitle(s_BGUT.pWindow, title.data());
 }
-
 
 void BGE::BGUTSetWindowFullscreen(BGUTWindowPtr pWindow, bool bUseFullscreen)
 {
@@ -406,61 +371,12 @@ int BGE::BGUTGetExitCode(void)
 	return s_BGUT.exitCode;
 }
 
-bool BGE::BGUTInitImGui(BGUTWindowPtr pWindow)
-{
-	IMGUI_CHECKVERSION(); // What does this do?
-	// Create ImGui context
-	if (!(s_BGUT.imGuiContexts.pImGuiContext = ImGui::CreateContext()))
-	{
-		BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImGui context!");
-		return false;
-	}
-	// Create ImPlot context
-	if (!(s_BGUT.imGuiContexts.pImPlotContext = ImPlot::CreateContext()))
-	{
-		BGE_ERROR("BGUTInitImGui Failure: Couldn't create ImPlot context!");
-		return false;
-	}
-
-	ImGuiIO &io = ImGui::GetIO();
-	//io.IniFilename = nullptr; // TODO: Set ImGui config filename/location.
-	// Set ImGui style colors
-	ImGui::StyleColorsDark();
-	// Setup platform/renderer backends
-	if (!ImGui_ImplSDL2_InitForOpenGL(pWindow, SDL_GL_GetCurrentContext()))
-	{
-		BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize SDL2 implementation!");
-		return false;
-	}
-	// TODO: Define the GLSL version string elsewhere.
-	if (!ImGui_ImplOpenGL3_Init("#version 330"))
-	{
-		BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize OpenGL3 implementation!");
-		return false;
-	}
-	return true;
-}
-
-void BGE::BGUTShutdownImGui(void)
-{
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-	ImPlot::DestroyContext(); // Destroy ImPlot context first
-	ImGui::DestroyContext();
-}
-
 void BGE::BGUTLogInfo(void)
 {
 	SDL_version version;
 	SDL_GetVersion(&version);
 	BGE_INFO("SDL Version: %d.%d.%d", version.major, version.minor, version.patch);
 	BGE_INFO("SDL Revision: %s", SDL_GetRevision());
-
-	// When ImGui is enabled, log the version
-	if (*s_BGUT.options.bImGuiEnabled)
-	{
-		BGE_INFO("ImGui Version: %s", ImGui::GetVersion());
-	}
 }
 
 void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuffered, bool bDebugEnabled)
