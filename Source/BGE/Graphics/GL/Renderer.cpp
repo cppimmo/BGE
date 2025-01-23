@@ -7,7 +7,7 @@
 #include "Graphics/GL/Shaders.hpp"
 #include "Graphics/GL/ShaderProgram.hpp"
 
-#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
 namespace BGE
@@ -71,7 +71,7 @@ namespace BGE
 
 		auto pWindow = BGUTGetWindowPtr();
 		// Setup platform/renderer backends
-		if (!ImGui_ImplSDL2_InitForOpenGL(pWindow, SDL_GL_GetCurrentContext()))
+		if (!ImGui_ImplSDL3_InitForOpenGL(pWindow, SDL_GL_GetCurrentContext()))
 		{
 			BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize SDL2 implementation!");
 			return false;
@@ -108,7 +108,7 @@ namespace BGE
 		}
 
 		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplSDL2_Shutdown();
+		ImGui_ImplSDL3_Shutdown();
 		ImPlot::DestroyContext(); // Destroy ImPlot context first
 		ImGui::DestroyContext();
 
@@ -129,7 +129,7 @@ namespace BGE
 			ImPlot::SetCurrentContext(m_pImPlotContext);
 
 			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplSDL2_NewFrame();
+			ImGui_ImplSDL3_NewFrame();
 			ImGui::NewFrame();
 		}
 
@@ -237,8 +237,7 @@ namespace BGE
 
 		auto createSurface = [&](void) -> auto
 		{
-			return  SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, kBitsPerPixel,
-										 rMask, gMask, bMask, aMask);
+			return SDL_CreateSurface(width, height, SDL_GetPixelFormatForMasks(kBitsPerPixel, rMask, gMask, bMask, aMask));
 		};
 
 		SDL_Surface *pTemp = createSurface();
@@ -264,12 +263,12 @@ namespace BGE
 		
 		// Write image to file on disk (do not return on failure, so surfaces can be freed):
 		BGE_LOG("OpenGL", "Screenshot filename: %s", GetScreenshotFilename(kSaveGameDir.string()).c_str());
-		BGE_LOG_IF(SDL_SaveBMP(pTemp, GetScreenshotFilename(kSaveGameDir.string()).c_str()) < 0,
+		BGE_LOG_IF(!SDL_SaveBMP(pTemp, GetScreenshotFilename(kSaveGameDir.string()).c_str()),
 				   "OpenGL", "Could not save file(% s).", SDL_GetError());
 		
 		// Free surfaces:
-		SDL_free(pTemp);
-		SDL_free(pImage);
+		SDL_DestroySurface(pTemp);
+		SDL_DestroySurface(pImage);
 
 		return true;
 	}
@@ -288,7 +287,7 @@ namespace BGE
 		oss << "GL_SHADING_LANGUAGE: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
 
 		// Output SDL OpenGL attibute values
-		auto logAttrib = [&oss](SDL_GLattr attrib) -> void
+		auto logAttrib = [&oss](SDL_GLAttr attrib) -> void
 		{
 			int attribValue = 0;
 			SDL_GL_GetAttribute(attrib, &attribValue);
@@ -323,7 +322,7 @@ namespace BGE
 		logAttrib(SDL_GL_RETAINED_BACKING);
 		logAttrib(SDL_GL_CONTEXT_MAJOR_VERSION);
 		logAttrib(SDL_GL_CONTEXT_MINOR_VERSION);
-		logAttrib(SDL_GL_CONTEXT_EGL);
+		//logAttrib(SDL_GL_CONTEXT_EGL);
 		logAttrib(SDL_GL_CONTEXT_FLAGS);
 		logAttrib(SDL_GL_CONTEXT_PROFILE_MASK);
 		logAttrib(SDL_GL_SHARE_WITH_CURRENT_CONTEXT);

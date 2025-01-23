@@ -3,6 +3,7 @@
     "assimp",
     "openal-soft",
     "sdl2",
-    "zlib"
+    "zlib",
+    "sdl3"
   ]
 }

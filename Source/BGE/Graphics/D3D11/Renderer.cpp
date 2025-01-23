@@ -1,9 +1,8 @@
 #include "Engine/EngineStd.hpp"
 #include "Graphics/D3D11/Renderer.hpp"
 
-#include <SDL_syswm.h>
 #include <d3dcompiler.h>
-#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdl3.h>
 #include <imgui_impl_dx11.h>
 
 #pragma comment(lib, "d3d11.lib")
@@ -19,7 +18,7 @@ namespace BGE
 {
 	D3D11Renderer::D3D11Renderer(void)
 		: m_options{},
-		  m_pViewport(std::make_unique<D3D11Viewport>(glm::ivec2(1280, 720))),
+		  m_pViewport(std::make_unique<D3DViewport>(glm::ivec2(1280, 720))),
 		  m_bgColor(0.1f, 0.1f, 0.1f, 1.0f)
 	{
 	}
@@ -128,11 +127,10 @@ namespace BGE
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFullscreenDesc = { };
 		swapChainFullscreenDesc.Windowed = true;
 		
+		// Retrieve the Win32 window pointer
 		auto pWindow = BGUTGetWindowPtr();
-		SDL_SysWMinfo wmInfo;
-		SDL_VERSION(&wmInfo.version);
-		SDL_GetWindowWMInfo(pWindow, &wmInfo);
-		HWND hWnd = reinterpret_cast<HWND>(wmInfo.info.win.window);
+		HWND hWnd = reinterpret_cast<HWND>(SDL_GetPointerProperty(SDL_GetWindowProperties(pWindow),
+																  SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
 
 		if (FAILED(m_pDXGIFactory->CreateSwapChainForHwnd(
 			m_pDevice.Get(),
@@ -237,7 +235,7 @@ namespace BGE
 		ImGui::StyleColorsDark();
 
 		// Setup platform/renderer backends
-		if (!ImGui_ImplSDL2_InitForD3D(BGUTGetWindowPtr()))
+		if (!ImGui_ImplSDL3_InitForD3D(BGUTGetWindowPtr()))
 		{
 			BGE_ERROR("BGUTInitImGui Failure: Couldn't initialize SDL2 implementation!");
 			return false;
@@ -323,7 +321,7 @@ namespace BGE
 		m_pShaderBuffer->VCreate();
 
 		// Set the default viewport
-		VSetViewport(D3D11Viewport(glm::ivec2(width, height)));
+		VSetViewport(D3DViewport(glm::ivec2(width, height)));
 
 		m_bInitialized = true; // Set the initialization flag
 		return true;
@@ -340,7 +338,7 @@ namespace BGE
 		if (*m_options.bImGuiEnabled)
 		{
 			ImGui_ImplDX11_Shutdown();
-			ImGui_ImplSDL2_Shutdown();
+			ImGui_ImplSDL3_Shutdown();
 			ImPlot::DestroyContext(); // Destroy ImPlot context first
 			ImGui::DestroyContext();
 		}
@@ -378,7 +376,7 @@ namespace BGE
 			ImPlot::SetCurrentContext(m_pImPlotContext);
 
 			ImGui_ImplDX11_NewFrame();
-			ImGui_ImplSDL2_NewFrame();
+			ImGui_ImplSDL3_NewFrame();
 			ImGui::NewFrame();
 		}
 
@@ -396,7 +394,7 @@ namespace BGE
 		viewport.Height = static_cast<decltype(D3D11_VIEWPORT::Height)>(m_pViewport->VGetSize().y);
 		viewport.MinDepth = 0.0f;
 		viewport.MaxDepth = 1.0f;
-		//D3D11Viewport::GetD3D11Viewport(m_pViewport.get());
+		//D3DViewport::GetD3D11Viewport(m_pViewport.get());
 
 		m_pDeviceContext->RSSetViewports(1u, &viewport);
 
@@ -506,11 +504,14 @@ namespace BGE
 			BGE_ERROR("Failed to create swap chain resources");
 			return;
 		}
+
+		// TODO: Automatically resize viewports/viewport layouts.
+		m_pViewport = std::make_unique<D3DViewport>(glm::ivec2(width, height));
 	}
 
 	void D3D11Renderer::VSetViewport(const IViewport &kViewport)
 	{
-		m_pViewport = std::make_unique<D3D11Viewport>(dynamic_cast<const D3D11Viewport &>(kViewport));
+		m_pViewport = std::make_unique<D3DViewport>(dynamic_cast<const D3DViewport &>(kViewport));
 	}
 
 	const IViewport &D3D11Renderer::VGetViewport(void) const
@@ -624,13 +625,16 @@ namespace BGE
 		// Get the raw data
 		std::uint8_t *pData = reinterpret_cast<std::uint8_t *>(mappedResource.pData);
 
-		SDL_Surface *pSurface = SDL_CreateRGBSurfaceWithFormatFrom(
+		SDL_Surface *pSurface = SDL_CreateSurfaceFrom(
+			renderTargetDesc.Width, renderTargetDesc.Height,
+			SDL_PIXELFORMAT_ARGB8888, mappedResource.pData, mappedResource.RowPitch);
+		/* SDL_Surface *pSurface = SDL_CreateRGBSurfaceWithFormatFrom(
 			mappedResource.pData,
 			renderTargetDesc.Width,
 			renderTargetDesc.Height,
 			(renderTargetDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM ? 32 : 24), // Bits per pixel
 			mappedResource.RowPitch,
-			SDL_PIXELFORMAT_ARGB8888);
+			SDL_PIXELFORMAT_ARGB8888); */
 
 		if (!pSurface)
 		{
@@ -647,7 +651,7 @@ namespace BGE
 		}
 
 		// Clean up
-		SDL_FreeSurface(pSurface);
+		SDL_DestroySurface(pSurface);
 		m_pDeviceContext->Unmap(pStagingTexture.Get(), 0u);
 		return true;
 	}

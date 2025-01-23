@@ -182,7 +182,7 @@ namespace BGE
 		}*/
 
 		// Navigation through history
-		if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)) && !m_commandHistory.empty())
+		if (ImGui::IsKeyPressed(ImGuiKey_UpArrow, false) && !m_commandHistory.empty())
 		{
 			if (m_historyIndex == -1)
 				m_historyIndex = static_cast<int>(m_commandHistory.size()) - 1;
@@ -191,7 +191,7 @@ namespace BGE
 
 			m_inputBuffer = m_commandHistory[m_historyIndex];
 		}
-		else if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) && m_historyIndex != -1)
+		else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow, false) && m_historyIndex != -1)
 		{
 			if (++m_historyIndex >= static_cast<int>(m_commandHistory.size()))
 			{

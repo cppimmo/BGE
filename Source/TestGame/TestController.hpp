@@ -54,8 +54,8 @@ namespace TestGame
 		virtual bool VOnGamepadConnected(BGE::JoystickID ID) override;
 		virtual bool VOnGamepadDisconnected(BGE::JoystickID ID) override;
 		// IKeyboardHandler's interface
-		virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) override;
-		virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) override;
+		virtual bool VOnKeyDown(SDL_Keycode key, bool bRepeat) override;
+		virtual bool VOnKeyUp(SDL_Keycode key, bool bRepeat) override;
 		// IMouseHandler's interface:
 		virtual bool VOnMouseMove(const glm::ivec2 &kPos, const glm::ivec2 &kRelPos) override;
 		virtual bool VOnMouseWheel(const glm::ivec2 &kPos, const glm::ivec2 &kScroll, const glm::fvec2 &kPreciseScroll) override;

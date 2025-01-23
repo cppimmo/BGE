@@ -33,7 +33,7 @@
 
 #include <cstdlib>
 
-#include <imgui_impl_sdl2.h>
+#include <imgui_impl_sdl3.h>
 
 #include "Utilities/Utils.hpp"
 
@@ -84,23 +84,25 @@ namespace BGE
 bool BGE::BGUTInit(const EngineOptions &kOptions)
 {
 	s_BGUT.options = kOptions;
+	
+	std::uint32_t initFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS;
 	// Decide which parts of SDL should be initialized
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+	if (SDL_Init(initFlags) < 0)
 	{
 		BGE_ERROR("BGUTInit Failure: SDL failed to initialize (%s).", SDL_GetError());
 		return false;
 	}
 
 	// Set SDL log output callback
-	SDL_LogSetOutputFunction(Logger::LogOutputFunc_SDL, nullptr);
-	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
+	SDL_SetLogOutputFunction(Logger::LogOutputFunc_SDL, nullptr);
+	SDL_SetLogPriorities(SDL_LOG_PRIORITY_WARN);
 
 	//BGE_LOG("BGUT", "Request OpenGL version %d.%d", s_BGUT.glVersion.major, s_BGUT.glVersion.minor);
 	// Set OpenGL attributes before window creation
 	
 	
 	// Set basic window flags
-	s_BGUT.windowFlags = SDL_WINDOW_SHOWN;
+	s_BGUT.windowFlags = 0u;
 	if (*kOptions.rendererImpl == RendererImpl::kOpenGL)
 	{
 		s_BGUT.windowFlags |= SDL_WINDOW_OPENGL;
@@ -117,17 +119,19 @@ bool BGE::BGUTInit(const EngineOptions &kOptions)
 	// When the window is set to be fullscreen
 	if (*kOptions.bFullscreen)
 	{
-		s_BGUT.windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		s_BGUT.windowFlags |= SDL_WINDOW_FULLSCREEN;
+
 		// Retrive the current display mode:
-		SDL_DisplayMode displayMode;
-		if (SDL_GetCurrentDisplayMode(0, &displayMode) != 0)
+		const SDL_DisplayMode *pkDisplayMode = SDL_GetCurrentDisplayMode(0);
+		if (!pkDisplayMode)
 		{
 			BGE_ERROR("BGUTInit Failure: Could not retrieve current display mode (%s).", SDL_GetError());
 			return false;
 		}
+		
 		// Set the desired width and height of fullscreen window:
-		s_BGUT.windowWidth = displayMode.w;
-		s_BGUT.windowHeight = displayMode.h;
+		s_BGUT.windowWidth = pkDisplayMode->w;
+		s_BGUT.windowHeight = pkDisplayMode->h;
 	}
 
 	if (*kOptions.rendererImpl == RendererImpl::kOpenGL)
@@ -136,8 +140,8 @@ bool BGE::BGUTInit(const EngineOptions &kOptions)
 	}
 
 	// Create the SDL window
-	s_BGUT.pWindow = SDL_CreateWindow((*kOptions.windowTitle).c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-									  s_BGUT.windowWidth, s_BGUT.windowHeight, s_BGUT.windowFlags);
+	s_BGUT.pWindow = SDL_CreateWindow((*kOptions.windowTitle).c_str(), s_BGUT.windowWidth,
+									  s_BGUT.windowHeight, s_BGUT.windowFlags);
 	if (!s_BGUT.pWindow)
 	{
 		BGE_ERROR("BGUTInit Failure: SDL window could not be created (%s).", SDL_GetError());
@@ -212,12 +216,12 @@ void BGE::BGUTMainLoop(void)
 	constexpr Uint64 kMILLIS = 1000;
 	// Protect from divide by zero UB
 	const Uint64 kTicksMinStepMillis = kMILLIS / ((s_BGUT.minFrames == 0) ? 1 : s_BGUT.minFrames); // Min delta
-	Uint64 kTicksLastStepMillis = SDL_GetTicks64(); // Previous delta
+	Uint64 kTicksLastStepMillis = SDL_GetTicks(); // Previous delta
 
 	s_BGUT.mainLoopTimer.Start(); // Start the mainloop timer
 	while (s_BGUT.bRunning) // Keep looping while bRunning is true
 	{
-		const Uint64 kTicksNowMillis = SDL_GetTicks64();
+		const Uint64 kTicksNowMillis = SDL_GetTicks();
 		while (SDL_PollEvent(&event))
 		{
 			// Call default event handler
@@ -274,7 +278,7 @@ void BGE::BGUTShutdown(void)
 {
 	if (s_BGUT.options.rendererImpl == RendererImpl::kOpenGL)
 	{
-		SDL_GL_DeleteContext(s_BGUT.pContext);
+		SDL_GL_DestroyContext(s_BGUT.pContext);
 		//gladLoaderUnloadGL(); // Unload glad
 	}
 
@@ -302,7 +306,7 @@ void BGE::BGUTSetWindowIcon(const std::filesystem::path &kFilePath)
 	}
 
 	SDL_SetWindowIcon(s_BGUT.pWindow, pIconSurface);
-	SDL_FreeSurface(pIconSurface);
+	SDL_DestroySurface(pIconSurface);
 }
 
 void BGE::BGUTSetWindowSize(BGUTWindowPtr pWindow, int width, int height)
@@ -373,10 +377,9 @@ int BGE::BGUTGetExitCode(void)
 
 void BGE::BGUTLogInfo(void)
 {
-	SDL_version version;
-	SDL_GetVersion(&version);
-	BGE_INFO("SDL Version: %d.%d.%d", version.major, version.minor, version.patch);
-	BGE_INFO("SDL Revision: %s", SDL_GetRevision());
+	int version = SDL_GetVersion();
+	//BGE_INFO("SDL Version: %d.%d.%d", version.major, version.minor, version.patch);
+	//BGE_INFO("SDL Revision: %s", SDL_GetRevision());
 }
 
 void BGE::BGUTSetAttributes(int versionMajor, int versionMinor, bool bDoubleBuffered, bool bDebugEnabled)
@@ -412,23 +415,20 @@ bool BGE::BGUTDefEventHandler(const SDL_Event &kEvent)
 {
 	switch (kEvent.type)
 	{
-	case SDL_QUIT:
+	case SDL_EVENT_QUIT:
 		s_BGUT.bRunning = false;
 		return true;
-	case SDL_WINDOWEVENT:
-		switch (kEvent.window.event)
-		{
-		case SDL_WINDOWEVENT_RESIZED:
-			if (s_BGUT.pResizeCallback)
-				s_BGUT.pResizeCallback(kEvent.window.data1, kEvent.window.data2);
-			break;
-		}
+	case SDL_EVENT_WINDOW_RESIZED:
+		if (s_BGUT.pResizeCallback)
+			s_BGUT.pResizeCallback(kEvent.window.data1, kEvent.window.data2);
 		return true;
+	default:
+		break;
 	}
 	// Call ImGui event handler when enabled
 	if (*s_BGUT.options.bImGuiEnabled)
 	{
-		if (ImGui_ImplSDL2_ProcessEvent(&kEvent)) return true;
+		if (ImGui_ImplSDL3_ProcessEvent(&kEvent)) return true;
 	}
 	return false;
 }

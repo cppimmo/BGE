@@ -31,14 +31,14 @@ bool BGE::HumanView::DefaultInputHandler::VOnGamepadDisconnected(JoystickID ID)
 	return false;
 }
 
-bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepeat)
+bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keycode key, bool bRepeat)
 {
-	if (key.sym == SDLK_ESCAPE)
+	if (key == SDLK_ESCAPE)
 	{
 		BGUTSendExitCode(kBGE_EXIT_SUCCESS);
 		return true;
 	}
-	else if (key.sym == SDLK_F5 && !bRepeat)
+	else if (key == SDLK_F5 && !bRepeat)
 	{
 		BGE_LOG("Input", "Taking screenshot...");
 		auto &app = GetEngineApp();
@@ -46,7 +46,7 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 		app.GetRenderer().VTakeScreenshot(app.VGetGameAppDirectory());
 		return true;
 	}
-	else if (key.sym == SDLK_BACKQUOTE && !bRepeat)
+	else if (key == SDLK_GRAVE && !bRepeat)
 	{
 		auto &app = GetEngineApp();
 		auto &dbgConsole = app.GetDebugConsole();
@@ -54,7 +54,7 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 		dbgConsole.SetEnabled(!dbgConsole.IsEnabled());
 		return true;
 	}
-	else if (key.sym == SDLK_BACKSPACE && !bRepeat)
+	else if (key == SDLK_BACKSPACE && !bRepeat)
 	{
 		if (IMouseHandler::IsCursorLocked())
 			IMouseHandler::LockMouseCursor();
@@ -64,7 +64,7 @@ bool BGE::HumanView::DefaultInputHandler::VOnKeyDown(SDL_Keysym key, bool bRepea
 	return false;
 }
 
-bool BGE::HumanView::DefaultInputHandler::VOnKeyUp(SDL_Keysym key, bool bRepeat)
+bool BGE::HumanView::DefaultInputHandler::VOnKeyUp(SDL_Keycode key, bool bRepeat)
 {
 	return false;
 }
@@ -152,141 +152,123 @@ bool BGE::HumanView::VOnHandleEvent(const SDL_Event &event)
 	switch (event.type)
 	{
 	// Remaining cases forwarded to GameLogic/GameViews:
-	case SDL_KEYDOWN: // Keyboard events
+	case SDL_EVENT_KEY_DOWN: // Keyboard events
 		for (auto &pHandler : m_keyboardHandlers)
 		{
-			pHandler->VOnKeyDown(event.key.keysym, event.key.repeat);
+			pHandler->VOnKeyDown(event.key.key, event.key.repeat);
 		}
 		break;
-	case SDL_KEYUP:
+	case SDL_EVENT_KEY_UP:
 		for (auto &pHandler : m_keyboardHandlers)
 		{
-			pHandler->VOnKeyUp(event.key.keysym, event.key.repeat);
+			pHandler->VOnKeyUp(event.key.key, event.key.repeat);
 		}
 		break;
-	case SDL_TEXTEDITING:
+	case SDL_EVENT_TEXT_EDITING:
 		break;
-	case SDL_TEXTINPUT:
+	case SDL_EVENT_TEXT_INPUT:
 		break;
-	case SDL_KEYMAPCHANGED:
+	case SDL_EVENT_KEYMAP_CHANGED:
 		break;
-	case SDL_TEXTEDITING_EXT:
+	case SDL_EVENT_TEXT_EDITING_CANDIDATES:
 		break;
-	case SDL_MOUSEMOTION: // Mouse events
+	case SDL_EVENT_MOUSE_ADDED: // Mouse events
+		break;
+	case SDL_EVENT_MOUSE_REMOVED:
+		break;
+	case SDL_EVENT_MOUSE_MOTION: // Mouse events
 		for (auto &pHandler : m_mouseHandlers)
 		{
 			pHandler->VOnMouseMove(glm::ivec2(event.motion.x, event.motion.y),
 								   glm::ivec2(event.motion.xrel, event.motion.yrel));
 		}
 		break;
-	case SDL_MOUSEBUTTONDOWN:
+	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		for (auto &pHandler : m_mouseHandlers)
 		{
 			pHandler->VOnMouseButtonDown(glm::ivec2(event.button.x, event.button.y),
 										 static_cast<MouseButton>(event.button.button), event.button.clicks);
 		}
 		break;
-	case SDL_MOUSEBUTTONUP:
+	case SDL_EVENT_MOUSE_BUTTON_UP:
 		for (auto &pHandler : m_mouseHandlers)
 		{
 			pHandler->VOnMouseButtonUp(glm::ivec2(event.button.x, event.button.y),
 									   static_cast<MouseButton>(event.button.button), event.button.clicks);
 		}
 		break;
-	case SDL_MOUSEWHEEL:
+	case SDL_EVENT_MOUSE_WHEEL:
 		for (auto &pHandler : m_mouseHandlers)
 		{
-			pHandler->VOnMouseWheel(glm::ivec2(event.wheel.mouseX, event.wheel.mouseY),
-									glm::ivec2(event.wheel.x, event.wheel.y), glm::fvec2(event.wheel.preciseX, event.wheel.preciseY));
+			pHandler->VOnMouseWheel(glm::ivec2(event.wheel.mouse_x, event.wheel.mouse_y),
+									glm::ivec2(event.wheel.x, event.wheel.y), glm::fvec2(event.wheel.x, event.wheel.y));
 		}
 		break;
-	case SDL_JOYAXISMOTION: // Joystick events
-		break;
-	case SDL_JOYBALLMOTION:
-		break;
-	case SDL_JOYHATMOTION:
-		break;
-	case SDL_JOYBUTTONDOWN:
-		break;
-	case SDL_JOYBUTTONUP:
-		break;
-	case SDL_JOYDEVICEADDED:
-		break;
-	case SDL_JOYDEVICEREMOVED:
-		break;
-	case SDL_JOYBATTERYUPDATED:
-		break;
-	case SDL_CONTROLLERAXISMOTION: // Game controller events
+	case SDL_EVENT_GAMEPAD_AXIS_MOTION: // Game controller events
 		for (auto &pHandler : m_gamepadHandlers)
 		{
 			// TODO: Handle return value.
-			pHandler->VOnAxis(event.caxis.which, static_cast<GamepadAxis>(event.caxis.axis), event.caxis.value);
+			pHandler->VOnAxis(event.gaxis.which, static_cast<GamepadAxis>(event.gaxis.axis), event.gaxis.value);
 		}
 		break;
-	case SDL_CONTROLLERBUTTONDOWN:
+	case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
 		for (auto &pHandler : m_gamepadHandlers)
 		{
-			pHandler->VOnButtonDown(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
+			pHandler->VOnButtonDown(event.gbutton.which, static_cast<GamepadButton>(event.gbutton.button));
 		}
 		break;
-	case SDL_CONTROLLERBUTTONUP:
+	case SDL_EVENT_GAMEPAD_BUTTON_UP:
 		for (auto &pHandler : m_gamepadHandlers)
 		{
-			pHandler->VOnButtonUp(event.cbutton.which, static_cast<GamepadButton>(event.cbutton.button));
+			pHandler->VOnButtonUp(event.gbutton.which, static_cast<GamepadButton>(event.gbutton.button));
 		}
 		break;
-	case SDL_CONTROLLERDEVICEADDED:
-		BGE_LOG("Input", "Gamepad device added (%d)", event.cdevice.which);
+	case SDL_EVENT_GAMEPAD_ADDED:
+		BGE_LOG("Input", "Gamepad device added (%d)", event.gdevice.which);
 
 		for (auto &pHandler : m_gamepadHandlers)
 		{
-			pHandler->VOnGamepadConnected(event.cdevice.which);
+			pHandler->VOnGamepadConnected(event.gdevice.which);
 		}
 		break;
-	case SDL_CONTROLLERDEVICEREMOVED:
-		BGE_LOG("Input", "Gamepad device removed (%d)", event.cdevice.which);
+	case SDL_EVENT_GAMEPAD_REMOVED:
+		BGE_LOG("Input", "Gamepad device removed (%d)", event.gdevice.which);
 
 		for (auto &pHandler : m_gamepadHandlers)
 		{
-			pHandler->VOnGamepadDisconnected(event.cdevice.which);
+			pHandler->VOnGamepadDisconnected(event.gdevice.which);
 		}
 		break;
-	case SDL_CONTROLLERDEVICEREMAPPED:
+	case SDL_EVENT_GAMEPAD_REMAPPED:
 		// What does this do?
 		break;
-	case SDL_CONTROLLERTOUCHPADDOWN:
+	case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
 		break;
-	case SDL_CONTROLLERTOUCHPADMOTION:
+	case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
 		break;
-	case SDL_CONTROLLERTOUCHPADUP:
+	case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
 		break;
-	case SDL_CONTROLLERSENSORUPDATE:
+	case SDL_EVENT_GAMEPAD_SENSOR_UPDATE:
 		break;
-	case SDL_CONTROLLERUPDATECOMPLETE_RESERVED_FOR_SDL3:
+	case SDL_EVENT_GAMEPAD_UPDATE_COMPLETE:
 		break;
-	case SDL_CONTROLLERSTEAMHANDLEUPDATED:
+	case SDL_EVENT_GAMEPAD_STEAM_HANDLE_UPDATED:
 		break;
-	case SDL_FINGERDOWN: // Touch events
+	case SDL_EVENT_FINGER_DOWN: // Touch events
 		break;
-	case SDL_FINGERUP:
+	case SDL_EVENT_FINGER_UP:
 		break;
-	case SDL_FINGERMOTION:
+	case SDL_EVENT_FINGER_MOTION:
 		break;
-	case SDL_DOLLARGESTURE: // Gesture events
+	case SDL_EVENT_CLIPBOARD_UPDATE: // Clipboard events
 		break;
-	case SDL_DOLLARRECORD:
+	case SDL_EVENT_DROP_FILE: // Drag and drop events
 		break;
-	case SDL_MULTIGESTURE:
+	case SDL_EVENT_DROP_TEXT:
 		break;
-	case SDL_CLIPBOARDUPDATE: // Clipboard events
+	case SDL_EVENT_DROP_BEGIN:
 		break;
-	case SDL_DROPFILE: // Drag and drop events
-		break;
-	case SDL_DROPTEXT:
-		break;
-	case SDL_DROPBEGIN:
-		break;
-	case SDL_DROPCOMPLETE:
+	case SDL_EVENT_DROP_COMPLETE:
 		break;
 	default:
 		break;

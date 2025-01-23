@@ -13,8 +13,8 @@ namespace BGE
 	public:
 		virtual ~IKeyboardHandler(void) = default;
 
-		virtual bool VOnKeyDown(SDL_Keysym key, bool bRepeat) = 0;
-		virtual bool VOnKeyUp(SDL_Keysym key, bool bRepeat) = 0;
+		virtual bool VOnKeyDown(SDL_Keycode key, bool bRepeat) = 0;
+		virtual bool VOnKeyUp(SDL_Keycode key, bool bRepeat) = 0;
 	};
 } // End namespace (BGE)
 

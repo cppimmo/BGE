@@ -381,117 +381,94 @@ namespace BGE
 		// TODO: Handle necessary SDL events.
 		switch (event.type)
 		{
-		case SDL_QUIT:
+		case SDL_EVENT_QUIT:
 			app.OnShutdown();
 			bResult = true;
 			break;
-		case SDL_APP_TERMINATING:
+		case SDL_EVENT_TERMINATING:
 			break;
-		case SDL_APP_LOWMEMORY:
+		case SDL_EVENT_LOW_MEMORY:
 			BGE_LOG("App", "Application low on memory!!!");
 			break;
-		case SDL_APP_WILLENTERBACKGROUND:
+		case SDL_EVENT_WILL_ENTER_BACKGROUND:
 			break;
-		case SDL_APP_DIDENTERBACKGROUND:
+		case SDL_EVENT_DID_ENTER_BACKGROUND:
 			break;
-		case SDL_APP_WILLENTERFOREGROUND:
+		case SDL_EVENT_WILL_ENTER_FOREGROUND:
 			break;
-		case SDL_APP_DIDENTERFOREGROUND:
+		case SDL_EVENT_DID_ENTER_FOREGROUND:
 			break;
-		case SDL_LOCALECHANGED:
+		case SDL_EVENT_LOCALE_CHANGED:
 			break;
-		case SDL_DISPLAYEVENT:
+		//case SDL_EVENT_DISPLAY_*:
+		//	break;
+		case SDL_EVENT_WINDOW_SHOWN:
 			break;
-		case SDL_WINDOWEVENT:
-			// Process window event
-			switch (event.window.event)
-			{
-			case SDL_WINDOWEVENT_SHOWN:
-				break;
-			case SDL_WINDOWEVENT_HIDDEN:
-				break;
-			case SDL_WINDOWEVENT_EXPOSED:
-				break;
-			case SDL_WINDOWEVENT_MOVED:
-				break;
-			case SDL_WINDOWEVENT_RESIZED:
-				break;
-			case SDL_WINDOWEVENT_SIZE_CHANGED:
-				break;
-			case SDL_WINDOWEVENT_MINIMIZED:
-				break;
-			case SDL_WINDOWEVENT_MAXIMIZED:
-				break;
-			case SDL_WINDOWEVENT_RESTORED:
-				break;
-			case SDL_WINDOWEVENT_ENTER:
-				break;
-			case SDL_WINDOWEVENT_LEAVE:
-				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				break;
-			case SDL_WINDOWEVENT_CLOSE:
-				break;
-			case SDL_WINDOWEVENT_TAKE_FOCUS:
-				break;
-			case SDL_WINDOWEVENT_HIT_TEST:
-				break;
-			case SDL_WINDOWEVENT_ICCPROF_CHANGED:
-				break;
-			case SDL_WINDOWEVENT_DISPLAY_CHANGED:
-				break;
-			default:
-				break;
-			}
+		case SDL_EVENT_WINDOW_HIDDEN:
 			break;
-		case SDL_SYSWMEVENT:
+		case SDL_EVENT_WINDOW_EXPOSED:
+			break;
+		case SDL_EVENT_WINDOW_MOVED:
+			break;
+		case SDL_EVENT_WINDOW_RESIZED:
+			break;
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			break;
+		case SDL_EVENT_WINDOW_MINIMIZED:
+			break;
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+			break;
+		case SDL_EVENT_WINDOW_RESTORED:
+			break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+			break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+			break;
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+			break;
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+			break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			break;
+		case SDL_EVENT_WINDOW_HIT_TEST:
+			break;
+		case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
+			break;
+		case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
 			break;
 		// Remaining cases forwarded to GameLogic/GameViews:
-		case SDL_KEYDOWN: // Keyboard events
-		case SDL_KEYUP:
-		case SDL_TEXTEDITING:
-		case SDL_TEXTINPUT:
-		case SDL_KEYMAPCHANGED:
-		case SDL_TEXTEDITING_EXT:
-		case SDL_MOUSEMOTION: // Mouse events
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP:
-		case SDL_MOUSEWHEEL:
-		case SDL_JOYAXISMOTION: // Joystick events
-		case SDL_JOYBALLMOTION:
-		case SDL_JOYHATMOTION:
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-		case SDL_JOYDEVICEADDED:
-		case SDL_JOYDEVICEREMOVED:
-		case SDL_JOYBATTERYUPDATED:
-		case SDL_CONTROLLERAXISMOTION: // Game controller events
-		case SDL_CONTROLLERBUTTONDOWN:
-		case SDL_CONTROLLERBUTTONUP:
-		case SDL_CONTROLLERDEVICEADDED:
-		case SDL_CONTROLLERDEVICEREMOVED:
-		case SDL_CONTROLLERDEVICEREMAPPED:
-		case SDL_CONTROLLERTOUCHPADDOWN:
-		case SDL_CONTROLLERTOUCHPADMOTION:
-		case SDL_CONTROLLERTOUCHPADUP:
-		case SDL_CONTROLLERSENSORUPDATE:
-		case SDL_CONTROLLERUPDATECOMPLETE_RESERVED_FOR_SDL3:
-		case SDL_CONTROLLERSTEAMHANDLEUPDATED:
-		case SDL_FINGERDOWN: // Touch events
-		case SDL_FINGERUP:
-		case SDL_FINGERMOTION:
-		case SDL_DOLLARGESTURE: // Gesture events
-		case SDL_DOLLARRECORD:
-		case SDL_MULTIGESTURE:
-		case SDL_CLIPBOARDUPDATE: // Clipboard events
-		case SDL_DROPFILE: // Drag and drop events
-		case SDL_DROPTEXT:
-		case SDL_DROPBEGIN:
-		case SDL_DROPCOMPLETE:
-		case SDL_AUDIODEVICEADDED: // Audio hotplug events
-		case SDL_AUDIODEVICEREMOVED:
+		case SDL_EVENT_KEY_DOWN: // Keyboard events
+		case SDL_EVENT_KEY_UP:
+		case SDL_EVENT_TEXT_EDITING:
+		case SDL_EVENT_TEXT_INPUT:
+		case SDL_EVENT_KEYMAP_CHANGED:
+		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+		case SDL_EVENT_MOUSE_MOTION: // Mouse events
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_WHEEL:
+		case SDL_EVENT_GAMEPAD_AXIS_MOTION: // Game controller events
+		case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+		case SDL_EVENT_GAMEPAD_BUTTON_UP:
+		case SDL_EVENT_GAMEPAD_ADDED:
+		case SDL_EVENT_GAMEPAD_REMOVED:
+		case SDL_EVENT_GAMEPAD_REMAPPED:
+		case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+		case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
+		case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+		case SDL_EVENT_GAMEPAD_SENSOR_UPDATE:
+		case SDL_EVENT_GAMEPAD_UPDATE_COMPLETE:
+		case SDL_EVENT_GAMEPAD_STEAM_HANDLE_UPDATED:
+		case SDL_EVENT_FINGER_DOWN: // Touch events
+		case SDL_EVENT_FINGER_UP:
+		case SDL_EVENT_FINGER_MOTION:
+		case SDL_EVENT_CLIPBOARD_UPDATE: // Clipboard events
+		case SDL_EVENT_DROP_FILE: // Drag and drop events
+		case SDL_EVENT_DROP_TEXT:
+		case SDL_EVENT_DROP_BEGIN:
+		case SDL_EVENT_DROP_COMPLETE:
+		case SDL_EVENT_AUDIO_DEVICE_ADDED: // Audio hotplug events
+		case SDL_EVENT_AUDIO_DEVICE_REMOVED:
 		{
 			auto &gameViews = app.GetGameLogic().GetGameViews();
 			// Iterate through the game views in reverse
@@ -514,10 +491,11 @@ namespace BGE
 
 	void EngineApp::OnResize(std::int32_t width, std::int32_t height)
 	{
-		//glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 		auto &app = GetEngineApp();
 
 		app.GetRenderer().VOnResize(width, height);
+		// TODO: Calls to OnResize should also resize the current viewports/viewport layout.
+		//app.GetRenderer().VSetViewport(D3DViewport())
 	}
 
 	void EngineApp::OnSignal(int signal)

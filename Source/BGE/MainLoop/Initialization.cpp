@@ -183,7 +183,7 @@ namespace BGE
 
 	int ReadLogicalCPUCores(void)
 	{
-		return SDL_GetCPUCount();
+		return SDL_GetNumLogicalCPUCores();
 	}
 	// Needs per-platform implementation:
 	std::uint32_t ReadCPUSpeed(void)

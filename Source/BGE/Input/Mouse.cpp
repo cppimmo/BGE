@@ -8,13 +8,13 @@ namespace BGE
 	void IMouseHandler::LockMouseCursor(void)
 	{
 		s_bCursorLocked = true;
-		SDL_SetRelativeMouseMode(SDL_TRUE);
+		SDL_SetWindowRelativeMouseMode(BGUTGetWindowPtr(), true);
 	}
 
 	void IMouseHandler::ReleaseMouseCursor(void)
 	{
 		s_bCursorLocked = false;
-		SDL_SetRelativeMouseMode(SDL_FALSE);
+		SDL_SetWindowRelativeMouseMode(BGUTGetWindowPtr(), false);
 	}
 
 	bool IMouseHandler::IsCursorLocked(void)

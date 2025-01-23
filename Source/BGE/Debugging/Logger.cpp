@@ -379,15 +379,15 @@ LogManager::ErrorDialogResult LogManager::Error(Logger::ErrorMessenger &pMesseng
 		mbData.numbuttons = 3;
 		SDL_MessageBoxButtonData mbButtons[3];
 		// Ignore button
-		mbButtons[2].buttonid = 1;
+		mbButtons[2].buttonID = 1;
 		mbButtons[2].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
 		mbButtons[2].text = "Ignore";
 		// Abort button
-		mbButtons[1].buttonid = 2;
+		mbButtons[1].buttonID = 2;
 		mbButtons[1].flags = SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT;
 		mbButtons[1].text = "Abort";
 		// Retry button
-		mbButtons[0].buttonid = 3;
+		mbButtons[0].buttonID = 3;
 		mbButtons[0].flags = 0;
 		mbButtons[0].text = "Retry";
 		// Set buttons

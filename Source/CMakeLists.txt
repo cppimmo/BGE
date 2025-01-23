@@ -93,24 +93,23 @@ endfunction()
 
 # SDL library:
 if(${SDL_VENDORED})
-  message(STATUS "Using vendored SDL2")
+  message(STATUS "Using vendored SDL3")
   # Add the SDL library subdirectory
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL EXCLUDE_FROM_ALL)
   
   # Set include and library directories
-  set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL/include)
-  set(SDL2_LIBRARIES SDL2-static)
+  set(SDL3_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Lib/SDL/include)
+  set(SDL3_LIBRARIES SDL3-static)
   #add_subdirectory(${SDL_LIB_DIR} EXCLUDE_FROM_ALL)
   #set(SDL2_INCLUDE_DIRS "Lib/SDL/include")
   #set(SDL2_INCLUDE_DIRS "Lib/SDL/include/SDL3")
 else()
-  message(STATUS "Using system-installed SDL2")
-  find_package(SDL2 CONFIG REQUIRED)
+  message(STATUS "Using system-installed SDL3")
+  find_package(SDL3 CONFIG REQUIRED)
 endif()
 
 #message("SDL2_LIBRARIES: ${SDL_LIBRARIES}")
-#message("SDL2_INCLUDE_DIRS: ${SDL_INCLUDE_DIRS}")
-include_directories(${SDL2_INCLUDE_DIRS})
+#include_directories(${SDL3_INCLUDE_DIRS})
 
 # ImGui library:
 add_library(ImGui STATIC
@@ -119,10 +118,10 @@ add_library(ImGui STATIC
   "${IMGUI_DIR}/imgui_draw.cpp"
   "${IMGUI_DIR}/imgui_tables.cpp"
   "${IMGUI_DIR}/imgui_widgets.cpp"
-  "${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp"
+  "${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp"
   "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
   "${IMGUI_DIR}/backends/imgui_impl_dx11.h")
-
+target_link_libraries(ImGui PRIVATE SDL3::SDL3)
 # Conditionally include backend implementations
 if(USE_OPENGL)
   target_sources(ImGui PRIVATE "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp")
@@ -268,7 +267,7 @@ endif()
 
 target_link_libraries(Engine PUBLIC
   glad
-  ${SDL2_LIBRARIES}
+  SDL3::SDL3
   glm::glm
   ImGui ImPlot
   #RmlUi::RmlUi

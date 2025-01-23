@@ -170,35 +170,35 @@ namespace TestGame
 		return true;
 	}
 
-	bool TestController::VOnKeyDown(SDL_Keysym key, bool bRepeat)
+	bool TestController::VOnKeyDown(SDL_Keycode key, bool bRepeat)
 	{
-		BGE_LOG("Input", "Key down (%d), repeat: %s", key.sym, BGE::BoolToString(bRepeat).data());
+		BGE_LOG("Input", "Key down (%d), repeat: %s", key, BGE::BoolToString(bRepeat).data());
 
-		switch (key.sym)
+		switch (key)
 		{
-		case SDLK_w:
+		case SDLK_W:
 			m_keys[kTEST_KEY_W] = true;
 			return true;
-		case SDLK_a:
+		case SDLK_A:
 			m_keys[kTEST_KEY_A] = true;
 			return true;
-		case SDLK_s:
+		case SDLK_S:
 			m_keys[kTEST_KEY_S] = true;
 			return true;
-		case SDLK_d:
+		case SDLK_D:
 			m_keys[kTEST_KEY_D] = true;
 			return true;
-		case SDLK_q:
+		case SDLK_Q:
 			m_keys[kTEST_KEY_Q] = true;
 			return true;
-		case SDLK_e:
+		case SDLK_E:
 			m_keys[kTEST_KEY_E] = true;
 			return true;
 		default:
 			break;
 		}
 
-		if (key.sym == SDLK_LSHIFT)
+		if (key == SDLK_LSHIFT)
 		{
 			m_bRunning = true;
 			return true;
@@ -207,35 +207,35 @@ namespace TestGame
 		return false;
 	}
 
-	bool TestController::VOnKeyUp(SDL_Keysym key, bool bRepeat)
+	bool TestController::VOnKeyUp(SDL_Keycode key, bool bRepeat)
 	{
-		BGE_LOG("Input", "Key up (%d), repeat: %s", key.sym, BGE::BoolToString(bRepeat).data());
+		BGE_LOG("Input", "Key up (%d), repeat: %s", key, BGE::BoolToString(bRepeat).data());
 
-		switch (key.sym)
+		switch (key)
 		{
-		case SDLK_w:
+		case SDLK_W:
 			m_keys[kTEST_KEY_W] = false;
 			return true;
-		case SDLK_a:
+		case SDLK_A:
 			m_keys[kTEST_KEY_A] = false;
 			return true;
-		case SDLK_s:
+		case SDLK_S:
 			m_keys[kTEST_KEY_S] = false;
 			return true;
-		case SDLK_d:
+		case SDLK_D:
 			m_keys[kTEST_KEY_D] = false;
 			return true;
-		case SDLK_q:
+		case SDLK_Q:
 			m_keys[kTEST_KEY_Q] = false;
 			return true;
-		case SDLK_e:
+		case SDLK_E:
 			m_keys[kTEST_KEY_E] = false;
 			return true;
 		default:
 			break;
 		}
 
-		if (key.sym == SDLK_LSHIFT)
+		if (key == SDLK_LSHIFT)
 		{
 			m_bRunning = false;
 			return true;

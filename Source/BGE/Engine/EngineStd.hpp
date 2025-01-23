@@ -32,9 +32,8 @@
 #define _BGE_ENGINESTD_HPP_
 
 // Common library headers:
-//#include <SDL2/SDL.h>
 #include <glad/gl.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <imgui.h>
 #include <implot.h>
 #include <tinyxml2.h>

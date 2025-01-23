@@ -3,7 +3,7 @@
 
 namespace BGE
 {
-	D3D11Viewport::D3D11Viewport(const glm::ivec2 &kSize, const glm::ivec2 &kOffset)
+	D3DViewport::D3DViewport(const glm::ivec2 &kSize, const glm::ivec2 &kOffset)
 		: m_size(kSize), m_offset(kOffset)
 	{
 		D3D11_VIEWPORT viewport = { };
@@ -16,17 +16,17 @@ namespace BGE
 		m_viewport = viewport;
 	}
 	
-	glm::ivec2 D3D11Viewport::VGetSize(void) const
+	glm::ivec2 D3DViewport::VGetSize(void) const
 	{
 		return m_size;
 	}
 	
-	glm::ivec2 D3D11Viewport::VGetOffset(void) const
+	glm::ivec2 D3DViewport::VGetOffset(void) const
 	{
 		return m_offset;
 	}
 
-	D3D11_VIEWPORT D3D11Viewport::GetD3D11Viewport(const D3D11Viewport &kViewport)
+	D3D11_VIEWPORT D3DViewport::GetD3D11Viewport(const D3DViewport &kViewport)
 	{
 		return kViewport.m_viewport;
 	}

@@ -32,8 +32,8 @@ namespace BGE
 {
 	bool IGamepadHandler::StartRumble(JoystickID ID, RumbleSpeed sharedSpeed, RumbleDuration durationMS)
 	{
-		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
-		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		SDL_Gamepad *pGamepad = SDL_OpenGamepad(ID);
+		if (!pGamepad) // && !SDL_GamepadHasRumble(pGamepad)
 		{
 			return false;
 		}
@@ -41,31 +41,31 @@ namespace BGE
 		// Assume left motor is twice as powerful
 		const auto kLeftSpeed = sharedSpeed;
 		const auto kRightSpeed = sharedSpeed / 2;
-		const int kResult = SDL_GameControllerRumble(pGameController, kLeftSpeed, kRightSpeed, durationMS);
+		const int kResult = SDL_RumbleGamepad(pGamepad, kLeftSpeed, kRightSpeed, durationMS);
 		return kResult == 0;
 	}
 
 	bool IGamepadHandler::StartRumble(JoystickID ID, RumbleSpeed leftSpeed, RumbleSpeed rightSpeed, RumbleDuration durationMS)
 	{
-		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
-		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		SDL_Gamepad *pGamepad = SDL_OpenGamepad(ID);
+		if (!pGamepad) // && !SDL_GameControllerHasRumble(pGameController)
 		{
 			return false;
 		}
 
-		const int kResult = SDL_GameControllerRumble(pGameController, leftSpeed, rightSpeed, durationMS);
+		const int kResult = SDL_RumbleGamepad(pGamepad, leftSpeed, rightSpeed, durationMS);
 		return kResult == 0;
 	}
 
 	bool IGamepadHandler::StopRumble(JoystickID ID)
 	{
-		SDL_GameController *pGameController = SDL_GameControllerOpen(ID);
-		if (!pGameController && !SDL_GameControllerHasRumble(pGameController))
+		SDL_Gamepad *pGameController = SDL_OpenGamepad(ID);
+		if (!pGameController) // && !SDL_GameControllerHasRumble(pGameController)
 		{
 			return false;
 		}
 
-		const int kResult = SDL_GameControllerRumble(pGameController, 0u, 0u, 0u);
+		const int kResult = SDL_RumbleGamepad(pGameController, 0u, 0u, 0u);
 		return kResult == 0;
 	}
 } // End namespace (BGE)
