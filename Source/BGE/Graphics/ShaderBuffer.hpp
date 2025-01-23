@@ -32,17 +32,21 @@ namespace BGE
 {
 	struct IShaderBufferData
 	{
-		virtual ~IShaderBufferData(void) = default;
+		// This class cannot have any virtual member functions.
 	};
+
+	/**
+	 * @brief Concept for shader buffer data types. Requires that the type is derived from IShaderBufferData,
+	 * and that the size of the type is a multiple of 16.
+	 */
 	template <typename Type>
-	concept DerivedFromIShaderBufferData = std::derived_from<Type, IShaderBufferData>;
+	concept ShaderBufferDataType = std::derived_from<Type, IShaderBufferData> && (sizeof(Type) % 16 == 0);
 
 	struct ShaderBufferData_WorldViewProjection : public IShaderBufferData
 	{
 		glm::mat4 world;
 		glm::mat4 view;
 		glm::mat4 projection;
-		std::int32_t _padding[2];
 	};
 
 	/**
@@ -50,7 +54,7 @@ namespace BGE
 	 * buffers or OpenGL's uniform buffers.
 	 * @tparam Type 
 	 */
-	template <DerivedFromIShaderBufferData Type>
+	template <ShaderBufferDataType Type>
 	class IShaderBuffer : public INonCopyable, public INonMovable
 	{
 	protected:

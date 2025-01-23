@@ -44,7 +44,7 @@ namespace BGE
 	 * buffers or OpenGL's uniform buffers.
 	 * @tparam Type
 	 */
-	template <DerivedFromIShaderBufferData Type>
+	template <ShaderBufferDataType Type>
 	class D3DShaderBuffer final : public IShaderBuffer<Type>
 	{
 	private:

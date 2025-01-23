@@ -21,7 +21,7 @@ namespace BGE
 		glm::vec3 color;
 	};
 
-	template <DerivedFromIShaderBufferData Type>
+	template <ShaderBufferDataType Type>
 	class D3DShaderBuffer; // Forward declare
 
 	/**

@@ -6,7 +6,7 @@
 namespace BGE
 {
 	
-	template <DerivedFromIShaderBufferData Type>
+	template <ShaderBufferDataType Type>
 	class GLShaderBuffer final : public IShaderBuffer<Type>
 	{
 	private:
