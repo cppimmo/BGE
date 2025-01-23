@@ -31,6 +31,8 @@
 #ifndef _BGE_EVENTREGISTRY_HPP_
 #define _BGE_EVENTREGISTRY_HPP_
 
+#include <mutex>
+
 #include "Events/EventData.hpp"
 
 namespace BGE

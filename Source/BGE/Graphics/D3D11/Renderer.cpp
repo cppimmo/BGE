@@ -13,6 +13,7 @@
 #pragma comment(lib, "dxguid.lib")
 
 #include "Graphics/D3D11/Viewport.hpp"
+#include "Graphics/D3D11/ShaderBuffer.hpp"
 
 namespace BGE
 {
@@ -318,6 +319,9 @@ namespace BGE
 			return false;
 		}
 
+		m_pShaderBuffer = std::make_unique<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>>();
+		m_pShaderBuffer->VCreate();
+
 		// Set the default viewport
 		VSetViewport(D3D11Viewport(glm::ivec2(width, height)));
 
@@ -423,6 +427,26 @@ namespace BGE
 		m_pDeviceContext->RSSetState(m_pSolidRasterState.Get());
 
 		m_pDeviceContext->PSSetShader(m_pPixelShader.Get(), nullptr, 0u);
+
+		ShaderBufferData_WorldViewProjection sbd = { };
+		sbd.world = glm::mat4(1.0f);
+		sbd.view = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, 5.0f), // Camera position
+			glm::vec3(0.0f, 0.0f, 0.0f), // Look-at target
+			glm::vec3(0.0f, 1.0f, 0.0f)); // Up direction
+		sbd.projection = glm::perspective(
+			glm::radians(45.0f), // Field of view
+			static_cast<float>(m_pViewport->VGetSize().x) / static_cast<float>(m_pViewport->VGetSize().y), // Aspect ratio
+			0.1f, // Near plane
+			100.0f); // Far plane
+
+		// Transpose the matrices for HLSL
+		sbd.world = glm::transpose(sbd.world);
+		sbd.view = glm::transpose(sbd.view);
+		sbd.projection = glm::transpose(sbd.projection);
+
+		m_pShaderBuffer->Update(sbd);
+		m_pShaderBuffer->VBind(0u);
 
 		m_pDeviceContext->Draw(3u, 0u);
 	}
@@ -722,14 +746,17 @@ namespace BGE
 		return renderer.m_pDeviceContext.Get();
 	}
 
-	std::vector<D3D11Renderer::ComPtr<IDXGIAdapter1>> D3D11Renderer::EnumerateAdapters(void)
+	std::vector<D3D11Renderer::AdapterData> D3D11Renderer::EnumerateAdapters(void)
 	{
-		std::vector<ComPtr<IDXGIAdapter1>> adapters;
+		std::vector<AdapterData> adapters;
 
 		ComPtr<IDXGIAdapter1> pAdapter = nullptr;
 		for (UINT i = 0; m_pDXGIFactory->EnumAdapters1(i, &pAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
 		{
-			adapters.push_back(pAdapter);
+			DXGI_ADAPTER_DESC1 desc1 = { };
+			pAdapter->GetDesc1(&desc1);
+
+			adapters.push_back({ .pAdapter = pAdapter, .desc = desc1 }); // Add the adapter data to the list
 		}
 
 		return adapters;

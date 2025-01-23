@@ -239,12 +239,11 @@ LogManager::~LogManager(void)
 
 bool LogManager::Init(std::string_view configFileName)
 {
-	using namespace tinyxml2;
-	XMLDocument xmlDocument; // Document object
-	XMLError xmlResult; // Result object
+	tinyxml2::XMLDocument xmlDocument; // Document object
+	tinyxml2::XMLError xmlResult; // Result object
 
 	xmlResult = xmlDocument.LoadFile(configFileName.data());
-	if (xmlResult != XML_SUCCESS) return false;
+	if (xmlResult != tinyxml2::XML_SUCCESS) return false;
 
 	// Fetch the root element: Logging
 	auto *pRoot = xmlDocument.RootElement();

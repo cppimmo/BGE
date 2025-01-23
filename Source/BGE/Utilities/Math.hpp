@@ -28,7 +28,10 @@
 #ifndef _BGE_MATH_HPP_
 #define _BGE_MATH_HPP_
 
+#define GLM_FORCE_RADIANS // Ensure GLM works in radians for compatibility
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE // Match DirectX's depth range [0, 1]
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp> // For matrix transformations
 
 namespace BGE::Math
 {

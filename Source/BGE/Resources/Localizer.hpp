@@ -31,6 +31,8 @@
 #ifndef _BGE_LOCALIZER_HPP_
 #define _BGE_LOCALIZER_HPP_
 
+#include <mutex>
+
 namespace BGE
 {
 	class Localizer; // Forward declare

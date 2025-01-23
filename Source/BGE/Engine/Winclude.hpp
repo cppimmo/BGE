@@ -87,5 +87,7 @@
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 #include <Windows.h>
 
+#include <wrl.h> // Windows Runtime Library (for ComPtr)
+
 #endif /* BGE_PLATFORM_WIN */
 #endif /* !_BGE_WINCLUDE_H_ */

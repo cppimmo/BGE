@@ -3,10 +3,11 @@
 
 #include <d3d11.h>
 #include <dxgi1_3.h>
-#include <wrl.h>
 
 #include "Graphics/Renderer.hpp"
 #include "Graphics/Viewport.hpp"
+#include "Graphics/ShaderBuffer.hpp"
+//#include "Graphics/D3D11/ShaderBuffer.hpp"
 //#include "Graphics/GL/Viewport.hpp"
 
 namespace BGE
@@ -20,6 +21,9 @@ namespace BGE
 		glm::vec3 color;
 	};
 
+	template <DerivedFromIShaderBufferData Type>
+	class D3DShaderBuffer; // Forward declare
+
 	/**
 	 * @brief .
 	 */
@@ -29,6 +33,12 @@ namespace BGE
 		//! Template alias for Microsoft's COM pointer.
 		template <typename Type>
 		using ComPtr = Microsoft::WRL::ComPtr<Type>;
+		
+		struct AdapterData
+		{
+			ComPtr<IDXGIAdapter1> pAdapter;
+			DXGI_ADAPTER_DESC1 desc;
+		};
 
 		EngineOptions m_options; //!< .
 		UniqueIViewportPtr m_pViewport; //!< .
@@ -48,6 +58,7 @@ namespace BGE
 		ComPtr<ID3D11InputLayout> m_pInputLayout = nullptr;
 		ComPtr<ID3D11VertexShader> m_pVertexShader = nullptr;
 		ComPtr<ID3D11PixelShader> m_pPixelShader = nullptr;
+		std::unique_ptr<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>> m_pShaderBuffer = nullptr;
 
 		D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE_HARDWARE; //!< D3D driver type.
 		ImGuiContext *m_pImGuiContext = nullptr; //< Pointer to ImGui context.
@@ -87,7 +98,7 @@ namespace BGE
 		static ID3D11Device *GetDevice(void) noexcept;
 		static ID3D11DeviceContext *GetDeviceContext(void) noexcept;
 	private:
-		std::vector<ComPtr<IDXGIAdapter1>> EnumerateAdapters(void);
+		std::vector<AdapterData> EnumerateAdapters(void);
 		bool CreateSwapchainResources(void);
 		void DestroySwapchainResources(void);
 		bool CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint, std::string_view profile, ComPtr<ID3DBlob> &pShaderBlob);

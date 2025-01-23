@@ -51,7 +51,7 @@ namespace BGE
 		kSubtractive
 	};
 
-	class IRenderer
+	class IRenderer : public INonCopyable, public INonMovable
 	{
 	public:
 		virtual ~IRenderer(void) = default;

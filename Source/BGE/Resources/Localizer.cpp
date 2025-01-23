@@ -33,16 +33,14 @@
 
 bool BGE::Localizer::LoadStrings(Language language)
 {
-	using namespace tinyxml2;
-
     std::lock_guard<std::mutex> lock(m_mutex);
 
     std::string languageFilePath = "Assets/Strings/";
     languageFilePath += LanguageToString(language).second; // Convert language enum to file path
     languageFilePath += ".xml";
 
-    XMLDocument xmlDocument;
-    if (xmlDocument.LoadFile(languageFilePath.c_str()) != XML_SUCCESS)
+    tinyxml2::XMLDocument xmlDocument;
+    if (xmlDocument.LoadFile(languageFilePath.c_str()) != tinyxml2::XML_SUCCESS)
     {
         // Log error
         BGE_ERROR("Could not load language file: " + languageFilePath);
