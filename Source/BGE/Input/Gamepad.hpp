@@ -1,5 +1,5 @@
 /*=============================================================================*
- * Joystick.hpp - Input from joysticks/gamepads.
+ * Gamepad.hpp - Input from joysticks/gamepads.
  *
  * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
@@ -25,13 +25,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
-#ifndef _BGE_JOYSTICK_HPP_
-#define _BGE_JOYSTICK_HPP_
+#ifndef _BGE_INPUT_GAMEPAD_HPP_
+#define _BGE_INPUT_GAMEPAD_HPP_
 
 namespace BGE
 {
+	//! .
 	using JoystickID = SDL_JoystickID;
 	
+	//! .
 	enum GamepadAxis : int
 	{
 		kGAMEPAD_AXIS_LEFT_X = SDL_GAMEPAD_AXIS_LEFTX,
@@ -65,6 +67,7 @@ namespace BGE
 		}
 	}
 	
+	//! .
 	enum GamepadButton : int
 	{
 		kGAMEPAD_BUTTON_A = SDL_GAMEPAD_BUTTON_SOUTH,
@@ -91,6 +94,7 @@ namespace BGE
 	class IGamepadHandler; // Forward declare
 	BGE_DECLARE_PTR(IGamepadHandler);
 
+	//! .
 	using GamepadHandlerList = std::list<StrongIGamepadHandlerPtr>;
 
 	//! Rumble speed.
@@ -101,6 +105,9 @@ namespace BGE
 	using RumbleDuration = std::uint32_t;
 	inline constexpr RumbleDuration kDEFAULT_RUMBLE_DURATION = 10;
 
+	/**
+	 * @brief .
+	 */
 	class IGamepadHandler
 	{
 	public:
@@ -115,31 +122,6 @@ namespace BGE
 		static bool StartRumble(JoystickID ID, RumbleSpeed leftSpeed, RumbleSpeed rightSpeed, RumbleDuration durationMS);
 		static bool StopRumble(JoystickID ID);
 	};
-
-	using JoystickId = int;
-
-	class IJoystick
-	{
-	public:
-		virtual bool VIsConnected(void) = 0;
-		virtual JoystickId VGetId(void) = 0;
-		virtual std::string VGetName(void) = 0;
-		virtual std::string VGetSerial(void) = 0;
-	protected:
-		virtual float VApplyDeadzone(float value, float maxValue, float deadzone) = 0;
-	};
-
-
-	class Gamepad : public IJoystick, public ISDLEventHandler
-	{
-	public:
-		virtual void VHandleEvent_SDL(const SDL_Event &kEvent) {}
-		virtual bool VIsConnected(void) { return false; }
-		virtual JoystickId VGetId(void) { return 0; }
-		virtual std::string VGetName(void) { return ""; }
-		virtual std::string VGetSerial(void) { return ""; }
-		virtual float VApplyDeadzone(float value, float maxValue, float deadzone) { return 0.0f; }
-	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_JOYSTICK_HPP_ */
+#endif /* !_BGE_INPUT_GAMEPAD_HPP_ */

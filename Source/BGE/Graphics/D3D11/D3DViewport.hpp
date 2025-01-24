@@ -1,5 +1,5 @@
-#ifndef _BGE_GRAPHICS_D3D11_VIEWPORT_HPP_
-#define _BGE_GRAPHICS_D3D11_VIEWPORT_HPP_
+#ifndef _BGE_GRAPHICS_D3D11_D3DVIEWPORT_HPP_
+#define _BGE_GRAPHICS_D3D11_D3DVIEWPORT_HPP_
 
 #include <d3d11.h>
 
@@ -30,4 +30,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_GRAPHICS_D3D11_VIEWPORT_HPP_ */
+#endif /* !_BGE_GRAPHICS_D3D11_D3DVIEWPORT_HPP_ */

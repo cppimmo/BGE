@@ -1,8 +1,8 @@
 #ifndef _TG_TESTEVENTS_HPP_
 #define _TG_TESTEVENTS_HPP_
 
-#include <Events/EventData.hpp>
-#include <Events/Events.hpp>
+#include <BGE/Events/EventData.hpp>
+#include <BGE/Events/Events.hpp>
 
 namespace TestGame
 {

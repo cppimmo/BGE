@@ -2,7 +2,7 @@
 #define _BGE_HUMANVIEW_HPP_
 
 #include "Events/EventData.hpp"
-#include "Input/Joystick.hpp"
+#include "Input/Gamepad.hpp"
 #include "Input/Keyboard.hpp"
 #include "Input/Mouse.hpp"
 #include "UI/GameView.hpp"

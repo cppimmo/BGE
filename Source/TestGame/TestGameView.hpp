@@ -1,12 +1,12 @@
 #ifndef _TG_TESTGAMEVIEW_HPP_
 #define _TG_TESTGAMEVIEW_HPP_
 
-#include <UI/HumanView.hpp>
-#include <Graphics/GL/Shaders.hpp>
-#include <Graphics/GL/ShaderProgram.hpp>
-#include <Graphics/Transform.hpp>
-#include <Graphics/Camera.hpp>
-#include <Graphics/Geometry.hpp>
+#include <BGE/UI/HumanView.hpp>
+#include <BGE/Graphics/GL/Shaders.hpp>
+#include <BGE/Graphics/GL/ShaderProgram.hpp>
+#include <BGE/Graphics/Transform.hpp>
+#include <BGE/Graphics/Camera.hpp>
+#include <BGE/Graphics/Geometry.hpp>
 
 #include "TestController.hpp"
 #include <glm/gtc/quaternion.hpp>

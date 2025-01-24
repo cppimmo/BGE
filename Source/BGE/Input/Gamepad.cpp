@@ -1,5 +1,5 @@
 /*=============================================================================*
- * Joystick.cpp - Input from joysticks/gamepads.
+ * Gamepad.cpp - Input from joysticks/gamepads.
  *
  * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
 #include "Engine/EngineStd.hpp"
-#include "Joystick.hpp"
+#include "Input/Gamepad.hpp"
 
 namespace BGE
 {

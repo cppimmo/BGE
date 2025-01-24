@@ -1,13 +1,17 @@
-#ifndef _BGE_KEYBOARD_HPP_
-#define _BGE_KEYBOARD_HPP_
+#ifndef _BGE_INPUT_KEYBOARD_HPP_
+#define _BGE_INPUT_KEYBOARD_HPP_
 
 namespace BGE
 {
 	class IKeyboardHandler; // Forware declare
 	BGE_DECLARE_PTR(IKeyboardHandler);
 
+	//! .
 	using KeyboardHandlerList = std::list<StrongIKeyboardHandlerPtr>;
 
+	/**
+	 * @brief .
+	 */
 	class IKeyboardHandler
 	{
 	public:
@@ -18,4 +22,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_KEYBOARD_HPP_ */
+#endif /* !_BGE_INPUT_KEYBOARD_HPP_ */

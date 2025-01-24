@@ -1,7 +1,7 @@
 #include "TestGameStd.hpp"
 #include "TestGame.hpp"
 
-#include <Events/EventRegistry.hpp>
+#include <BGE/Events/EventRegistry.hpp>
 
 #include "TestEvents.hpp"
 #include "TestProcesses.hpp"

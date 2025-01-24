@@ -44,27 +44,40 @@ namespace BGE
 	//! Map of shaders to given names.
 	using ShaderMap = std::map<std::string, StrongIShaderPtr>;
 
+	//! .
+	enum struct ShaderType
+	{
+		kVertex,
+		kHull,
+		kDomain,
+		kGeometry,
+		kPixel,
+		kCompute
+	};
+
 	/**
 	 * @brief .
 	 */
 	class IShader
 	{
+	protected:
+		ShaderType m_type;
 	public:
+		explicit IShader(ShaderType shaderType) : m_type(shaderType) { }
 		virtual ~IShader(void) = default;
+		// Interface:
 		//! .
 		virtual bool VCreate(void) = 0;
 		//! .
-		virtual bool VCompile(std::string_view source) = 0;
-		//! .
 		virtual bool VCompile(StrongResourceHandlePtr pResourceHandle) = 0;
 		//! .
-		virtual bool VCompileBinary(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint) = 0;
-		//! .
-		virtual GLuint VGetID(void) const = 0;
+		virtual void *VGetBlob(void) const = 0;
 		//! .
 		virtual void VDestroy(void) = 0;
 		//! .
 		virtual bool VIsValid(void) const = 0;
+
+		ShaderType GetType(void) const noexcept { return m_type; }
 	};
 
 	class IShaderFactory
@@ -73,10 +86,10 @@ namespace BGE
 		virtual ~IShaderFactory(void) = default;
 		// Interface:
 		virtual StrongIShaderPtr VCreateVertexShader(void) const = 0;
-		virtual StrongIShaderPtr VCreateTessControlShader(void) const = 0;
-		virtual StrongIShaderPtr VCreateTessEvalShader(void) const = 0;
+		virtual StrongIShaderPtr VCreateHullShader(void) const = 0; // Tess Control
+		virtual StrongIShaderPtr VCreateDomainShader(void) const = 0; // Tess Eval
 		virtual StrongIShaderPtr VCreateGeometryShader(void) const = 0;
-		virtual StrongIShaderPtr VCreateFragmentShader(void) const = 0;
+		virtual StrongIShaderPtr VCreatePixelShader(void) const = 0; // Fragment
 		virtual StrongIShaderPtr VCreateComputeShader(void) const = 0;
 	};
 } // End namespace (BGE)

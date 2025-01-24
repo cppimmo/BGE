@@ -119,6 +119,13 @@
 #include "Utilities/Timer.hpp"
 #include "Utilities/Math.hpp"
 
+#if BGE_PLATFORM_WIN && defined(BGE_USE_D3D11)
+#include "Graphics/D3D11/D3DStd.hpp"
+#endif
+#if defined(BGE_USE_OPENGL)
+#include "Graphics/GL/GLStd.hpp"
+#endif
+
 //#include "Utilities/Random.hpp"
 #include "Engine/BGUT.hpp"
 

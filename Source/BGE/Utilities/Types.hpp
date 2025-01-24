@@ -34,7 +34,15 @@
 #define BGE_DECLARE_PTR(TYPE) \
 	using Unique ## TYPE ## Ptr = std::unique_ptr<TYPE>; \
 	using Strong ## TYPE ## Ptr = std::shared_ptr<TYPE>; \
-	using Weak ## TYPE ## Ptr = std::weak_ptr<TYPE>; \
+	using Weak ## TYPE ## Ptr = std::weak_ptr<TYPE>;
+
+#define BGE_DECLARE_MULTITEMPLATED_PTR(CLASS_NAME) \
+    template <typename... Types> \
+    using Unique ## CLASS_NAME ## Ptr = std::unique_ptr<CLASS_NAME<Types...>>; \
+    template <typename... Types> \
+    using Strong ## CLASS_NAME ## Ptr = std::shared_ptr<CLASS_NAME<Types...>>; \
+    template <typename... Types> \
+    using Weak ## CLASS_NAME ## Ptr = std::weak_ptr<CLASS_NAME<Types...>>;
 
 #define BGE_BITOP_ENUM(ENUM) \
 inline constexpr auto operator|(const ENUM &lhs, const ENUM &rhs) \
@@ -48,7 +56,7 @@ inline constexpr auto operator&(const ENUM &lhs, const ENUM &rhs) \
 inline constexpr auto operator^(const ENUM &lhs, const ENUM &rhs) \
 { \
 	return static_cast<ENUM>(BGE::Utils::ToUnderlying(lhs) ^ BGE::Utils::ToUnderlying(rhs)); \
-} \
+}
 
 namespace BGE
 {

@@ -1,5 +1,5 @@
 /*=============================================================================*
- * IndexBuffer.hpp - Index buffer utilities.
+ * IndexBuffer.hpp - .
  *
  * Copyright (c) 2023, Brian Hoffpauir All rights reserved.
  *
@@ -25,7 +25,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
-#ifndef _BGE_INDEXBUFFER_HPP_
-#define _BGE_INDEXBUFFER_HPP_
+#ifndef _BGE_GRAPHICS_INDEXBUFFER_HPP_
+#define _BGE_GRAPHICS_INDEXBUFFER_HPP_
 
-#endif /* !_BGE_INDEXBUFFER_HPP_ */
+#include <cstdint>
+#include <concepts>
+#include <vector>
+
+namespace BGE
+{
+	template <typename IndexType>
+	requires std::integral<IndexType> // Ensure only integral types (e.g., std::uint16_t, std::uint32_t)
+	class IIndexBuffer
+	{
+	public:
+		virtual ~IIndexBuffer(void) = default;
+		// Interface:
+		virtual bool VCreate(const std::vector<IndexType> &kIndices, bool bDynamic) = 0;
+		virtual void VBind(void) const = 0;
+		virtual void VUpdate(const std::vector<IndexType> &kIndices) = 0;
+		virtual void VDestroy(void) = 0;
+		virtual std::size_t VGetIndexCount(void) const noexcept = 0;
+		virtual std::uintptr_t VGetNativeHandle(void) const = 0;
+	};
+} // End namespace (BGE)
+
+#endif /* !_BGE_GRAPHICS_INDEXBUFFER_HPP_ */

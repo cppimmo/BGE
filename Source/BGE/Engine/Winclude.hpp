@@ -89,5 +89,10 @@
 
 #include <wrl.h> // Windows Runtime Library (for ComPtr)
 
+namespace Michaelsoft
+{
+	using Microsoft::WRL::ComPtr;
+}
+
 #endif /* BGE_PLATFORM_WIN */
 #endif /* !_BGE_WINCLUDE_H_ */

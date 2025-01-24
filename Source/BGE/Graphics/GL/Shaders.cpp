@@ -1,10 +1,15 @@
 #include "Engine/EngineStd.hpp"
 #include "Graphics/GL/Shaders.hpp"
+#include "Shaders.hpp"
+#include "Shaders.hpp"
+#include "Shaders.hpp"
+#include "Shaders.hpp"
+#include "Shaders.hpp"
 
 namespace BGE
 {
-	GLShader::GLShader(void)
-		: m_shaderID(0)
+	GLShader::GLShader(ShaderType shaderType)
+		: IShader(shaderType), m_shaderID(0)
 	{
 	}
 
@@ -13,45 +18,47 @@ namespace BGE
 		VDestroy();
 	}
 
-	bool GLShader::VCompile(std::string_view source)
+	bool GLShader::VCreate(void)
 	{
-		return GLShader::Compile(m_shaderID, source);
+		switch (m_type)
+		{
+		case ShaderType::kVertex:
+			m_shaderID = glCreateShader(GL_VERTEX_SHADER);
+			break;
+		case ShaderType::kHull:
+			m_shaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
+			break;
+		case ShaderType::kDomain:
+			m_shaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
+			break;
+		case ShaderType::kGeometry:
+			m_shaderID = glCreateShader(GL_GEOMETRY_SHADER);
+			break;
+		case ShaderType::kPixel:
+			m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
+			break;
+		case ShaderType::kCompute:
+			m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
+			break;
+		default:
+			BGE_ASSERT(false && "Invalid shader type");
+			break;
+		}
+
+		return glIsShader(m_shaderID);
 	}
 
 	bool GLShader::VCompile(StrongResourceHandlePtr pResourceHandle)
 	{
+		BGE_ASSERT(pResourceHandle->GetType() == ResourceType::kGLSL);
 		// TODO: Add some error checking here to ensure the handle is GLSL.
 		std::string source = pResourceHandle->GetExtraData()->VGetExtraData();
-		return VCompile(source);
+		return Compile(m_shaderID, source);
 	}
 
-	bool GLShader::VCompileBinary(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint)
+	void *GLShader::VGetBlob(void) const
 	{
-		//glShaderBinary(1, &m_shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, nullptr, 0);
-
-		// Check the shader compilation status
-		GLint status{};
-		glGetShaderiv(m_shaderID, GL_COMPILE_STATUS, &status);
-		if (status != GL_TRUE)
-		{
-			// Get the length of the shader info log
-			GLint infoLogLength{};
-			glGetShaderiv(m_shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-			// Retrieve the shader info log
-			std::string infoLog(infoLogLength, '\0');
-			GLsizei length{};
-			glGetShaderInfoLog(m_shaderID, infoLogLength, &length, infoLog.data());
-
-			// Log the error message
-			BGE_LOG("Graphics", "Shader compilation failed: %s", infoLog.c_str());
-			return false;
-		}
-	}
-
-	GLuint GLShader::VGetID(void) const
-	{
-		return m_shaderID;
+		return (void *)&m_shaderID;
 	}
 
 	void GLShader::VDestroy(void)
@@ -96,67 +103,31 @@ namespace BGE
 
 	StrongIShaderPtr GLShaderFactory::VCreateVertexShader(void) const
 	{
-		return std::make_shared<GLVertexShader>();
+		return std::make_shared<GLShader>(ShaderType::kVertex);
 	}
 
-	StrongIShaderPtr GLShaderFactory::VCreateTessControlShader(void) const
+	StrongIShaderPtr GLShaderFactory::VCreateHullShader(void) const
 	{
-		return std::make_shared<GLTessControlShader>();
+		return std::make_shared<GLShader>(ShaderType::kHull);
 	}
 
-	StrongIShaderPtr GLShaderFactory::VCreateTessEvalShader(void) const
+	StrongIShaderPtr GLShaderFactory::VCreateDomainShader(void) const
 	{
-		return std::make_shared<GLTessEvalShader>();
+		return std::make_shared<GLShader>(ShaderType::kDomain);
 	}
 
 	StrongIShaderPtr GLShaderFactory::VCreateGeometryShader(void) const
 	{
-		return std::make_shared<GLGeometryShader>();
+		return std::make_shared<GLShader>(ShaderType::kGeometry);
 	}
 
-	StrongIShaderPtr GLShaderFactory::VCreateFragmentShader(void) const
+	StrongIShaderPtr GLShaderFactory::VCreatePixelShader(void) const
 	{
-		return std::make_shared<GLFragmentShader>();
+		return std::make_shared<GLShader>(ShaderType::kPixel);
 	}
 
 	StrongIShaderPtr GLShaderFactory::VCreateComputeShader(void) const
 	{
-		return std::make_shared<GLComputeShader>();
-	}
-
-	bool GLVertexShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_VERTEX_SHADER);
-		return m_shaderID != 0;
-	}
-
-	bool GLTessControlShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
-		return m_shaderID != 0;
-	}
-
-	bool GLTessEvalShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
-		return m_shaderID != 0;
-	}
-
-	bool GLGeometryShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_GEOMETRY_SHADER);
-		return m_shaderID != 0;
-	}
-
-	bool GLFragmentShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
-		return m_shaderID != 0;
-	}
-
-	bool GLComputeShader::VCreate(void)
-	{
-		m_shaderID = glCreateShader(GL_COMPUTE_SHADER);
-		return m_shaderID != 0;
+		return std::make_shared<GLShader>(ShaderType::kCompute);
 	}
 } // End namespace (BGE)

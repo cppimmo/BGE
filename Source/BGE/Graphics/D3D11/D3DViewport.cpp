@@ -1,5 +1,5 @@
 #include "Engine/EngineStd.hpp"
-#include "Graphics/D3D11/Viewport.hpp"
+#include "Graphics/D3D11/D3DViewport.hpp"
 
 namespace BGE
 {

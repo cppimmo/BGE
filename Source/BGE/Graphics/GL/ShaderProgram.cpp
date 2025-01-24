@@ -1,6 +1,29 @@
 #include "Engine/EngineStd.hpp"
 #include "Graphics/GL/ShaderProgram.hpp"
 
+#include "Graphics/GL/Shaders.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+#include "ShaderProgram.hpp"
+
 namespace BGE
 {
 	GLShaderProgram::GLShaderProgram(void)
@@ -34,15 +57,18 @@ namespace BGE
 			return; // If the passed pointer is null, exit early
 		}
 
+		// Check that pShader is an instance of GLShader
+		BGE_ERROR_IF(typeid(*pShader) != typeid(GLShader), "pShader is not an instance of GLShader");
+
 		auto findIt = std::ranges::find(m_shaders, pShader);
 		if (findIt != m_shaders.end())
 		{
 			return; // Can't link against the same shader multiple times
 		}
-
+		
 		m_shaders.push_back(pShader);
 		// Attach the shader to the program
-		glAttachShader(m_programID, pShader->VGetID());
+		glAttachShader(m_programID, std::dynamic_pointer_cast<GLShader>(pShader)->GetID());
 	}
 
 	void GLShaderProgram::VDetachShader(StrongIShaderPtr pShader)
@@ -52,13 +78,16 @@ namespace BGE
 			return; // If the passed pointer is null, exit early
 		}
 
+		// Check that pShader is an instance of GLShader
+		BGE_ERROR_IF(typeid(*pShader) != typeid(GLShader), "pShader is not an instance of GLShader");
+
 		m_shaders.remove_if([&pShader](const StrongIShaderPtr &shader)
 		{
 			return shader == pShader; // Remove the shader if it matches
 		});
 
 		// Detach the shader from the program
-		glDetachShader(m_programID, pShader->VGetID());
+		glDetachShader(m_programID, std::dynamic_pointer_cast<GLShader>(pShader)->GetID());
 	}
 
 	bool GLShaderProgram::VLink(void)

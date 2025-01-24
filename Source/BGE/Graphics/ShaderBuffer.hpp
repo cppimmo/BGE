@@ -28,12 +28,13 @@
 #ifndef _BGE_GRAPHICS_SHADERBUFFER_HPP_
 #define _BGE_GRAPHICS_SHADERBUFFER_HPP_
 
+#include <cstdint>
+#include <concepts>
+
 namespace BGE
 {
-	struct IShaderBufferData
-	{
-		// This class cannot have any virtual member functions.
-	};
+	//! All shader buffer data structs should inherit form `IShaderBufferData`.
+	struct IShaderBufferData { }; // This class cannot have any virtual member functions.
 
 	/**
 	 * @brief Concept for shader buffer data types. Requires that the type is derived from IShaderBufferData,
@@ -42,6 +43,7 @@ namespace BGE
 	template <typename Type>
 	concept ShaderBufferDataType = std::derived_from<Type, IShaderBufferData> && (sizeof(Type) % 16 == 0);
 
+	//! Shader buffer data struct for world, view, & projection matrices.
 	struct ShaderBufferData_WorldViewProjection : public IShaderBufferData
 	{
 		glm::mat4 world;
@@ -58,10 +60,11 @@ namespace BGE
 	class IShaderBuffer : public INonCopyable, public INonMovable
 	{
 	protected:
-		Type m_bufferData; //!< Stored data specific to the buffer type.
+		ShaderType m_shaderType;
+		Type m_bufferData{}; //!< Stored data specific to the buffer type.
 	public:
-		IShaderBuffer(void) = default;
-		IShaderBuffer(const Type &kData) : m_bufferData(kData) { }
+		explicit IShaderBuffer(ShaderType shaderType) : m_shaderType(shaderType) { }
+		IShaderBuffer(ShaderType shaderType, const Type &kData) : m_shaderType(shaderType), m_bufferData(kData) { }
 		virtual ~IShaderBuffer(void) = default;
 		// Interface:
 		virtual bool VCreate(void) = 0;
@@ -69,8 +72,11 @@ namespace BGE
 		virtual void VBind(std::uint32_t slot) const = 0;
 		virtual void VDestroy(void) = 0;
 		// Accessors:
-		const Type &GetData(void) const { return m_bufferData; }
+		ShaderType GetShaderType(void) const noexcept { return m_shaderType; }
+		const Type &GetData(void) const noexcept { return m_bufferData; }
 	};
+
+	BGE_DECLARE_MULTITEMPLATED_PTR(IShaderBuffer);
 } // End namespace (BGE)
 
 #endif /* !_BGE_GRAPHICS_SHADERBUFFER_HPP_ */

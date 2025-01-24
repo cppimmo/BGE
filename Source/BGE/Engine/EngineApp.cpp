@@ -48,8 +48,12 @@
 #include "Resources/ResourceLoader.hpp"
 #include "Scripting/ScriptExports.hpp"
 #include "Audio/AL/AudioSystem.hpp"
+#if defined(BGE_USE_OPENGL)
 #include "Graphics/GL/Renderer.hpp"
-#include "Graphics/D3D11/Renderer.hpp"
+#endif /* defined(BGE_USE_OPENGL) */
+#if defined(BGE_USE_D3D11)
+#include "Graphics/D3D11/D3DRenderer.hpp"
+#endif /* defined (BGE_USE_D3D11) */
 
 namespace BGE
 {
@@ -195,12 +199,20 @@ namespace BGE
 		switch (*m_options.rendererImpl)
 		{
 		case RendererImpl::kOpenGL:
+#if defined(BGE_USE_OPENGL)
 			m_pRenderer = std::make_unique<GLRenderer>();
 			BGE_LOG("App", "Using OpenGL 4.5 renderer");
+#else
+			BGE_ERROR("OpenGL renderer not supported");
+#endif
 			break;
 		case RendererImpl::kD3D11:
-			m_pRenderer = std::make_unique<D3D11Renderer>();
+#if defined(BGE_USE_D3D11)
+			m_pRenderer = std::make_unique<D3DRenderer>();
 			BGE_LOG("App", "Using DirectX 11 renderer");
+#else
+			BGE_ERROR("DirectX 11 renderer not supported");
+#endif
 			break;
 		default:
 			return false;

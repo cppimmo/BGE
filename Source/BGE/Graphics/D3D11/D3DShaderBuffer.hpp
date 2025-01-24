@@ -25,19 +25,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *============================================================================*/
-#ifndef _BGE_GRAPHICS_D3D11_SHADERBUFFER_HPP_
-#define _BGE_GRAPHICS_D3D11_SHADERBUFFER_HPP_
+#ifndef _BGE_GRAPHICS_D3D11_D3DSHADERBUFFER_HPP_
+#define _BGE_GRAPHICS_D3D11_D3DSHADERBUFFER_HPP_
 
 #include <d3d11.h>
 
 #include "Graphics/ShaderBuffer.hpp"
-#include "Graphics/D3D11/Renderer.hpp"
+#include "Graphics/D3D11/D3DRenderer.hpp"
 
 namespace BGE
 {
-	//template <typename Type>
-	//class IShaderBuffer; // Forward declare;
-	//BGE_DECLARE_PTR(IShaderBuffer);
+	template <ShaderBufferDataType Type>
+	class D3DShaderBuffer; // Forward declare
+	BGE_DECLARE_MULTITEMPLATED_PTR(D3DShaderBuffer);
 
 	/**
 	 * @brief Wrapper around a shader buffer object. Can be applied to DirectX 11's constant
@@ -47,11 +47,13 @@ namespace BGE
 	template <ShaderBufferDataType Type>
 	class D3DShaderBuffer final : public IShaderBuffer<Type>
 	{
+		using IShaderBuffer<Type>::m_shaderType;
+		using IShaderBuffer<Type>::m_bufferData;
 	private:
 		Microsoft::WRL::ComPtr<ID3D11Buffer> m_pBuffer = nullptr;
 	public:
-		D3DShaderBuffer(void) = default;
-		D3DShaderBuffer(const Type &kData) : IShaderBuffer<Type>(kData) { }
+		explicit D3DShaderBuffer(ShaderType shaderType) : IShaderBuffer<Type>(shaderType) { }
+		D3DShaderBuffer(ShaderType shaderType, const Type &kData) : IShaderBuffer<Type>(shaderType, kData) { }
 		~D3DShaderBuffer(void) override { VDestroy(); }
 		// IShaderBuffer's interface:
 		virtual bool VCreate(void) override
@@ -65,9 +67,9 @@ namespace BGE
 			bufferDesc.StructureByteStride = 0u;
 
 			D3D11_SUBRESOURCE_DATA subData = { };
-			subData.pSysMem = &(this->m_bufferData);
+			subData.pSysMem = &m_bufferData;
 
-			HRESULT hr = D3D11Renderer::GetDevice()->CreateBuffer(&bufferDesc, &subData, &m_pBuffer);
+			HRESULT hr = D3DRenderer::GetDevice()->CreateBuffer(&bufferDesc, &subData, &m_pBuffer);
 			if (FAILED(hr))
 			{
 				BGE_ERROR("Failed to create shader buffer.");
@@ -79,20 +81,39 @@ namespace BGE
 
 		virtual void Update(const Type &kData) override
 		{
-			IShaderBuffer<Type>::m_bufferData = kData;
+			m_bufferData = kData;
 			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			D3D11Renderer::GetDeviceContext()->Map(m_pBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &mappedResource);
-			std::memcpy(mappedResource.pData, reinterpret_cast<const void *>(&(this->m_bufferData)), sizeof(Type));
-			D3D11Renderer::GetDeviceContext()->Unmap(m_pBuffer.Get(), 0u);
+			D3DRenderer::GetDeviceContext()->Map(m_pBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &mappedResource);
+			std::memcpy(mappedResource.pData, reinterpret_cast<const void *>(&m_bufferData), sizeof(Type));
+			D3DRenderer::GetDeviceContext()->Unmap(m_pBuffer.Get(), 0u);
 		}
 
 		virtual void VBind(std::uint32_t slot) const override
 		{
-			D3D11Renderer::GetDeviceContext()->VSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
-			D3D11Renderer::GetDeviceContext()->HSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
-			D3D11Renderer::GetDeviceContext()->DSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
-			D3D11Renderer::GetDeviceContext()->GSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
-			D3D11Renderer::GetDeviceContext()->PSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+			switch (m_shaderType)
+			{
+			case ShaderType::kVertex:
+				D3DRenderer::GetDeviceContext()->VSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			case ShaderType::kHull:
+				D3DRenderer::GetDeviceContext()->HSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			case ShaderType::kDomain:
+				D3DRenderer::GetDeviceContext()->DSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			case ShaderType::kGeometry:
+				D3DRenderer::GetDeviceContext()->GSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			case ShaderType::kPixel:
+				D3DRenderer::GetDeviceContext()->PSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			case ShaderType::kCompute:
+				D3DRenderer::GetDeviceContext()->CSSetConstantBuffers(slot, 1u, m_pBuffer.GetAddressOf());
+				break;
+			default:
+				BGE_ASSERT(false && "Invalid shader type");
+				break;
+			}
 		}
 
 		virtual void VDestroy(void) override
@@ -102,4 +123,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_GRAPHICS_D3D11_SHADERBUFFER_HPP_ */
+#endif /* !_BGE_GRAPHICS_D3D11_D3DSHADERBUFFER_HPP_ */

@@ -1,34 +1,27 @@
 #include "Engine/EngineStd.hpp"
-#include "Graphics/D3D11/Renderer.hpp"
+#include "Graphics/D3D11/D3DRenderer.hpp"
 
-#include <d3dcompiler.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_dx11.h>
 
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "winmm.lib")
-#pragma comment(lib, "dxguid.lib")
-
-#include "Graphics/D3D11/Viewport.hpp"
-#include "Graphics/D3D11/ShaderBuffer.hpp"
+#include "Graphics/D3D11/D3DViewport.hpp"
+#include "Graphics/D3D11/D3DShaderBuffer.hpp"
 
 namespace BGE
 {
-	D3D11Renderer::D3D11Renderer(void)
+	D3DRenderer::D3DRenderer(void)
 		: m_options{},
 		  m_pViewport(std::make_unique<D3DViewport>(glm::ivec2(1280, 720))),
 		  m_bgColor(0.1f, 0.1f, 0.1f, 1.0f)
 	{
 	}
 
-	D3D11Renderer::~D3D11Renderer(void)
+	D3DRenderer::~D3DRenderer(void)
 	{
 		VShutdown();
 	}
 
-	bool D3D11Renderer::VInit(const EngineOptions &kOptions)
+	bool D3DRenderer::VInit(const EngineOptions &kOptions)
 	{
 		m_options = kOptions; // Set the options
 
@@ -251,11 +244,27 @@ namespace BGE
 		auto &app = GetEngineApp();
 		auto &resCache = app.GetResourceCache();
 		ComPtr<ID3DBlob> pVertexShaderBlob = nullptr;
+
+		//m_pVertexShader = std::make_unique<D3DShader>(ShaderType::kVertex);
+		//m_pVertexShader->VCreate();
+		//if (!m_pVertexShader->VCompile(resCache.GetHandle(Resource("Assets\\Shaders\\Test.vs.hlsl"))))
+		//{
+		//	return false;
+		//}
+
+		//ID3DBlob *pVertexShaderBlob = static_cast<ID3DBlob *>(m_pVertexShader->VGetBlob());
 		m_pVertexShader = CreateVertexShader(resCache.GetHandle(Resource("Assets\\Shaders\\Test.vs.hlsl")), pVertexShaderBlob);
 		if (!m_pVertexShader)
 		{
 			return false;
 		}
+
+		//m_pPixelShader = std::make_unique<D3DShader>(ShaderType::kPixel);
+		//m_pPixelShader->VCreate();
+		//if (m_pPixelShader->VCompile(resCache.GetHandle(Resource("Assets\\Shaders\\Test.ps.hlsl"))))
+		//{
+		//	return false;
+		//}
 
 		m_pPixelShader = CreatePixelShader(resCache.GetHandle(Resource("Assets\\Shaders\\Test.ps.hlsl")));
 		if (!m_pPixelShader)
@@ -317,7 +326,7 @@ namespace BGE
 			return false;
 		}
 
-		m_pShaderBuffer = std::make_unique<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>>();
+		m_pShaderBuffer = std::make_unique<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>>(ShaderType::kVertex);
 		m_pShaderBuffer->VCreate();
 
 		// Set the default viewport
@@ -327,7 +336,7 @@ namespace BGE
 		return true;
 	}
 
-	void D3D11Renderer::VShutdown(void)
+	void D3DRenderer::VShutdown(void)
 	{
 		// Check for proper initialization
 		if (!m_bInitialized)
@@ -359,12 +368,12 @@ namespace BGE
 		m_bInitialized = false; // Set the initialization flag
 	}
 
-	RendererImpl D3D11Renderer::VGetImpl(void) const
+	RendererImpl D3DRenderer::VGetImpl(void) const
 	{
 		return RendererImpl::kD3D11;
 	}
 
-	void D3D11Renderer::VBeginFrame(void)
+	void D3DRenderer::VBeginFrame(void)
 	{
 		BGE_ASSERT(m_pDeviceContext);
 		BGE_ASSERT(m_pSwapChain);
@@ -449,7 +458,7 @@ namespace BGE
 		m_pDeviceContext->Draw(3u, 0u);
 	}
 
-	void D3D11Renderer::VEndFrame(void)
+	void D3DRenderer::VEndFrame(void)
 	{
 		// When ImGui is enabled, call end of frame routines
 		if (*m_options.bImGuiEnabled)
@@ -462,25 +471,25 @@ namespace BGE
 		m_pSwapChain->Present((*m_options.bVSync ? 1U : 0U), 0U); 
 	}
 
-	StrongIShaderFactoryPtr D3D11Renderer::VCreateShaderFactory(void)
+	StrongIShaderFactoryPtr D3DRenderer::VCreateShaderFactory(void)
 	{
 		//return std::make_shared<GLShaderFactory>();
 		return nullptr;
 	}
 
-	StrongIShaderProgramPtr D3D11Renderer::VCreateShaderProgram(std::string_view name)
+	StrongIShaderProgramPtr D3DRenderer::VCreateShaderProgram(std::string_view name)
 	{
 		//auto pShaderProgram = std::make_shared<GLShaderProgram>();
 		//return pShaderProgram;
 		return nullptr;
 	}
 
-	StrongIShaderProgramPtr D3D11Renderer::VGetShaderProgram(std::string_view name)
+	StrongIShaderProgramPtr D3DRenderer::VGetShaderProgram(std::string_view name)
 	{
 		return nullptr;
 	}
 
-	void D3D11Renderer::VOnResize(std::int32_t width, std::int32_t height)
+	void D3DRenderer::VOnResize(std::int32_t width, std::int32_t height)
 	{
 		BGE_ASSERT(width >= 0 && height >= 0);
 
@@ -509,45 +518,45 @@ namespace BGE
 		m_pViewport = std::make_unique<D3DViewport>(glm::ivec2(width, height));
 	}
 
-	void D3D11Renderer::VSetViewport(const IViewport &kViewport)
+	void D3DRenderer::VSetViewport(const IViewport &kViewport)
 	{
 		m_pViewport = std::make_unique<D3DViewport>(dynamic_cast<const D3DViewport &>(kViewport));
 	}
 
-	const IViewport &D3D11Renderer::VGetViewport(void) const
+	const IViewport &D3DRenderer::VGetViewport(void) const
 	{
 		BGE_ASSERT(m_pViewport);
 		return *m_pViewport.get();
 	}
 
-	void D3D11Renderer::VSetBackgroundColor(const glm::vec4 &kColor)
+	void D3DRenderer::VSetBackgroundColor(const glm::vec4 &kColor)
 	{
 		m_bgColor = kColor;
 	}
 
-	glm::vec4 D3D11Renderer::VGetBackgroundColor(void)
+	glm::vec4 D3DRenderer::VGetBackgroundColor(void)
 	{
 		return m_bgColor;
 	}
 
-	void D3D11Renderer::VEnableDepthTest(bool bEnable)
+	void D3DRenderer::VEnableDepthTest(bool bEnable)
 	{
 	}
 
-	void D3D11Renderer::VEnableBlending(bool bEnable)
+	void D3DRenderer::VEnableBlending(bool bEnable)
 	{
 	}
 
-	void D3D11Renderer::VSetBlendMode(BlendMode mode)
+	void D3DRenderer::VSetBlendMode(BlendMode mode)
 	{
 	}
 
-	BlendMode D3D11Renderer::VGetBlendMode(void) const
+	BlendMode D3DRenderer::VGetBlendMode(void) const
 	{
 		return BlendMode();
 	}
 
-	bool D3D11Renderer::VTakeScreenshot(const std::filesystem::path &kSaveGameDir)
+	bool D3DRenderer::VTakeScreenshot(const std::filesystem::path &kSaveGameDir)
 	{
 		BGE_ASSERT(m_pRenderTargetView);
 
@@ -656,11 +665,11 @@ namespace BGE
 		return true;
 	}
 
-	void D3D11Renderer::VEnableDebugOutput(bool bEnable)
+	void D3DRenderer::VEnableDebugOutput(bool bEnable)
 	{
 	}
 
-	std::string D3D11Renderer::VGetRendererInfo(void) const
+	std::string D3DRenderer::VGetRendererInfo(void) const
 	{
 		BGE_ASSERT(m_pDevice && m_pDeviceContext);
 		HRESULT hr = S_OK;
@@ -734,23 +743,23 @@ namespace BGE
 		return oss.str();
 	}
 	
-	ID3D11Device *D3D11Renderer::GetDevice(void) noexcept
+	ID3D11Device *D3DRenderer::GetDevice(void) noexcept
 	{
 		auto &app = GetEngineApp(); // Retrieve the engine app (contains renderer instance)
-		auto &renderer = dynamic_cast<D3D11Renderer &>(app.GetRenderer()); // Cast to derived type
+		auto &renderer = dynamic_cast<D3DRenderer &>(app.GetRenderer()); // Cast to derived type
 
 		return renderer.m_pDevice.Get();
 	}
 
-	ID3D11DeviceContext *D3D11Renderer::GetDeviceContext(void) noexcept
+	ID3D11DeviceContext *D3DRenderer::GetDeviceContext(void) noexcept
 	{
 		auto &app = GetEngineApp(); // Retrieve the engine app (contains renderer instance)
-		auto &renderer = dynamic_cast<D3D11Renderer &>(app.GetRenderer()); // Cast to derived type
+		auto &renderer = dynamic_cast<D3DRenderer &>(app.GetRenderer()); // Cast to derived type
 
 		return renderer.m_pDeviceContext.Get();
 	}
 
-	std::vector<D3D11Renderer::AdapterData> D3D11Renderer::EnumerateAdapters(void)
+	std::vector<D3DRenderer::AdapterData> D3DRenderer::EnumerateAdapters(void)
 	{
 		std::vector<AdapterData> adapters;
 
@@ -766,7 +775,7 @@ namespace BGE
 		return adapters;
 	}
 
-	bool D3D11Renderer::CreateSwapchainResources(void)
+	bool D3DRenderer::CreateSwapchainResources(void)
 	{
 		ComPtr<ID3D11Texture2D> pBackBuffer = nullptr;
 		if (FAILED(m_pSwapChain->GetBuffer(
@@ -789,12 +798,12 @@ namespace BGE
 		return true;
 	}
 
-	void D3D11Renderer::DestroySwapchainResources(void)
+	void D3DRenderer::DestroySwapchainResources(void)
 	{
 		m_pRenderTargetView.Reset();
 	}
 
-	bool D3D11Renderer::CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint,
+	bool D3DRenderer::CompileShader(StrongResourceHandlePtr pResourceHandle, std::string_view entryPoint,
 									  std::string_view profile, ComPtr<ID3DBlob> &pShaderBlob)
 	{
 		BGE_ASSERT(pResourceHandle->GetType() == ResourceType::kHLSL);
@@ -833,7 +842,7 @@ namespace BGE
 		return true;
 	}
 	
-	D3D11Renderer::ComPtr<ID3D11VertexShader> D3D11Renderer::CreateVertexShader(StrongResourceHandlePtr pResourceHandle, ComPtr<ID3DBlob> &pShaderBlob)
+	D3DRenderer::ComPtr<ID3D11VertexShader> D3DRenderer::CreateVertexShader(StrongResourceHandlePtr pResourceHandle, ComPtr<ID3DBlob> &pShaderBlob)
 	{
 		if (!CompileShader(pResourceHandle, "Main", "vs_5_0", pShaderBlob))
 		{
@@ -854,7 +863,7 @@ namespace BGE
 		return pVertexShader;
 	}
 	
-	D3D11Renderer::ComPtr<ID3D11PixelShader> D3D11Renderer::CreatePixelShader(StrongResourceHandlePtr pResourceHandle)
+	D3DRenderer::ComPtr<ID3D11PixelShader> D3DRenderer::CreatePixelShader(StrongResourceHandlePtr pResourceHandle)
 	{
 		ComPtr<ID3DBlob> pShaderBlob = nullptr;
 		if (!CompileShader(pResourceHandle, "Main", "ps_5_0", pShaderBlob))

@@ -1,10 +1,10 @@
 #ifndef _TG_TESTCONTROLLER_HPP_
 #define _TG_TESTCONTROLLER_HPP_
 
-#include <Input/Joystick.hpp>
-#include <Input/Keyboard.hpp>
-#include <Input/Mouse.hpp>
-#include <Graphics/Camera.hpp>
+#include <BGE/Input/Gamepad.hpp>
+#include <BGE/Input/Keyboard.hpp>
+#include <BGE/Input/Mouse.hpp>
+#include <BGE/Graphics/Camera.hpp>
 
 namespace TestGame
 {

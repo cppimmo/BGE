@@ -1,7 +1,7 @@
 #ifndef _TG_TESTPROCESSES_HPP_
 #define _TG_TESTPROCESSES_HPP_
 
-#include <Events/EventData.hpp>
+#include <BGE/Events/EventData.hpp>
 
 namespace TestGame
 {

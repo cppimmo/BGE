@@ -1,8 +1,6 @@
 #ifndef _BGE_TRANSFORM_HPP_
 #define _BGE_TRANSFORM_HPP_
 
-#include <glm/glm.hpp>
-
 namespace BGE
 {
 	class Transform; // Forward declare

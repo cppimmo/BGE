@@ -1,5 +1,5 @@
 #include "Engine/EngineStd.hpp"
-#include "HumanView.hpp"
+#include "UI/HumanView.hpp"
 
 BGE::HumanView::DefaultInputHandler::DefaultInputHandler(HumanView &humanView)
 	: m_humanView(humanView)

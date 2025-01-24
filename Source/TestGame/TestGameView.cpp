@@ -1,9 +1,9 @@
 #include "TestGameStd.hpp"
 #include "TestGameView.hpp"
 
-#include "Audio/SoundResource.hpp"
-#include "Resources/JSONResource.hpp"
-#include "Graphics/ImageResource.hpp"
+#include <BGE/Audio/SoundResource.hpp>
+#include <BGE/Resources/JSONResource.hpp>
+#include <BGE/Graphics/ImageResource.hpp>
 
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -104,7 +104,7 @@ namespace TestGame
 		pVertexShader->VCompile(pVSSourceHandle);
 
 		auto pFSSourceHandle = resCache.GetHandle(BGE::Resource("Assets\\Shaders\\test_frag.glsl"));
-		BGE::StrongIShaderPtr pFragmentShader = pShaderFactory->VCreateFragmentShader();
+		BGE::StrongIShaderPtr pFragmentShader = pShaderFactory->VCreatePixelShader();
 		pFragmentShader->VCreate();
 		pFragmentShader->VCompile(pFSSourceHandle);
 
@@ -129,7 +129,7 @@ namespace TestGame
 		pSkyboxVertexShader->VCompile(pSkyboxVSSourceHandle);
 
 		auto pSkyboxFSSourceHandle = resCache.GetHandle(BGE::Resource("Assets\\Shaders\\skybox_frag.glsl"));
-		BGE::StrongIShaderPtr pSkyboxFragmentShader = pShaderFactory->VCreateFragmentShader();
+		BGE::StrongIShaderPtr pSkyboxFragmentShader = pShaderFactory->VCreatePixelShader();
 		pSkyboxFragmentShader->VCreate();
 		pSkyboxFragmentShader->VCompile(pSkyboxFSSourceHandle);
 

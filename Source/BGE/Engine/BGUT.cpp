@@ -87,7 +87,7 @@ bool BGE::BGUTInit(const EngineOptions &kOptions)
 	
 	std::uint32_t initFlags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD | SDL_INIT_EVENTS;
 	// Decide which parts of SDL should be initialized
-	if (SDL_Init(initFlags) < 0)
+	if (!SDL_Init(initFlags))
 	{
 		BGE_ERROR("BGUTInit Failure: SDL failed to initialize (%s).", SDL_GetError());
 		return false;
@@ -160,14 +160,14 @@ bool BGE::BGUTInit(const EngineOptions &kOptions)
 		}
 	
 		// Set the current OpenGL context
-		if (SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
+		if (!SDL_GL_MakeCurrent(s_BGUT.pWindow, s_BGUT.pContext) < 0)
 		{
 			BGE_ERROR("BGUTInit Failure: OpenGL context could not be set (%s).", SDL_GetError());
 			return false;
 		}
 	
 		// Determine if vertical sync should be enabled
-		if (SDL_GL_SetSwapInterval((kOptions.bVSync ? 1 : 0) < 0)) // Vertical sync
+		if (!SDL_GL_SetSwapInterval(kOptions.bVSync ? 1 : 0)) // Vertical sync
 		{
 			BGE_ERROR("BGUTInit Failure: Can't set OpenGL swap interval (%s).", SDL_GetError());
 			return false;

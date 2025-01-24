@@ -1,19 +1,17 @@
-#ifndef _BGE_D3D11_D3D11RENDERER_HPP_
-#define _BGE_D3D11_D3D11RENDERER_HPP_
-
-#include <d3d11.h>
-#include <dxgi1_3.h>
+#ifndef _BGE_GRAPHICS_D3D11_D3DRENDERER_HPP_
+#define _BGE_GRAPHICS_D3D11_D3DRENDERER_HPP_
 
 #include "Graphics/Renderer.hpp"
 #include "Graphics/Viewport.hpp"
 #include "Graphics/ShaderBuffer.hpp"
 //#include "Graphics/D3D11/ShaderBuffer.hpp"
 //#include "Graphics/GL/Viewport.hpp"
+//#include "Graphics/D3D11/D3DShaders.hpp"
 
 namespace BGE
 {
-	class D3D11Renderer; // Forward declare
-	BGE_DECLARE_PTR(D3D11Renderer);
+	class D3DRenderer; // Forward declare
+	BGE_DECLARE_PTR(D3DRenderer);
 
 	struct VertexPositionColor
 	{
@@ -27,7 +25,7 @@ namespace BGE
 	/**
 	 * @brief .
 	 */
-	class D3D11Renderer : public IRenderer
+	class D3DRenderer : public IRenderer
 	{
 	private:
 		//! Template alias for Microsoft's COM pointer.
@@ -56,17 +54,21 @@ namespace BGE
 
 		ComPtr<ID3D11Buffer> m_pVertexBuffer = nullptr;
 		ComPtr<ID3D11InputLayout> m_pInputLayout = nullptr;
+		//UniqueIShaderPtr m_pVertexShader = nullptr;
+		//UniqueIShaderPtr m_pPixelShader = nullptr;
 		ComPtr<ID3D11VertexShader> m_pVertexShader = nullptr;
 		ComPtr<ID3D11PixelShader> m_pPixelShader = nullptr;
-		std::unique_ptr<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>> m_pShaderBuffer = nullptr;
+
+		UniqueIShaderBufferPtr<ShaderBufferData_WorldViewProjection> m_pShaderBuffer = nullptr;
+		//std::unique_ptr<D3DShaderBuffer<ShaderBufferData_WorldViewProjection>> m_pShaderBuffer = nullptr;
 
 		D3D_DRIVER_TYPE m_driverType = D3D_DRIVER_TYPE_HARDWARE; //!< D3D driver type.
 		ImGuiContext *m_pImGuiContext = nullptr; //< Pointer to ImGui context.
 		ImPlotContext *m_pImPlotContext = nullptr; //< Pointer to ImPlot context.
 		bool m_bInitialized = false; //!< Was the renderer intialized?
 	public:
-		D3D11Renderer(void);
-		virtual ~D3D11Renderer(void) override;
+		D3DRenderer(void);
+		virtual ~D3DRenderer(void) override;
 
 		virtual bool VInit(const EngineOptions &kOptions) override;
 		virtual void VShutdown(void) override;
@@ -107,4 +109,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_D3D11_D3D11RENDERER_HPP_ */
+#endif /* !_BGE_GRAPHICS_D3D11_D3DRENDERER_HPP_ */

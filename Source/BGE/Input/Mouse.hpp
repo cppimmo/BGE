@@ -1,13 +1,15 @@
-#ifndef _BGE_MOUSE_HPP_
-#define _BGE_MOUSE_HPP_
+#ifndef _BGE_INPUT_MOUSE_HPP_
+#define _BGE_INPUT_MOUSE_HPP_
 
 namespace BGE
 {
 	class IMouseHandler; // Forward declare
 	BGE_DECLARE_PTR(IMouseHandler);
 
+	//! .
 	using MouseHandlerList = std::list<StrongIMouseHandlerPtr>;
 
+	//! .
 	enum MouseButton : int
 	{
 		kMOUSE_BUTTON_LEFT = SDL_BUTTON_LEFT,
@@ -18,6 +20,9 @@ namespace BGE
 		kMOUSE_BUTTON_INVALID = -1
 	};
 
+	/**
+	 * @brief .
+	 */
 	class IMouseHandler
 	{
 	private:
@@ -37,4 +42,4 @@ namespace BGE
 	};
 } // End namespace (BGE)
 
-#endif /* !_BGE_MOUSE_HPP_ */
+#endif /* !_BGE_INPUT_MOUSE_HPP_ */

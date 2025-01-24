@@ -1,8 +1,8 @@
 #ifndef _TG_TESTGAME_HPP_
 #define _TG_TESTGAME_HPP_
 
-#include <Engine/EngineApp.hpp>
-#include <Engine/BaseGameLogic.hpp>
+#include <BGE/Engine/EngineApp.hpp>
+#include <BGE/Engine/BaseGameLogic.hpp>
 
 namespace TestGame
 {

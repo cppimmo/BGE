@@ -123,11 +123,11 @@ add_library(ImGui STATIC
   "${IMGUI_DIR}/backends/imgui_impl_dx11.h")
 target_link_libraries(ImGui PRIVATE SDL3::SDL3)
 # Conditionally include backend implementations
-if(USE_OPENGL)
+if(${USE_OPENGL})
   target_sources(ImGui PRIVATE "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp")
 endif()
 
-if(USE_D3D11)
+if(${USE_D3D11})
   target_sources(ImGui PRIVATE "${IMGUI_DIR}/backends/imgui_impl_dx11.cpp")
 endif()
 
@@ -251,7 +251,13 @@ set(ENGINE_SRC_DIR "BGE")
 
 add_library(Engine SHARED)
 
-target_compile_definitions(Engine PRIVATE BGE_ENGINE_EXPORTS)
+target_compile_definitions(Engine
+    PRIVATE BGE_ENGINE_EXPORTS # Definition used only in Engine
+    PUBLIC                     # Definitions propagated to Engine users
+        $<$<BOOL:${USE_OPENGL}>:BGE_USE_OPENGL>   # Adds BGE_USE_OPENGL if USE_OPENGL is enabled
+        $<$<BOOL:${USE_D3D11}>:BGE_USE_D3D11>     # Adds BGE_USE_D3D11 if USE_D3D11 is enabled
+)
+
 target_include_directories(Engine PUBLIC
   "${ENGINE_SRC_DIR}" ${OPENAL_INCLUDE_DIR}
   "${VORBIS_DIR}/include"
@@ -327,7 +333,7 @@ set(GAME_SRC_DIR "TestGame")
 
 add_executable(Game)
 
-target_include_directories(Game PUBLIC "${GAME_SRC_DIR}")
+target_include_directories(Game PUBLIC "${GAME_SRC_DIR}" ${CMAKE_CURRENT_SOURCE_DIR})
 
 get_sources_match_list(GAME_SRC_FILES "${GAME_SRC_DIR}")
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Source Files" FILES ${GAME_SRC_FILES})
